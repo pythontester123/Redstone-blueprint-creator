@@ -134,6 +134,12 @@ svg.i { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-widt
 .search input:focus { box-shadow: 0 0 0 2px var(--accent-soft), 0 0 0 1px var(--accent); }
 .search svg { position: absolute; left: 12px; top: 10px; width: 16px; height: 16px; color: var(--secondary); }
 .cat h3 { margin: 0 0 6px 4px; font-size: 12px; font-weight: 600; color: var(--secondary); }
+.mc-cat summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 6px; margin: 0 0 6px; padding: 7px 10px; border-radius: 12px; font-size: 12.5px; font-weight: 600; color: var(--label); background: var(--fill-2); }
+.mc-cat summary::-webkit-details-marker { display: none; }
+.mc-cat summary::after { content: ""; margin-left: auto; width: 7px; height: 7px; border-right: 1.6px solid var(--secondary); border-bottom: 1.6px solid var(--secondary); transform: rotate(-45deg); transition: transform .2s; }
+.mc-cat[open] summary::after { transform: rotate(45deg); }
+.mc-cat summary small { color: var(--secondary); font-weight: 500; }
+.mc-cat summary:hover { background: var(--fill); }
 .pal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
 .pal-item {
   display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 7px 2px 6px; min-width: 0;
@@ -563,6 +569,1958 @@ table.bom canvas { width: 26px; height: 26px; vertical-align: middle; image-rend
 <script>
 'use strict';
 /* =====================================================================
+   CATALOGUE : tous les blocs posables de Minecraft Java (version 26.3)
+   id | nom français | comportement | catégorie | couleurs du dessus | couleurs des côtés
+   Couleurs : teinte principale . teinte d'accent . part de l'accent (%) . grain.
+   Noms : traduction officielle du jeu. Couleurs : moyennes calculées sur les textures.
+   ===================================================================== */
+const MC_DATA = `acacia_button|Bouton en acacia|button|rs|a85a32..0.24|=
+acacia_door|Porte en acacia|door|rs|c06b45.7f4b2f.37.44|bf6943.824b2e.46.43
+acacia_fence|Barrière en acacia|post|wood|a85a32..0.24|=
+acacia_fence_gate|Portillon en acacia|misc|wood|a85a32..0.24|=
+acacia_hanging_sign|Pancarte suspendue en acacia|miscbreak|deco|ac5b3b.394051.15.46|=
+acacia_leaves|Feuilles d'acacia|clear|nature|46641b..0.22|=
+acacia_log|Bûche d'acacia|cube|wood|ab5b32.565148.23.41|676157..0.25
+acacia_planks|Planches d'acacia|cube|wood|a85a32..0.24|=
+acacia_pressure_plate|Plaque de pression en acacia|plate|rs|a85a32..0.24|=
+acacia_sapling|Pousse d'acacia|plant|plant|777618..0.29|=
+acacia_shelf|Étagère en acacia|miscfix|deco|9c5636..0.25|=
+acacia_sign|Pancarte en acacia|miscbreak|deco|9d5a36..0.34|=
+acacia_slab|Dalle en acacia|slab|wood|a85a32..0.24|=
+acacia_stairs|Escalier en acacia|stairs|wood|a85a32..0.24|=
+acacia_trapdoor|Trappe en acacia|trapdoor|rs|864b2e.b9673a.44.37|=
+acacia_wood|Bois d'acacia|cube|wood|676157..0.25|=
+activator_rail|Rails déclencheurs|rail|rs|8d8677.511b11.44.60|=
+allium|Allium|plant|plant|c48ef0.59804c.34.60|=
+amethyst_block|Bloc d'améthyste|cube|ore|6e4fa9.a87ddf.41.56|=
+amethyst_cluster|Amas d'améthyste|plant|plant|7b5bb7.d8adee.44.60|=
+ancient_debris|Débris antiques|cube|ore|422219.836b64.45.60|502c24.735851.44.47
+andesite|Andésite|cube|stone|888889..0.27|=
+andesite_slab|Dalle d'andésite|slab|stone|888889..0.27|=
+andesite_stairs|Escalier en andésite|stairs|stone|888889..0.27|=
+andesite_wall|Muret d'andésite|post|stone|888889..0.27|=
+anvil|Enclume|misc|deco|494949..0.14|454545..0.16
+azalea|Azalée|misc|plant|667d30..0.19|5e762d..0.25
+azalea_leaves|Feuilles d'azalée|clear|plant|475e2a.6e892f.49.33|=
+azure_bluet|Houstonie bleue|plant|plant|eeefc1.52a12d.44.60|=
+bamboo|Bambou|miscbreak|plant|548608.8fc550.16.45|=
+bamboo_block|Bloc de bambou|cube|wood|767b31.afad56.38.51|728033.95aa44.39.35
+bamboo_button|Bouton en bambou|button|rs|b19e47.dcc460.39.41|=
+bamboo_door|Porte en bambou|door|rs|d7c15d.a59445.48.41|b3a148.ddc662.48.39
+bamboo_fence|Barrière en bambou|post|wood|beac4b.e1cb69.47.34|=
+bamboo_fence_gate|Portillon en bambou|misc|wood|ceba57..0.25|=
+bamboo_hanging_sign|Pancarte suspendue en bambou|miscbreak|deco|d0bb59.414447.20.60|=
+bamboo_mosaic|Mosaïque de bambou|cube|wood|d2bc57.a59444.45.38|=
+bamboo_mosaic_slab|Dalle de mosaïque de bambou|slab|wood|d2bc57.a59444.45.38|=
+bamboo_mosaic_stairs|Escalier en mosaïque de bambou|stairs|wood|d2bc57.a59444.45.38|=
+bamboo_planks|Planches de bambou|cube|wood|b19e47.dcc460.39.41|=
+bamboo_pressure_plate|Plaque de pression en bambou|plate|rs|b19e47.dcc460.39.41|=
+bamboo_shelf|Étagère en bambou|miscfix|deco|cab754.a29143.49.35|=
+bamboo_sign|Pancarte en bambou|miscbreak|deco|d0bb58..0.25|=
+bamboo_slab|Dalle en bambou|slab|wood|b19e47.dcc460.39.41|=
+bamboo_stairs|Escalier en bambou|stairs|wood|b19e47.dcc460.39.41|=
+bamboo_trapdoor|Trappe en bambou|trapdoor|rs|b3a249.dfc865.45.39|=
+barrel|Tonneau|cubefix|deco|87653a..0.24|88643a.423426.40.48
+basalt|Basalte|cube|nether|636263.303440.36.44|49494e..0.27
+beacon|Balise|miscfix|deco|92c4ce.d0eae9.48.42|=
+bedrock|Bedrock|cubefix|nature|6f6f6f.303030.41.60|=
+bee_nest|Nid d'abeilles|cubefix|nature|f9d660.926031.46.60|e2b95c.9d6a3a.43.60
+beehive|Ruche|cubefix|deco|b5925a..0.19|b6945e.836739.48.44
+beetroots|Betteraves|plant|plant|3d8429.8b230f.41.60|=
+bell|Cloche|miscfix|deco|bd942a..0.60|=
+big_dripleaf|Grande foliogoutte|miscbreak|plant|607a2e.86ab3c.41.39|4b622c..0.12
+birch_button|Bouton en bouleau|button|rs|d2c083.ac9b6d.46.32|=
+birch_door|Porte en bouleau|door|rs|f4eddb.c1b27f.46.60|e1d8ab.bfac75.49.57
+birch_fence|Barrière en bouleau|post|wood|d2c083.ac9b6d.46.32|=
+birch_fence_gate|Portillon en bouleau|misc|wood|d2c083.ac9b6d.46.32|=
+birch_hanging_sign|Pancarte suspendue en bouleau|miscbreak|deco|c5af75.394051.15.60|=
+birch_leaves|Feuilles de bouleau|clear|nature|42552b..0.19|=
+birch_log|Bûche de bouleau|cube|wood|d6c795.a09571.38.60|ebe9e5.4f4d43.12.60
+birch_planks|Planches de bouleau|cube|wood|d2c083.ac9b6d.46.32|=
+birch_pressure_plate|Plaque de pression en bouleau|plate|rs|d2c083.ac9b6d.46.32|=
+birch_sapling|Pousse de bouleau|plant|plant|628c34.c2cd8a.32.60|=
+birch_shelf|Étagère en bouleau|miscfix|deco|a18d60.c9b67c.35.36|=
+birch_sign|Pancarte en bouleau|miscbreak|deco|d6c897.a9996b.43.57|=
+birch_slab|Dalle en bouleau|slab|wood|d2c083.ac9b6d.46.32|=
+birch_stairs|Escalier en bouleau|stairs|wood|d2c083.ac9b6d.46.32|=
+birch_trapdoor|Trappe en bouleau|trapdoor|rs|b3a270.f1ebd4.45.60|=
+birch_wood|Bois de bouleau|cube|wood|ebe9e5.4f4d43.12.60|=
+black_banner|Bannière noire|miscbreak|color|b19058.7b5f35.28.42|=
+black_bed|Lit noir|miscbreak|color|222227..0.7|b19058.7b5f35.28.42
+black_candle|Bougie noire|miscbreak|color|26253a..0.29|=
+black_carpet|Tapis noir|flat|color|15151a..0.13|=
+black_concrete|Béton noir|cube|color|080a0f..0.2|=
+black_concrete_powder|Béton noir en poudre|cube|color|191b20..0.14|=
+black_concrete_slab|Dalle de béton noir|slab|stone|080a0f..0.2|=
+black_concrete_stairs|Escalier en béton noir|stairs|stone|080a0f..0.2|=
+black_glazed_terracotta|Terre cuite émaillée noire|cube|color|231d20.912121.30.58|=
+black_shulker_box|Boîte de Shulker noire|miscbreak|color|19191e..0.11|=
+black_stained_glass|Verre noir|clear|color|191919..0.0|=
+black_stained_glass_pane|Vitre noire|post|color|191919..0.0|=
+black_terracotta|Terre cuite noire|cube|color|251710..0.2|=
+black_wool|Laine noire|cube|color|15151a..0.13|=
+black_wool_slab|Dalle de laine noire|slab|stone|15151a..0.13|=
+black_wool_stairs|Escalier en laine noire|stairs|stone|15151a..0.13|=
+blackstone|Roche noire|cube|nether|2a242a..0.28|2a2429..0.29
+blackstone_slab|Dalle de roche noire|slab|nether|2a242a..0.28|2a2429..0.29
+blackstone_stairs|Escalier en roche noire|stairs|nether|2a242a..0.28|2a2429..0.29
+blackstone_wall|Muret de roche noire|post|nether|2a2429..0.29|=
+blast_furnace|Haut fourneau|cubefix|deco|515051..0.26|515051.8c8c8c.46.59
+blue_banner|Bannière bleue|miscbreak|color|b19058.7b5f35.28.42|=
+blue_bed|Lit bleu|miscbreak|color|415ab9..0.14|b19058.7b5f35.28.42
+blue_candle|Bougie bleue|miscbreak|color|394ca1..0.33|=
+blue_carpet|Tapis bleu|flat|color|35399d..0.13|=
+blue_concrete|Béton bleu|cube|color|2d2f8f..0.1|=
+blue_concrete_powder|Béton bleu en poudre|cube|color|4649a7..0.12|=
+blue_concrete_slab|Dalle de béton bleu|slab|stone|2d2f8f..0.1|=
+blue_concrete_stairs|Escalier en béton bleu|stairs|stone|2d2f8f..0.1|=
+blue_glazed_terracotta|Terre cuite émaillée bleue|cube|color|262563.3b65c0.44.60|=
+blue_ice|Glace bleue|cube|nature|74a8fd..0.17|=
+blue_orchid|Orchidée bleue|plant|plant|25aaed.439522.34.60|=
+blue_shulker_box|Boîte de Shulker bleue|miscbreak|color|2c2e8c..0.20|=
+blue_stained_glass|Verre bleu|clear|color|334cb2..0.0|=
+blue_stained_glass_pane|Vitre bleue|post|color|334cb2..0.0|=
+blue_terracotta|Terre cuite bleue|cube|color|4a3c5b..0.2|=
+blue_wool|Laine bleue|cube|color|35399d..0.13|=
+blue_wool_slab|Dalle de laine bleue|slab|stone|35399d..0.13|=
+blue_wool_stairs|Escalier en laine bleue|stairs|stone|35399d..0.13|=
+bone_block|Bloc d'os|cube|stone|d2ceb3..0.27|e5e2d0..0.8
+bookshelf|Bibliothèque|cube|deco|b19058.7b5f35.28.42|484031.a88147.47.60
+brain_coral|Corail cerveau|plant|plant|d764a6.9d2f77.29.52|=
+brain_coral_block|Bloc de corail cerveau|cube|plant|c14590.df73b0.48.38|=
+brain_coral_fan|Gorgone de corail cerveau|plant|plant|db64a6.b53f8a.43.37|=
+brewing_stand|Alambic|miscfix|deco|56413f.cfb97b.30.60|=
+brick_slab|Dalle de briques|slab|stone|a37669.8a4d3c.49.43|=
+brick_stairs|Escalier en briques|stairs|stone|a37669.8a4d3c.49.43|=
+brick_wall|Muret de briques|post|stone|a37669.8a4d3c.49.43|=
+bricks|Briques|cube|stone|a37669.8a4d3c.49.43|=
+brown_banner|Bannière marron|miscbreak|color|b19058.7b5f35.28.42|=
+brown_bed|Lit marron|miscbreak|color|8b5833..0.15|b19058.7b5f35.28.42
+brown_candle|Bougie marron|miscbreak|color|704629..0.31|=
+brown_carpet|Tapis marron|flat|color|724829..0.14|=
+brown_concrete|Béton marron|cube|color|603c20..0.1|=
+brown_concrete_powder|Béton marron en poudre|cube|color|7e5536..0.13|=
+brown_concrete_slab|Dalle de béton marron|slab|stone|603c20..0.1|=
+brown_concrete_stairs|Escalier en béton marron|stairs|stone|603c20..0.1|=
+brown_glazed_terracotta|Terre cuite émaillée marron|cube|color|976747.1e7382.26.60|=
+brown_mushroom|Champignon brun|plant|plant|7a5c48.c79879.41.58|=
+brown_mushroom_block|Bloc de champignon brun|cube|plant|957051..0.5|=
+brown_shulker_box|Boîte de Shulker marron|miscbreak|color|6a4224..0.12|=
+brown_stained_glass|Verre marron|clear|color|664c33..0.0|=
+brown_stained_glass_pane|Vitre marron|post|color|664c33..0.0|=
+brown_terracotta|Terre cuite marron|cube|color|4d3324..0.2|=
+brown_wool|Laine marron|cube|color|724829..0.14|=
+brown_wool_slab|Dalle de laine marron|slab|stone|724829..0.14|=
+brown_wool_stairs|Escalier en laine marron|stairs|stone|724829..0.14|=
+bubble_coral|Corail bulles|plant|plant|b820b1.760880.35.47|=
+bubble_coral_block|Bloc de corail bulles|cube|plant|961798.c922bb.30.36|=
+bubble_coral_fan|Gorgone de corail bulles|plant|plant|8f1393.cd45bf.28.49|=
+budding_amethyst|Druse d'améthyste|cube|ore|6748a1.b385e3.39.60|=
+bush|Buisson|plant|plant|445a2a..0.27|=
+cactus|Cactus|miscbreak|plant|608c31.3f611e.30.40|699639.476c21.48.45
+cactus_flower|Fleur de cactus|plant|plant|d27987..0.52|=
+cake|Gâteau|miscbreak|deco|fdf8ee.d53237.13.60|a44d22.fbf4e7.45.60
+calcite|Calcite|cube|nature|d0d1cd.f1f1ee.47.33|=
+calibrated_sculk_sensor|Capteur sculk calibré|miscfix|rs|054554.9386be.16.60|0d171e.06414d.38.42
+campfire|Feu de camp|miscfix|deco|313740.89704b.35.60|=
+candle|Bougie|miscbreak|color|fce5ad.d2aa83.48.60|=
+carrots|Carottes|plant|plant|758d24.286828.46.60|=
+cartography_table|Table de cartographie|cube|deco|47351c.cabfb9.25.60|442c14..0.21
+carved_pumpkin|Citrouille sculptée|cube|nature|b46611.e39024.39.41|da851f.98510c.34.47
+cauldron|Chaudron|misc|deco|4a494a..0.26|4a494b..0.25
+cave_vines|Lianes des cavernes|plant|plant|4e5a25.6e8b2f.39.35|=
+cherry_button|Bouton en cerisier|button|rs|e7beb8.d79690.28.30|=
+cherry_door|Porte en cerisier|door|rs|e6bab4.d28d89.35.34|e2b0aa..0.28
+cherry_fence|Barrière en cerisier|post|wood|e7beb8.d79690.28.30|=
+cherry_fence_gate|Portillon en cerisier|misc|wood|e7beb8.d79690.28.30|=
+cherry_hanging_sign|Pancarte suspendue en cerisier|miscbreak|deco|d58e91.394051.15.60|=
+cherry_leaves|Feuilles de cerisier|clear|nature|f3b1d6.7d922a.12.60|=
+cherry_log|Bûche de cerisier|cube|wood|e2afa7.331e28.23.60|37212c..0.18
+cherry_planks|Planches de cerisier|cube|wood|e7beb8.d79690.28.30|=
+cherry_pressure_plate|Plaque de pression en cerisier|plate|rs|e7beb8.d79690.28.30|=
+cherry_sapling|Pousse de cerisier|plant|plant|f2b3d6.331f2a.41.60|=
+cherry_shelf|Étagère en cerisier|miscfix|deco|c17572.da979a.39.34|=
+cherry_sign|Pancarte en cerisier|miscbreak|deco|e3b2ac.38222d.13.60|=
+cherry_slab|Dalle en cerisier|slab|wood|e7beb8.d79690.28.30|=
+cherry_stairs|Escalier en cerisier|stairs|wood|e7beb8.d79690.28.30|=
+cherry_trapdoor|Trappe en cerisier|trapdoor|rs|e2b3ac..0.28|=
+cherry_wood|Bois de cerisier|cube|wood|37212c..0.18|=
+chest|Coffre|miscfix|deco|b19058.7b5f35.28.42|=
+chipped_anvil|Enclume ébréchée|misc|deco|494949..0.25|454545..0.16
+chiseled_bookshelf|Bibliothèque sculptée|cubefix|deco|b29159..0.28|af8e56..0.30
+chiseled_cinnabar|Cinabre sculpté|cube|stone|7b2a2b.af4746.45.38|=
+chiseled_copper|Cuivre sculpté|cube|ore|c97154.9a5038.37.38|=
+chiseled_deepslate|Ardoise des abîmes sculptée|cube|stone|363637..0.28|=
+chiseled_nether_bricks|Briques du Nether sculptées|cube|nether|2e171b..0.20|=
+chiseled_polished_blackstone|Pierre noire sculptée|cube|nether|282025.45424e.48.35|=
+chiseled_quartz_block|Bloc de quartz sculpté|cube|nether|e8e3d9..0.17|e8e3da..0.15
+chiseled_red_sandstone|Grès rouge sculpté|cube|nature|b5621f..0.10|b7611c..0.27
+chiseled_resin_bricks|Briques de résine sculptées|cube|nature|b53f12.e97724.38.44|=
+chiseled_sandstone|Grès sculpté|cube|nature|e0d6aa..0.10|e1dbaf.cdb782.44.35
+chiseled_stone_bricks|Pierre sculptée|cube|stone|888788.606060.41.39|=
+chiseled_sulfur|Soufre sculpté|cube|stone|cac463.a98b52.46.41|=
+chiseled_tuff|Tuf sculpté|cube|nature|4e554c.757772.40.35|494f45.6d716c.45.35
+chiseled_tuff_bricks|Tuf taillé sculpté|cube|stone|6f726b..0.29|757771.4e554b.46.35
+chorus_flower|Fleur de chorus|miscbreak|plant|512b51.8c7184.27.53|=
+cinnabar|Cinabre|cube|stone|98534e..0.27|=
+cinnabar_brick_slab|Dalle de cinabre taillé|slab|stone|943836..0.32|=
+cinnabar_brick_stairs|Escalier en cinabre taillé|stairs|stone|943836..0.32|=
+cinnabar_brick_wall|Muret de cinabre taillé|post|stone|943836..0.32|=
+cinnabar_bricks|Cinabre taillé|cube|stone|943836..0.32|=
+cinnabar_slab|Dalle de cinabre|slab|stone|98534e..0.27|=
+cinnabar_stairs|Escalier en cinabre|stairs|stone|98534e..0.27|=
+cinnabar_wall|Muret de cinabre|post|stone|98534e..0.27|=
+clay|Argile|cube|nature|a1a6b3..0.13|=
+closed_eyeblossom|Oeilchidée fermée|plant|plant|484141.94868d.48.60|=
+coal_block|Bloc de charbon|cube|ore|101010..0.15|=
+coal_ore|Minerai de charbon|cube|ore|7c7c7c.444543.32.52|=
+coarse_dirt|Terre stérile|cube|nature|664831.9d7351.32.45|=
+cobbled_deepslate|Pierres des abîmes|cube|stone|404045.676767.34.35|=
+cobbled_deepslate_slab|Dalle de pierres des abîmes|slab|stone|404045.676767.34.35|=
+cobbled_deepslate_stairs|Escalier en pierres des abîmes|stairs|stone|404045.676767.34.35|=
+cobbled_deepslate_wall|Muret de pierres des abîmes|post|stone|404045.676767.34.35|=
+cobblestone|Pierres|cube|stone|989798.656464.47.51|=
+cobblestone_slab|Dalle de pierres|slab|stone|989798.656464.47.51|=
+cobblestone_stairs|Escalier en pierre|stairs|stone|989798.656464.47.51|=
+cobblestone_wall|Muret de pierres|post|stone|989798.656464.47.51|=
+cobweb|Toile d'araignée|plant|plant|f2f5f5.c4ced2.30.36|=
+cocoa|Cacao|miscbreak|plant|793b10.c5854a.44.60|=
+composter|Composteur|misc|deco|af7440.7f5026.46.34|8c5b2f.4a2a0b.43.51
+conduit|Conduit|miscfix|deco|b7a087.6a5d3f.31.60|=
+copper_bars|Barreaux de cuivre|post|ore|89422a.b46449.43.35|=
+copper_block|Bloc de cuivre|cube|ore|c06c50..0.33|=
+copper_bulb|Ampoule en cuivre|cube|rs|794223.c97155.45.59|=
+copper_chain|Chaîne en cuivre|post|ore|984f37..0.25|=
+copper_chest|Coffre en cuivre|miscfix|ore|c06c50..0.33|=
+copper_door|Porte en cuivre|door|rs|d2795d.a15940.36.38|ce7558.995841.47.44
+copper_golem_statue|Statue de golem de cuivre|miscfix|ore|c06c50..0.33|=
+copper_grate|Grille en cuivre|clear|ore|c06c4f..0.33|=
+copper_lantern|Lanterne en cuivre|miscbreak|ore|a1573d.9cdc9d.17.60|=
+copper_ore|Minerai de cuivre|cube|ore|737670.98938e.27.43|=
+copper_torch|Torche de cuivre|miscbreak|ore|51482d.a19d6d.45.60|=
+copper_trapdoor|Trappe en cuivre|trapdoor|rs|d57a5e.a2563d.44.39|=
+cornflower|Bleuet|plant|plant|546edf.4b8541.49.60|=
+cracked_deepslate_bricks|Ardoise des abîmes taillée craquelée|cube|stone|323232.59595a.39.39|=
+cracked_deepslate_tiles|Ardoise des abîmes carrelée craquelée|cube|stone|353535..0.26|=
+cracked_nether_bricks|Briques du Nether craquelées|cube|nether|281418..0.18|=
+cracked_polished_blackstone_bricks|Pierre noire taillée craquelée|cube|nether|1f1719.3b3742.46.33|=
+cracked_stone_bricks|Pierre taillée craquelée|cube|stone|848284.626262.39.33|=
+crafter|Fabricateur|cubefix|rs|878787.461f22.35.60|524f4a.928b80.50.60
+crafting_table|Établi|cube|deco|482b19.ad6c3f.47.60|af9364.342414.38.60
+creaking_heart|Coeur de grinceur|cubefix|stone|c65f1d.64473f.46.60|aa4f1b.6f5e5a.35.60
+creeper_head|Tête de Creeper|miscbreak|deco|513e33..0.29|=
+crimson_button|Bouton carmin|button|rs|653147..0.31|=
+crimson_door|Porte carmin|door|rs|72374f..0.32|73374f..0.31
+crimson_fence|Barrière carmin|post|wood|653147..0.31|=
+crimson_fence_gate|Portillon carmin|misc|wood|653147..0.31|=
+crimson_fungus|Champignon carmin|plant|plant|631210.c54e2f.43.60|=
+crimson_hanging_sign|Pancarte suspendue carmin|miscbreak|nether|863858.394051.15.33|=
+crimson_hyphae|Hyphes carmin|cube|wood|6b120e.4a2536.41.37|=
+crimson_nylium|Nylium carmin|cube|nether|862a2a.7b0000.25.38|6b1b1b..0.38
+crimson_planks|Planches carmin|cube|wood|653147..0.31|=
+crimson_pressure_plate|Plaque de pression carmin|plate|rs|653147..0.31|=
+crimson_roots|Racines carmin|plant|plant|9d0a2b.5d0628.48.36|=
+crimson_shelf|Étagère carmin|miscfix|nether|813453..0.24|=
+crimson_sign|Pancarte carmin|miscbreak|nether|652f43..0.33|=
+crimson_slab|Dalle carmin|slab|wood|653147..0.31|=
+crimson_stairs|Escalier carmin|stairs|wood|653147..0.31|=
+crimson_stem|Tige carmin|cube|wood|713246..0.37|6b120e.4a2536.41.37
+crimson_trapdoor|Trappe carmin|trapdoor|rs|562c3e.893e5c.35.32|=
+crying_obsidian|Obsidienne pleureuse|cubefix|nature|0d0916.4a0c8d.32.60|=
+cut_copper|Cuivre taillé|cube|ore|a85a41.d87c61.49.37|=
+cut_copper_slab|Dalle de cuivre taillé|slab|ore|a85a41.d87c61.49.37|=
+cut_copper_stairs|Escalier en cuivre taillé|stairs|ore|a85a41.d87c61.49.37|=
+cut_red_sandstone|Grès rouge taillé|cube|nature|b5621f..0.10|bd6620..0.22
+cut_red_sandstone_slab|Dalle de grès rouge taillé|slab|nature|b5621f..0.10|bd6620..0.22
+cut_sandstone|Grès taillé|cube|nature|e0d6aa..0.10|dacea0..0.29
+cut_sandstone_slab|Dalle de grès taillé|slab|nature|e0d6aa..0.10|dacea0..0.29
+cyan_banner|Bannière cyan|miscbreak|color|b19058.7b5f35.28.42|=
+cyan_bed|Lit cyan|miscbreak|color|129b9a..0.14|b19058.7b5f35.28.42
+cyan_candle|Bougie cyan|miscbreak|color|119392.116263.48.41|=
+cyan_carpet|Tapis cyan|flat|color|158a91..0.12|=
+cyan_concrete|Béton cyan|cube|color|157788..0.1|=
+cyan_concrete_powder|Béton cyan en poudre|cube|color|25949d..0.14|=
+cyan_concrete_slab|Dalle de béton cyan|slab|stone|157788..0.1|=
+cyan_concrete_stairs|Escalier en béton cyan|stairs|stone|157788..0.1|=
+cyan_glazed_terracotta|Terre cuite émaillée cyan|cube|color|30949c.3c4145.35.60|=
+cyan_shulker_box|Boîte de Shulker cyan|miscbreak|color|147987..0.20|=
+cyan_stained_glass|Verre cyan|clear|color|4c7f99..0.0|=
+cyan_stained_glass_pane|Vitre cyan|post|color|4c7f99..0.0|=
+cyan_terracotta|Terre cuite cyan|cube|color|575b5b..0.3|=
+cyan_wool|Laine cyan|cube|color|158a91..0.12|=
+cyan_wool_slab|Dalle de laine cyan|slab|stone|158a91..0.12|=
+cyan_wool_stairs|Escalier en laine cyan|stairs|stone|158a91..0.12|=
+damaged_anvil|Enclume endommagée|misc|deco|484848..0.27|454545..0.16
+dandelion|Pissenlit|plant|plant|428718.fddc44.44.60|=
+dark_oak_button|Bouton en chêne noir|button|rs|432b14..0.18|=
+dark_oak_door|Porte en chêne noir|door|rs|4d3419..0.32|493118..0.28
+dark_oak_fence|Barrière en chêne noir|post|wood|432b14..0.18|=
+dark_oak_fence_gate|Portillon en chêne noir|misc|wood|432b14..0.18|=
+dark_oak_hanging_sign|Pancarte suspendue en chêne noir|miscbreak|deco|443625.444a5c.10.23|=
+dark_oak_leaves|Feuilles de chêne noir|clear|nature|46651c..0.24|=
+dark_oak_log|Bûche de chêne noir|cube|wood|442d16..0.13|3c2f1a..0.16
+dark_oak_planks|Planches de chêne noir|cube|wood|432b14..0.18|=
+dark_oak_pressure_plate|Plaque de pression en chêne noir|plate|rs|432b14..0.18|=
+dark_oak_sapling|Pousse de chêne noir|plant|plant|565b26.165a14.39.50|=
+dark_oak_shelf|Étagère en chêne noir|miscfix|deco|423321..0.14|=
+dark_oak_sign|Pancarte en chêne noir|miscbreak|deco|402a14..0.17|=
+dark_oak_slab|Dalle en chêne noir|slab|wood|432b14..0.18|=
+dark_oak_stairs|Escalier en chêne noir|stairs|wood|432b14..0.18|=
+dark_oak_trapdoor|Trappe en chêne noir|trapdoor|rs|4b3217..0.23|=
+dark_oak_wood|Bois de chêne noir|cube|wood|3c2f1a..0.16|=
+dark_prismarine|Prismarine sombre|cube|stone|345c4c..0.30|=
+dark_prismarine_slab|Dalle de prismarine sombre|slab|stone|345c4c..0.30|=
+dark_prismarine_stairs|Escalier en prismarine sombre|stairs|stone|345c4c..0.30|=
+dead_brain_coral|Corail cerveau mort|plant|plant|7d736f.a29e99.24.33|=
+dead_brain_coral_block|Bloc de corail cerveau mort|cube|plant|696361.918984.48.37|=
+dead_brain_coral_fan|Gorgone de corail cerveau morte|plant|plant|776e6b.9e9893.36.39|=
+dead_bubble_coral|Corail bulles mort|plant|plant|796f6c.9c9691.35.36|=
+dead_bubble_coral_block|Bloc de corail bulles mort|cube|plant|7a706d.9b9690.30.32|=
+dead_bubble_coral_fan|Gorgone de corail bulles morte|plant|plant|9e9993.6e6663.36.42|=
+dead_bush|Buisson mort|plant|plant|5c4628.98672a.26.33|=
+dead_fire_coral|Corail de feu mort|plant|plant|7c726e.9e9893.38.33|=
+dead_fire_coral_block|Bloc de corail de feu mort|cube|plant|79706d.9b958f.31.32|=
+dead_fire_coral_fan|Gorgone de corail de feu morte|plant|plant|918984.635e5c.44.42|=
+dead_horn_coral|Corail corné mort|plant|plant|8f8782..0.25|=
+dead_horn_coral_block|Bloc de corail corné mort|cube|plant|766d6a.9f9a95.38.40|=
+dead_horn_coral_fan|Gorgone de corail corné morte|plant|plant|7a716d.9c9792.34.34|=
+dead_tube_coral|Corail tubulaire mort|plant|plant|766f6c..0.34|=
+dead_tube_coral_block|Bloc de corail tubulaire mort|cube|plant|908883.696462.35.36|=
+dead_tube_coral_fan|Gorgone de corail tubulaire morte|plant|plant|6b6562.9a938e.46.42|=
+decorated_pot|Vase décoré|miscfix|deco|985e44..0.3|=
+deepslate|Ardoise des abîmes|cube|stone|575759..0.29|444447.6a6a6a.32.36
+deepslate_brick_slab|Dalle d'ardoise des abîmes taillée|slab|stone|343434.5a5a5b.50.38|=
+deepslate_brick_stairs|Escalier en ardoise des abîmes taillée|stairs|stone|343434.5a5a5b.50.38|=
+deepslate_brick_wall|Muret d'ardoise des abîmes taillée|post|stone|343434.5a5a5b.50.38|=
+deepslate_bricks|Ardoise des abîmes taillée|cube|stone|343434.5a5a5b.50.38|=
+deepslate_coal_ore|Minerai de charbon des abîmes|cube|ore|616161.2e2e32.45.51|=
+deepslate_copper_ore|Minerai de cuivre des abîmes|cube|ore|42484a.7a756b.47.53|=
+deepslate_diamond_ore|Minerai de diamant des abîmes|cube|ore|4c4d4f.619e9c.36.60|=
+deepslate_emerald_ore|Minerai d'émeraude des abîmes|cube|ore|3a4c41.678b74.45.60|=
+deepslate_gold_ore|Minerai d'or des abîmes|cube|ore|4d4d4f.a98c4d.42.60|=
+deepslate_iron_ore|Minerai de fer des abîmes|cube|ore|4f4e4f.968577.39.60|=
+deepslate_lapis_ore|Minerai de lapis-lazuli des abîmes|cube|ore|515153.4f689f.43.60|=
+deepslate_redstone_ore|Minerai de redstone des abîmes|cube|rs|533a3d.885f5f.41.60|=
+deepslate_tile_slab|Dalle d'ardoise des abîmes carrelée|slab|stone|373737..0.26|=
+deepslate_tile_stairs|Escalier en ardoise des abîmes carrelée|stairs|stone|373737..0.26|=
+deepslate_tile_wall|Muret d'ardoise des abîmes carrelée|post|stone|373737..0.26|=
+deepslate_tiles|Ardoise des abîmes carrelée|cube|stone|373737..0.26|=
+detector_rail|Rails détecteurs|flat|rs|654836.979489.44.60|=
+diamond_block|Bloc de diamant|cube|ore|83faeb.38dddc.44.56|=
+diamond_ore|Minerai de diamant|cube|ore|717979.85acab.40.58|=
+diorite|Diorite|cube|stone|a5a4a5.e0e0e0.41.60|=
+diorite_slab|Dalle de diorite|slab|stone|a5a4a5.e0e0e0.41.60|=
+diorite_stairs|Escalier en diorite|stairs|stone|a5a4a5.e0e0e0.41.60|=
+diorite_wall|Muret de diorite|post|stone|a5a4a5.e0e0e0.41.60|=
+dirt|Terre|cube|nature|714f36.a07653.45.40|=
+dirt_path|Chemin de terre|misc|nature|947a41..0.14|9c784d.714f36.46.39
+dispenser|Distributeur|cubefix|rs|868686.565555.49.47|949494.555454.44.60
+dragon_egg|Oeuf de dragon|miscbreak|end|0d0910..0.14|=
+dragon_head|Tête de dragon|miscbreak|end|513e33..0.29|=
+dried_ghast|Ghast desséché|misc|deco|9f9191..0.25|9e9090..0.31
+dried_kelp_block|Bloc d'algues séchées|cube|plant|252f1c.908d76.12.58|202b17.888d79.6.44
+dripstone_block|Bloc de spéléothème|cube|nature|866c5d..0.31|=
+dropper|Dropper|cubefix|rs|868686.565555.49.47|949494.555454.44.60
+emerald_block|Bloc d'émeraude|cube|ore|18be42.5ff497.25.60|=
+emerald_ore|Minerai d'émeraude|cube|ore|617f68.8fa798.24.60|=
+enchanting_table|Table d'enchantement|miscfix|deco|7e192b.8af0de.23.60|220b1b.8af0de.16.60
+end_portal_frame|Cadre de portail de l'End|miscfix|end|2e554b.c5cd95.30.60|d3d295.264a49.35.60
+end_rod|Barre de l'End|miscbreak|end|fbf1e1.928a86.41.60|=
+end_stone|Pierre de l'End|cube|end|dcdf9e..0.29|=
+end_stone_brick_slab|Dalle de pierre taillée de l'End|slab|end|e6f0af.c6c28a.35.38|=
+end_stone_brick_stairs|Escalier en pierre taillée de l'End|stairs|end|e6f0af.c6c28a.35.38|=
+end_stone_brick_wall|Muret de pierre taillée de l'End|post|end|e6f0af.c6c28a.35.38|=
+end_stone_bricks|Pierre taillée de l'End|cube|end|e6f0af.c6c28a.35.38|=
+ender_chest|Coffre de l'Ender|miscfix|deco|0f0b19..0.33|=
+exposed_chiseled_copper|Cuivre sculpté exposé|cube|ore|ab7e6c.796956.33.36|=
+exposed_copper|Cuivre exposé|cube|ore|a17e68..0.31|=
+exposed_copper_bars|Barreaux de cuivre exposé|post|ore|776553.ae7c6b.28.34|=
+exposed_copper_bulb|Ampoule en cuivre exposé|cube|rs|6c5e4c.b38271.38.49|=
+exposed_copper_chain|Chaîne en cuivre exposé|post|ore|93725d.665849.46.29|=
+exposed_copper_chest|Coffre en cuivre exposé|miscfix|ore|a17e68..0.31|=
+exposed_copper_door|Porte en cuivre exposé|door|rs|bd8477.89725d.48.38|b38170.7d6b58.49.42
+exposed_copper_golem_statue|Statue de golem de cuivre exposé|miscfix|ore|a17e68..0.31|=
+exposed_copper_grate|Grille en cuivre exposé|clear|ore|947a60.c3877d.29.32|=
+exposed_copper_lantern|Lanterne en cuivre exposé|miscbreak|ore|88745b.b8ae90.28.60|=
+exposed_copper_trapdoor|Trappe en cuivre exposé|trapdoor|rs|b68573.84725a.42.37|=
+exposed_cut_copper|Cuivre taillé exposé|cube|ore|83725a.b48271.48.35|=
+exposed_cut_copper_slab|Dalle de cuivre taillé exposé|slab|ore|83725a.b48271.48.35|=
+exposed_cut_copper_stairs|Escalier en cuivre taillé exposé|stairs|ore|83725a.b48271.48.35|=
+exposed_lightning_rod|Paratonnerre exposé|miscbreak|rs|b88374.7b6855.40.41|=
+farmland|Terre labourée|misc|nature|a47651.6e4d35.38.42|714f36.a07653.45.40
+fern|Fougère|plant|plant|475c2b..0.26|=
+fire_coral|Corail de feu|plant|plant|be2b33.791a26.33.41|=
+fire_coral_block|Bloc de corail de feu|cube|plant|921f2b.cb2d37.31.32|=
+fire_coral_fan|Gorgone de corail de feu|plant|plant|b92933.7d1b27.44.37|=
+firefly_bush|Buisson à lucioles|plant|plant|383c1f.7b6c39.48.50|=
+fletching_table|Table d'archerie|cube|deco|afa072.ddcb9b.48.55|c2b180.523b22.18.60
+flower_pot|Pot de fleurs|miscbreak|deco|7c4535..0.13|=
+flowering_azalea|Azalée fleurie|misc|plant|667d2f.b864bf.12.59|5d752d.b864bf.19.60
+flowering_azalea_leaves|Feuilles d'azalée fleurie|clear|plant|7e804f.475d29.48.60|=
+frogspawn|Oeufs de grenouille|miscbreak|deco|796a62.160a00.11.58|=
+furnace|Fourneau|cubefix|deco|868686.565555.49.47|949494.555454.44.60
+gilded_blackstone|Roche noire dorée|cube|nether|261a17.4d4038.46.56|=
+glass_pane|Vitre|post|glass|92c4ce.d0eae9.48.42|=
+glow_lichen|Lichen lumineux|flat|plant|70837a..0.23|=
+glowstone|Pierre lumineuse|clear|nether|7b512a.ebc38b.44.60|=
+gold_block|Bloc d'or|cube|ore|ffe34f.ecb828.44.43|=
+gold_ore|Minerai d'or|cube|ore|817d74.f2be2f.14.60|=
+golden_dandelion|Pissenlit doré|plant|plant|a06625..0.60|=
+granite|Granite|cube|stone|a1705e.754f40.27.37|=
+granite_slab|Dalle de granite|slab|stone|a1705e.754f40.27.37|=
+granite_stairs|Escalier en granite|stairs|stone|a1705e.754f40.27.37|=
+granite_wall|Muret de granite|post|stone|a1705e.754f40.27.37|=
+grass_block|Bloc d'herbe|cube|nature|546d33..0.18|79573b.8c9e51.29.50
+gravel|Gravier|cube|nature|847f7f..0.30|=
+gray_banner|Bannière grise|miscbreak|color|b19058.7b5f35.28.42|=
+gray_bed|Lit gris|miscbreak|color|5f6e72..0.11|b19058.7b5f35.28.42
+gray_candle|Bougie grise|miscbreak|color|505e61..0.27|=
+gray_carpet|Tapis gris|flat|color|3f4448..0.10|=
+gray_concrete|Béton gris|cube|color|373a3e..0.1|=
+gray_concrete_powder|Béton gris en poudre|cube|color|4d5155..0.10|=
+gray_concrete_slab|Dalle de béton gris|slab|stone|373a3e..0.1|=
+gray_concrete_stairs|Escalier en béton gris|stairs|stone|373a3e..0.1|=
+gray_glazed_terracotta|Terre cuite émaillée grise|cube|color|3e4447.768083.38.57|=
+gray_shulker_box|Boîte de Shulker grise|miscbreak|color|373b3e..0.14|=
+gray_stained_glass|Verre gris|clear|color|4c4c4c..0.0|=
+gray_stained_glass_pane|Vitre grise|post|color|4c4c4c..0.0|=
+gray_terracotta|Terre cuite grise|cube|color|3a2a24..0.2|=
+gray_wool|Laine grise|cube|color|3f4448..0.10|=
+gray_wool_slab|Dalle de laine grise|slab|stone|3f4448..0.10|=
+gray_wool_stairs|Escalier en laine grise|stairs|stone|3f4448..0.10|=
+green_banner|Bannière verte|miscbreak|color|b19058.7b5f35.28.42|=
+green_bed|Lit vert|miscbreak|color|5c7c15..0.13|b19058.7b5f35.28.42
+green_candle|Bougie verte|miscbreak|color|496015..0.29|=
+green_carpet|Tapis vert|flat|color|556e1c..0.14|=
+green_concrete|Béton vert|cube|color|495b24..0.1|=
+green_concrete_powder|Béton vert en poudre|cube|color|61772d..0.12|=
+green_concrete_slab|Dalle de béton vert|slab|stone|495b24..0.1|=
+green_concrete_stairs|Escalier en béton vert|stairs|stone|495b24..0.1|=
+green_glazed_terracotta|Terre cuite émaillée verte|cube|color|5e7b21.b2c0a0.27.60|=
+green_shulker_box|Boîte de Shulker verte|miscbreak|color|4f6520..0.10|=
+green_stained_glass|Verre vert|clear|color|667f33..0.0|=
+green_stained_glass_pane|Vitre verte|post|color|667f33..0.0|=
+green_terracotta|Terre cuite verte|cube|color|4c532a..0.2|=
+green_wool|Laine verte|cube|color|556e1c..0.14|=
+green_wool_slab|Dalle de laine verte|slab|stone|556e1c..0.14|=
+green_wool_stairs|Escalier en laine verte|stairs|stone|556e1c..0.14|=
+grindstone|Meule|misc|deco|9d9d9d.787878.47.37|=
+hanging_roots|Racines suspendues|plant|plant|b48872.8b5a40.45.44|=
+hay_block|Botte de paille|cube|nature|a68b0c..0.28|b8a12b.936e21.48.39
+heavy_core|Noyau lourd|misc|deco|393b3e.797f8e.40.60|=
+heavy_weighted_pressure_plate|Plaque de pression pondérée lourde|plate|rs|e5e5e5.bfbfbf.23.31|=
+honey_block|Bloc de miel|misc|deco|faaf20.fdd265.30.41|faaf21.fbd467.36.43
+honeycomb_block|Bloc de rayon de miel|cube|nature|d97b07.fdc347.35.59|=
+horn_coral|Corail corné|plant|plant|c49e39.dfd745.49.39|=
+horn_coral_block|Bloc de corail corné|cube|plant|e0d946.c8a73b.34.34|=
+horn_coral_fan|Gorgone de corail corné|plant|plant|ceb73d..0.31|=
+ice|Glace|clear|nature|92b8fe..0.14|=
+infested_chiseled_stone_bricks|Pierre sculptée infestée|cube|stone|888788.606060.41.39|=
+infested_cobblestone|Pierres infestées|cube|stone|989798.656464.47.51|=
+infested_cracked_stone_bricks|Pierre taillée craquelée infestée|cube|stone|848284.626262.39.33|=
+infested_deepslate|Ardoise des abîmes infestée|cube|stone|575759..0.29|444447.6a6a6a.32.36
+infested_mossy_stone_bricks|Pierre taillée moussue infestée|cube|stone|838283.63704e.49.40|=
+infested_stone|Roche infestée|cube|stone|7e7e7e..0.19|=
+infested_stone_bricks|Pierre taillée infestée|cube|stone|7a7a7a..0.33|=
+iron_bars|Barreaux de fer|post|stone|6e726b.adadad.43.58|=
+iron_block|Bloc de fer|cube|ore|e5e5e5.bfbfbf.23.31|=
+iron_chain|Chaîne en fer|post|stone|333a4a..0.23|=
+iron_ore|Minerai de fer|cube|ore|7a7772.a4958b.35.38|=
+jack_o_lantern|Citrouille-lanterne|cube|deco|b46611.e39024.39.41|da851f.98510c.34.47
+jukebox|Jukebox|cubefix|deco|3f3025.82543b.46.45|422d1f.88573d.33.46
+jungle_button|Bouton en acajou|button|rs|b58460.885f3f.46.41|=
+jungle_door|Porte en acajou|door|rs|bc8c65.815c3d.42.50|875f3e.b78661.48.43
+jungle_fence|Barrière en acajou|post|wood|b58460.885f3f.46.41|=
+jungle_fence_gate|Portillon en acajou|misc|wood|b58460.885f3f.46.41|=
+jungle_hanging_sign|Pancarte suspendue en acajou|miscbreak|deco|a68250.394051.15.51|=
+jungle_leaves|Feuilles d'acajou|clear|nature|49671a..0.22|=
+jungle_log|Bûche d'acajou|cube|wood|a97954.57471a.23.53|554419..0.22
+jungle_planks|Planches d'acajou|cube|wood|b58460.885f3f.46.41|=
+jungle_pressure_plate|Plaque de pression en acajou|plate|rs|b58460.885f3f.46.41|=
+jungle_sapling|Pousse d'acajou|plant|plant|2f3c0a.31761c.36.32|=
+jungle_shelf|Étagère en acajou|miscfix|deco|9c7a4a..0.30|=
+jungle_sign|Pancarte en acajou|miscbreak|deco|aa7b56.634927.28.50|=
+jungle_slab|Dalle en acajou|slab|wood|b58460.885f3f.46.41|=
+jungle_stairs|Escalier en acajou|stairs|wood|b58460.885f3f.46.41|=
+jungle_trapdoor|Trappe en acajou|trapdoor|rs|ad7d58.6b4c35.31.46|=
+jungle_wood|Bois d'acajou|cube|wood|554419..0.22|=
+kelp|Algue|plant|plant|588e2d..0.30|=
+ladder|Échelle|miscbreak|deco|624c2b.aa844a.38.53|=
+lantern|Lanterne|miscbreak|deco|4b4751.f2b965.19.60|=
+lapis_block|Bloc de lapis-lazuli|cube|ore|1f438c..0.17|=
+lapis_ore|Minerai de lapis-lazuli|cube|ore|7e7e7e.2c5abe.23.60|=
+large_amethyst_bud|Grand cristal d'améthyste|plant|plant|795ab5.deb6eb.40.60|=
+large_fern|Grande fougère|plant|plant|4b622e..0.21|=
+lava|Lave|plant|nature|d4560f.e49232.32.40|=
+leaf_litter|Tas de feuilles|flat|plant|989898.cfcfcf.34.53|=
+lectern|Pupitre|miscfix|rs|ae8a53..0.26|a7844a.5b4424.48.60
+light_blue_banner|Bannière bleu clair|miscbreak|color|b19058.7b5f35.28.42|=
+light_blue_bed|Lit bleu clair|miscbreak|color|299ed6..0.12|b19058.7b5f35.28.42
+light_blue_candle|Bougie bleu clair|miscbreak|color|238ac5..0.43|=
+light_blue_carpet|Tapis bleu clair|flat|color|3aafd9..0.24|=
+light_blue_concrete|Béton bleu clair|cube|color|2489c7..0.2|=
+light_blue_concrete_powder|Béton bleu clair en poudre|cube|color|4ab5d5..0.19|=
+light_blue_concrete_slab|Dalle de béton bleu clair|slab|stone|2489c7..0.2|=
+light_blue_concrete_stairs|Escalier en béton bleu clair|stairs|stone|2489c7..0.2|=
+light_blue_glazed_terracotta|Terre cuite émaillée bleu clair|cube|color|86d2e9.2866b0.42.60|=
+light_blue_shulker_box|Boîte de Shulker bleu clair|miscbreak|color|31a4d4..0.21|=
+light_blue_stained_glass|Verre bleu clair|clear|color|6699d8..0.0|=
+light_blue_stained_glass_pane|Vitre bleu clair|post|color|6699d8..0.0|=
+light_blue_terracotta|Terre cuite bleu clair|cube|color|716d8a..0.3|=
+light_blue_wool|Laine bleu clair|cube|color|3aafd9..0.24|=
+light_blue_wool_slab|Dalle de laine bleu clair|slab|stone|3aafd9..0.24|=
+light_blue_wool_stairs|Escalier en laine bleu clair|stairs|stone|3aafd9..0.24|=
+light_gray_banner|Bannière gris clair|miscbreak|color|b19058.7b5f35.28.42|=
+light_gray_bed|Lit gris clair|miscbreak|color|909289..0.18|b19058.7b5f35.28.42
+light_gray_candle|Bougie gris clair|miscbreak|color|888a82.63655d.48.43|=
+light_gray_carpet|Tapis gris clair|flat|color|8e8e87..0.17|=
+light_gray_concrete|Béton gris clair|cube|color|7d7d73..0.1|=
+light_gray_concrete_powder|Béton gris clair en poudre|cube|color|9b9b94..0.17|=
+light_gray_concrete_slab|Dalle de béton gris clair|slab|stone|7d7d73..0.1|=
+light_gray_concrete_stairs|Escalier en béton gris clair|stairs|stone|7d7d73..0.1|=
+light_gray_glazed_terracotta|Terre cuite émaillée gris clair|cube|color|bdbfc1.4e8083.40.60|=
+light_gray_shulker_box|Boîte de Shulker gris clair|miscbreak|color|7c7c73..0.31|=
+light_gray_stained_glass|Verre gris clair|clear|color|999999..0.0|=
+light_gray_stained_glass_pane|Vitre gris clair|post|color|999999..0.0|=
+light_gray_terracotta|Terre cuite gris clair|cube|color|876b62..0.3|=
+light_gray_wool|Laine gris clair|cube|color|8e8e87..0.17|=
+light_gray_wool_slab|Dalle de laine gris clair|slab|stone|8e8e87..0.17|=
+light_gray_wool_stairs|Escalier en laine gris clair|stairs|stone|8e8e87..0.17|=
+light_weighted_pressure_plate|Plaque de pression pondérée légère|plate|rs|ffe34f.ecb828.44.43|=
+lightning_rod|Paratonnerre|miscbreak|rs|d37a5c.a65940.32.32|=
+lilac|Lilas|plant|plant|ba72bc.388d1b.38.60|=
+lily_of_the_valley|Muguet|plant|plant|51982b.ededed.27.60|=
+lily_pad|Nénuphar|flat|plant|114319..0.16|=
+lime_banner|Bannière vert clair|miscbreak|color|b19058.7b5f35.28.42|=
+lime_bed|Lit vert clair|miscbreak|color|79c21b..0.15|b19058.7b5f35.28.42
+lime_candle|Bougie vert clair|miscbreak|color|62ac17..0.41|=
+lime_carpet|Tapis vert clair|flat|color|70b91a..0.15|=
+lime_concrete|Béton vert clair|cube|color|5ea918..0.2|=
+lime_concrete_powder|Béton vert clair en poudre|cube|color|7dbd2a..0.14|=
+lime_concrete_slab|Dalle de béton vert clair|slab|stone|5ea918..0.2|=
+lime_concrete_stairs|Escalier en béton vert clair|stairs|stone|5ea918..0.2|=
+lime_glazed_terracotta|Terre cuite émaillée vert clair|cube|color|92b71a.d1eb84.27.60|=
+lime_shulker_box|Boîte de Shulker vert clair|miscbreak|color|64ad17..0.24|=
+lime_stained_glass|Verre vert clair|clear|color|7fcc19..0.0|=
+lime_stained_glass_pane|Vitre vert clair|post|color|7fcc19..0.0|=
+lime_terracotta|Terre cuite vert clair|cube|color|687635..0.4|=
+lime_wool|Laine vert clair|cube|color|70b91a..0.15|=
+lime_wool_slab|Dalle de laine vert clair|slab|stone|70b91a..0.15|=
+lime_wool_stairs|Escalier en laine vert clair|stairs|stone|70b91a..0.15|=
+lodestone|Magnétite|cubefix|nether|808080.a7abb3.49.43|909193.57575b.43.59
+loom|Métier à tisser|cube|deco|b69b7e.4e3e25.38.60|7c4c3d.be9760.33.54
+magenta_banner|Bannière magenta|miscbreak|color|b19058.7b5f35.28.42|=
+magenta_bed|Lit magenta|miscbreak|color|b93baf..0.14|b19058.7b5f35.28.42
+magenta_candle|Bougie magenta|miscbreak|color|a12e99..0.42|=
+magenta_carpet|Tapis magenta|flat|color|be45b4..0.22|=
+magenta_concrete|Béton magenta|cube|color|a9309f..0.2|=
+magenta_concrete_powder|Béton magenta en poudre|cube|color|c154b9..0.18|=
+magenta_concrete_slab|Dalle de béton magenta|slab|stone|a9309f..0.2|=
+magenta_concrete_stairs|Escalier en béton magenta|stairs|stone|a9309f..0.2|=
+magenta_glazed_terracotta|Terre cuite émaillée magenta|cube|color|bf47b6.e98fcf.41.53|=
+magenta_shulker_box|Boîte de Shulker magenta|miscbreak|color|ae36a4..0.20|=
+magenta_stained_glass|Verre magenta|clear|color|b24cd8..0.0|=
+magenta_stained_glass_pane|Vitre magenta|post|color|b24cd8..0.0|=
+magenta_terracotta|Terre cuite magenta|cube|color|96586d..0.4|=
+magenta_wool|Laine magenta|cube|color|be45b4..0.22|=
+magenta_wool_slab|Dalle de laine magenta|slab|stone|be45b4..0.22|=
+magenta_wool_stairs|Escalier en laine magenta|stairs|stone|be45b4..0.22|=
+magma_block|Bloc de magma|cube|nether|5b2323.e36d19.38.60|=
+mangrove_button|Bouton en palétuvier|button|rs|763631..0.22|=
+mangrove_door|Porte en palétuvier|door|rs|71312f..0.26|70302e..0.24
+mangrove_fence|Barrière en palétuvier|post|wood|763631..0.22|=
+mangrove_fence_gate|Portillon en palétuvier|misc|wood|763631..0.22|=
+mangrove_hanging_sign|Pancarte suspendue en palétuvier|miscbreak|deco|783730.394051.15.29|=
+mangrove_leaves|Feuilles de palétuvier|clear|nature|5a7a2c.37481a.44.36|=
+mangrove_log|Bûche de palétuvier|cube|wood|67312a..0.22|544329..0.17
+mangrove_planks|Planches de palétuvier|cube|wood|763631..0.22|=
+mangrove_pressure_plate|Plaque de pression en palétuvier|plate|rs|763631..0.22|=
+mangrove_propagule|Propagule de palétuvier|misc|plant|60af54..0.37|=
+mangrove_roots|Racines de palétuvier|misc|plant|4b3c27..0.16|4b3c26..0.15
+mangrove_shelf|Étagère en palétuvier|miscfix|deco|6d2d2a..0.19|=
+mangrove_sign|Pancarte en palétuvier|miscbreak|deco|70372f..0.24|=
+mangrove_slab|Dalle en palétuvier|slab|wood|763631..0.22|=
+mangrove_stairs|Escalier en palétuvier|stairs|wood|763631..0.22|=
+mangrove_trapdoor|Trappe en palétuvier|trapdoor|rs|6f2f2a..0.27|=
+mangrove_wood|Bois de palétuvier|cube|wood|544329..0.17|=
+medium_amethyst_bud|Cristal moyen d'améthyste|plant|plant|7657b1.ddadef.39.60|=
+melon|Pastèque|cube|nature|59861f.a7ac1d.28.45|54831f.a7ac1d.36.50
+melon_stem|Tige de pastèque|plant|plant|3d4c1c.60772d.49.34|=
+moss_block|Bloc de mousse|cube|nature|596e2d..0.23|=
+moss_carpet|Tapis de mousse|flat|plant|596e2d..0.23|=
+mossy_cobblestone|Pierres moussues|cube|stone|616d4c.919091.27.49|=
+mossy_cobblestone_slab|Dalle de pierres moussues|slab|stone|616d4c.919091.27.49|=
+mossy_cobblestone_stairs|Escalier en pierres moussues|stairs|stone|616d4c.919091.27.49|=
+mossy_cobblestone_wall|Muret de pierres moussues|post|stone|616d4c.919091.27.49|=
+mossy_stone_brick_slab|Dalle de pierre taillée moussue|slab|stone|838283.63704e.49.40|=
+mossy_stone_brick_stairs|Escalier en pierre taillée moussue|stairs|stone|838283.63704e.49.40|=
+mossy_stone_brick_wall|Muret de pierre taillée moussue|post|stone|838283.63704e.49.40|=
+mossy_stone_bricks|Pierre taillée moussue|cube|stone|838283.63704e.49.40|=
+mud|Boue|clear|nature|3c393d..0.12|=
+mud_brick_slab|Dalle de briques de terre crue|slab|nature|89684f..0.29|=
+mud_brick_stairs|Escalier en briques de terre crue|stairs|nature|89684f..0.29|=
+mud_brick_wall|Muret de briques de terre crue|post|nature|89684f..0.29|=
+mud_bricks|Briques de terre crue|cube|nature|89684f..0.29|=
+muddy_mangrove_roots|Racines de palétuvier boueuses|clear|plant|463b2d..0.19|443b30..0.19
+mushroom_stem|Tige de champignon|cube|plant|cbc5ba..0.12|=
+mycelium|Mycélium|cube|nature|6f6365..0.15|846a5e.5d432f.47.50
+nether_brick_fence|Barrière en briques du Nether|post|nether|2c161a..0.17|=
+nether_brick_slab|Dalle de briques du Nether|slab|nether|2c161a..0.17|=
+nether_brick_stairs|Escalier en briques du Nether|stairs|nether|2c161a..0.17|=
+nether_brick_wall|Muret de briques du Nether|post|nether|2c161a..0.17|=
+nether_bricks|Briques du Nether|cube|nether|2c161a..0.17|=
+nether_gold_ore|Minerai d'or du Nether|cube|ore|662827.edb845.10.60|=
+nether_quartz_ore|Minerai de quartz du Nether|cube|ore|642a29.c2a699.19.60|=
+nether_sprouts|Germes du Nether|plant|plant|149785..0.21|=
+nether_wart|Verrues du Nether|plant|plant|550807.982226.39.44|=
+nether_wart_block|Bloc de verrues du Nether|cube|plant|730302..0.22|=
+netherite_block|Bloc de netherite|cube|ore|433d40..0.27|=
+netherrack|Netherrack|cube|nether|622626..0.24|=
+oak_door|Porte en chêne|door|rs|a07f4d.68502d.35.45|a07d49.6b532f.41.42
+oak_fence|Barrière en chêne|post|wood|b19058.7b5f35.28.42|=
+oak_fence_gate|Portillon en chêne|misc|wood|b19058.7b5f35.28.42|=
+oak_hanging_sign|Pancarte suspendue en chêne|miscbreak|deco|ae8d53.394051.15.56|=
+oak_leaves|Feuilles de chêne|clear|nature|43611b..0.27|=
+oak_log|Bûche de chêne|cube|wood|ab8a53.5e4a2b.25.51|7e623b.503f25.37.36
+oak_planks|Planches de chêne|cube|wood|b19058.7b5f35.28.42|=
+oak_pressure_plate|Plaque de pression en chêne|plate|rs|b19058.7b5f35.28.42|=
+oak_sapling|Pousse de chêne|plant|plant|594a23.408f2f.47.53|=
+oak_shelf|Étagère en chêne|miscfix|deco|775c34.b29157.44.48|=
+oak_sign|Pancarte en chêne|miscbreak|deco|b19158.765c34.39.48|=
+oak_slab|Dalle en chêne|slab|wood|b19058.7b5f35.28.42|=
+oak_stairs|Escalier en chêne|stairs|wood|b19058.7b5f35.28.42|=
+oak_trapdoor|Trappe en chêne|trapdoor|rs|9a7948.594826.45.48|=
+oak_wood|Bois de chêne|cube|wood|7e623b.503f25.37.36|=
+ochre_froglight|Grelampe ocrée|cube|stone|fdfee4.f4e19c.30.40|fcf9d1.e8c97e.33.54
+open_eyeblossom|Oeilchidée ouverte|plant|plant|574e4f.e2dbe1.33.60|=
+orange_banner|Bannière orange|miscbreak|color|b19058.7b5f35.28.42|=
+orange_bed|Lit orange|miscbreak|color|fa7f16..0.20|b19058.7b5f35.28.42
+orange_candle|Bougie orange|miscbreak|color|f1740c.c35305.48.53|=
+orange_carpet|Tapis orange|flat|color|f17614..0.20|=
+orange_concrete|Béton orange|cube|color|e06101..0.2|=
+orange_concrete_powder|Béton orange en poudre|cube|color|e38420..0.18|=
+orange_concrete_slab|Dalle de béton orange|slab|stone|e06101..0.2|=
+orange_concrete_stairs|Escalier en béton orange|stairs|stone|e06101..0.2|=
+orange_glazed_terracotta|Terre cuite émaillée orange|cube|color|f17f1b.2aafb1.43.60|=
+orange_poplar_leaves|Feuilles de peuplier orange|clear|nature|9c4218.e26f18.46.46|=
+orange_shulker_box|Boîte de Shulker orange|miscbreak|color|ea6a09..0.19|=
+orange_stained_glass|Verre orange|clear|color|d87f33..0.0|=
+orange_stained_glass_pane|Vitre orange|post|color|d87f33..0.0|=
+orange_terracotta|Terre cuite orange|cube|color|a25426..0.4|=
+orange_tulip|Tulipe orange|plant|plant|7b962a.177c04.29.60|=
+orange_wool|Laine orange|cube|color|f17614..0.20|=
+orange_wool_slab|Dalle de laine orange|slab|stone|f17614..0.20|=
+orange_wool_stairs|Escalier en laine orange|stairs|stone|f17614..0.20|=
+oxeye_daisy|Marguerite|plant|plant|dde8e3.7ca321.43.60|=
+oxidized_chiseled_copper|Cuivre sculpté oxydé|cube|ore|5eb592.41816d.37.39|=
+oxidized_copper|Cuivre oxydé|cube|ore|52a385..0.35|=
+oxidized_copper_bars|Barreaux de cuivre oxydé|post|ore|3b705c.509a7e.26.29|=
+oxidized_copper_bulb|Ampoule en cuivre oxydé|cube|rs|386453.5aaf90.43.55|=
+oxidized_copper_chain|Chaîne en cuivre oxydé|post|ore|3e7663..0.22|=
+oxidized_copper_chest|Coffre en cuivre oxydé|miscfix|ore|52a385..0.35|=
+oxidized_copper_door|Porte en cuivre oxydé|door|rs|5bb595.46846e.43.42|55a98c.3f6655.23.44
+oxidized_copper_golem_statue|Statue de golem de cuivre oxydé|miscfix|ore|52a385..0.35|=
+oxidized_copper_grate|Grille en cuivre oxydé|clear|ore|5ab394.488a6e.44.39|=
+oxidized_copper_lantern|Lanterne en cuivre oxydé|miscbreak|ore|3c745e.71b68e.38.60|=
+oxidized_copper_trapdoor|Trappe en cuivre oxydé|trapdoor|rs|498c72.5fb897.49.40|=
+oxidized_cut_copper|Cuivre taillé oxydé|cube|ore|57a789.3a6e5a.23.40|=
+oxidized_cut_copper_slab|Dalle de cuivre taillé oxydé|slab|ore|57a789.3a6e5a.23.40|=
+oxidized_cut_copper_stairs|Escalier en cuivre taillé oxydé|stairs|ore|57a789.3a6e5a.23.40|=
+oxidized_lightning_rod|Paratonnerre oxydé|miscbreak|rs|4f9a80..0.42|=
+packed_ice|Glace compactée|cube|nature|8eb4fa..0.19|=
+packed_mud|Terre crue|cube|nature|8e6b50..0.17|=
+pale_hanging_moss|Mousse pâle suspendue|plant|plant|72776f.515551.45.29|=
+pale_moss_block|Bloc de mousse pâle|cube|nature|6b7069..0.30|=
+pale_moss_carpet|Tapis de mousse pâle|flat|plant|6b7069..0.30|=
+pale_oak_button|Bouton en chêne pâle|button|rs|f5eeec.d0c1c1.46.41|=
+pale_oak_door|Porte en chêne pâle|door|rs|ebe1e0.5d5d5d.13.60|e4d9d8.817c7c.29.60
+pale_oak_fence|Barrière en chêne pâle|post|wood|f5eeec.d0c1c1.46.41|=
+pale_oak_fence_gate|Portillon en chêne pâle|misc|wood|f5eeec.d0c1c1.46.41|=
+pale_oak_hanging_sign|Pancarte suspendue en chêne pâle|miscbreak|deco|ece2e1.394051.15.60|=
+pale_oak_leaves|Feuilles de chêne pâle|clear|nature|5c605a.91978e.47.53|=
+pale_oak_log|Bûche de chêne pâle|cube|wood|e7dedd.5f5451.23.60|584e4b..0.29
+pale_oak_planks|Planches de chêne pâle|cube|wood|f5eeec.d0c1c1.46.41|=
+pale_oak_pressure_plate|Plaque de pression en chêne pâle|plate|rs|f5eeec.d0c1c1.46.41|=
+pale_oak_sapling|Pousse de chêne pâle|plant|plant|7f837a.5c4f4b.49.46|=
+pale_oak_shelf|Étagère en chêne pâle|miscfix|deco|d3c6c5.f4edec.49.39|=
+pale_oak_sign|Pancarte en chêne pâle|miscbreak|deco|e1d6d5.574d4b.13.60|=
+pale_oak_slab|Dalle en chêne pâle|slab|wood|f5eeec.d0c1c1.46.41|=
+pale_oak_stairs|Escalier en chêne pâle|stairs|wood|f5eeec.d0c1c1.46.41|=
+pale_oak_trapdoor|Trappe en chêne pâle|trapdoor|rs|faf3f1.cbbdbc.42.56|=
+pale_oak_wood|Bois de chêne pâle|cube|wood|584e4b..0.29|=
+pearlescent_froglight|Grelampe nacrée|cube|stone|fdfbfa.e4d5d6.30.30|f9f4f2.d1bac9.33.44
+peony|Pivoine|plant|plant|204923.e5aff6.28.60|=
+petrified_oak_slab|Dalle en chêne pétrifiée|slab|wood|b19058.7b5f35.28.42|=
+piglin_head|Tête de Piglin|miscbreak|deco|513e33..0.29|=
+pink_banner|Bannière rose|miscbreak|color|b19058.7b5f35.28.42|=
+pink_bed|Lit rose|miscbreak|color|f184a7..0.20|b19058.7b5f35.28.42
+pink_candle|Bougie rose|miscbreak|color|e977a0.b5537b.48.57|=
+pink_carpet|Tapis rose|flat|color|ee8dac..0.29|=
+pink_concrete|Béton rose|cube|color|d6658f..0.2|=
+pink_concrete_powder|Béton rose en poudre|cube|color|e599b5..0.22|=
+pink_concrete_slab|Dalle de béton rose|slab|stone|d6658f..0.2|=
+pink_concrete_stairs|Escalier en béton rose|stairs|stone|d6658f..0.2|=
+pink_glazed_terracotta|Terre cuite émaillée rose|cube|color|eeb5c8.e880a2.49.40|=
+pink_petals|Pétales roses|flat|plant|a9a9a9..0.21|=
+pink_shulker_box|Boîte de Shulker rose|miscbreak|color|e67a9e..0.26|=
+pink_stained_glass|Verre rose|clear|color|f27fa5..0.0|=
+pink_stained_glass_pane|Vitre rose|post|color|f27fa5..0.0|=
+pink_terracotta|Terre cuite rose|cube|color|a24e4f..0.4|=
+pink_tulip|Tulipe rose|plant|plant|3d931e.ebc4fa.22.60|=
+pink_wool|Laine rose|cube|color|ee8dac..0.29|=
+pink_wool_slab|Dalle de laine rose|slab|stone|ee8dac..0.29|=
+pink_wool_stairs|Escalier en laine rose|stairs|stone|ee8dac..0.29|=
+pitcher_crop|Plant de planturne|misc|plant|c8a969.8b8e57.10.23|=
+player_head|Tête de joueur|miscbreak|deco|513e33..0.29|=
+podzol|Podzol|cube|nature|5c3f18..0.24|8d6546.573d20.34.47
+pointed_dripstone|Spéléothème pointu|miscbreak|nature|73564f.99836b.38.36|=
+polished_andesite|Andésite polie|cube|stone|848786..0.36|=
+polished_andesite_slab|Dalle d'andésite polie|slab|stone|848786..0.36|=
+polished_andesite_stairs|Escalier en andésite polie|stairs|stone|848786..0.36|=
+polished_basalt|Basalte poli|cube|nether|515053.7b7b7b.43.41|4b4b50.747474.33.39
+polished_blackstone|Pierre noire|cube|nether|353139..0.28|=
+polished_blackstone_brick_slab|Dalle de pierre noire taillée|slab|nether|302b32..0.31|=
+polished_blackstone_brick_stairs|Escalier en pierre noire taillée|stairs|nether|302b32..0.31|=
+polished_blackstone_brick_wall|Muret de pierre noire taillée|post|nether|302b32..0.31|=
+polished_blackstone_bricks|Pierre noire taillée|cube|nether|302b32..0.31|=
+polished_blackstone_button|Bouton en pierre noire|button|rs|353139..0.28|=
+polished_blackstone_pressure_plate|Plaque de pression en pierre noire|plate|rs|353139..0.28|=
+polished_blackstone_slab|Dalle de pierre noire|slab|nether|353139..0.28|=
+polished_blackstone_stairs|Escalier en pierre noire|stairs|nether|353139..0.28|=
+polished_blackstone_wall|Muret de pierre noire|post|nether|353139..0.28|=
+polished_cinnabar|Cinabre poli|cube|stone|993a37..0.31|=
+polished_cinnabar_slab|Dalle de cinabre poli|slab|stone|993a37..0.31|=
+polished_cinnabar_stairs|Escalier en cinabre poli|stairs|stone|993a37..0.31|=
+polished_cinnabar_wall|Muret de cinabre poli|post|stone|993a37..0.31|=
+polished_deepslate|Ardoise des abîmes polie|cube|stone|575758.353535.43.35|=
+polished_deepslate_slab|Dalle d'ardoise des abîmes polie|slab|stone|575758.353535.43.35|=
+polished_deepslate_stairs|Escalier en ardoise des abîmes polie|stairs|stone|575758.353535.43.35|=
+polished_deepslate_wall|Muret d'ardoise des abîmes polie|post|stone|575758.353535.43.35|=
+polished_diorite|Diorite polie|cube|stone|cfcfd1.878989.20.59|=
+polished_diorite_slab|Dalle de diorite polie|slab|stone|cfcfd1.878989.20.59|=
+polished_diorite_stairs|Escalier en diorite polie|stairs|stone|cfcfd1.878989.20.59|=
+polished_granite|Granite poli|cube|stone|9a6b59..0.38|=
+polished_granite_slab|Dalle de granite poli|slab|stone|9a6b59..0.38|=
+polished_granite_stairs|Escalier en granite poli|stairs|stone|9a6b59..0.38|=
+polished_sulfur|Soufre poli|cube|stone|bcaa5b..0.34|=
+polished_sulfur_slab|Dalle de soufre poli|slab|stone|bcaa5b..0.34|=
+polished_sulfur_stairs|Escalier en soufre poli|stairs|stone|bcaa5b..0.34|=
+polished_sulfur_wall|Muret de soufre poli|post|stone|bcaa5b..0.34|=
+polished_tuff|Tuf poli|cube|nature|626864..0.23|=
+polished_tuff_slab|Dalle de tuf poli|slab|stone|626864..0.23|=
+polished_tuff_stairs|Escalier en tuf poli|stairs|stone|626864..0.23|=
+polished_tuff_wall|Muret de tuf poli|post|stone|626864..0.23|=
+poplar_button|Bouton en peuplier|button|rs|96897f..0.30|=
+poplar_door|Porte en peuplier|door|rs|a59b8d.83756e.40.37|a3988b.83756f.48.37
+poplar_fence|Barrière en peuplier|post|stone|96897f..0.30|=
+poplar_fence_gate|Portillon en peuplier|misc|deco|96897f..0.30|=
+poplar_hanging_sign|Pancarte suspendue en peuplier|miscbreak|deco|a09488.394051.15.54|=
+poplar_log|Bûche de peuplier|cube|stone|998d82.513e2c.23.60|4f3d2b..0.14
+poplar_planks|Planches de peuplier|cube|stone|96897f..0.30|=
+poplar_pressure_plate|Plaque de pression en peuplier|plate|rs|96897f..0.30|=
+poplar_sapling|Pousse de peuplier|plant|plant|643d26.c76625.44.60|=
+poplar_shelf|Étagère en peuplier|miscfix|deco|94877e..0.32|=
+poplar_sign|Pancarte en peuplier|miscbreak|deco|998c82.5c4a3d.20.52|=
+poplar_slab|Dalle en peuplier|slab|stone|96897f..0.30|=
+poplar_stairs|Escalier en peuplier|stairs|stone|96897f..0.30|=
+poplar_trapdoor|Trappe en peuplier|trapdoor|rs|a49a8c.81736d.45.39|=
+poplar_wood|Bois de peuplier|cube|stone|4f3d2b..0.14|=
+poppy|Coquelicot|plant|plant|ce2a27.2f5924.49.60|=
+potatoes|Pommes de terre|plant|plant|689332.2a6d29.31.51|=
+potent_sulfur|Soufre concentré|cube|stone|d3d161..0.16|=
+powder_snow|Neige poudreuse|clear|nature|f8fdfd..0.8|=
+prismarine|Prismarine|cube|stone|75b3a6.448670.38.49|=
+prismarine_brick_slab|Dalle de briques de prismarine|slab|stone|559f90.7ac0b6.38.41|=
+prismarine_brick_stairs|Escalier en briques de prismarine|stairs|stone|559f90.7ac0b6.38.41|=
+prismarine_bricks|Briques de prismarine|cube|stone|559f90.7ac0b6.38.41|=
+prismarine_slab|Dalle de prismarine|slab|stone|75b3a6.448670.38.49|=
+prismarine_stairs|Escalier en prismarine|stairs|stone|75b3a6.448670.38.49|=
+prismarine_wall|Muret de prismarine|post|stone|75b3a6.448670.38.49|=
+pumpkin|Citrouille|cube|nature|b46611.e39024.39.41|da851f.98510c.34.47
+pumpkin_stem|Tige de citrouille|plant|plant|4f6124..0.30|=
+purple_banner|Bannière violette|miscbreak|color|b19058.7b5f35.28.42|=
+purple_bed|Lit violet|miscbreak|color|802bb2..0.12|b19058.7b5f35.28.42
+purple_candle|Bougie violette|miscbreak|color|69229f..0.34|=
+purple_carpet|Tapis violet|flat|color|7a2aad..0.20|=
+purple_concrete|Béton violet|cube|color|64209c..0.1|=
+purple_concrete_powder|Béton violet en poudre|cube|color|8438b2..0.13|=
+purple_concrete_slab|Dalle de béton violet|slab|stone|64209c..0.1|=
+purple_concrete_stairs|Escalier en béton violet|stairs|stone|64209c..0.1|=
+purple_glazed_terracotta|Terre cuite émaillée violette|cube|color|4c256e.923bc5.49.60|=
+purple_shulker_box|Boîte de Shulker violette|miscbreak|color|67209c..0.20|=
+purple_stained_glass|Verre violet|clear|color|7f3fb2..0.0|=
+purple_stained_glass_pane|Vitre violette|post|color|7f3fb2..0.0|=
+purple_terracotta|Terre cuite violette|cube|color|764656..0.4|=
+purple_wool|Laine violette|cube|color|7a2aad..0.20|=
+purple_wool_slab|Dalle de laine violette|slab|stone|7a2aad..0.20|=
+purple_wool_stairs|Escalier en laine violette|stairs|stone|7a2aad..0.20|=
+purpur_block|Bloc de purpur|cube|end|aa7eaa..0.30|=
+purpur_pillar|Pilier de purpur|cube|end|ac80ab..0.29|ac82ac..0.33
+purpur_slab|Dalle de purpur|slab|end|aa7eaa..0.30|=
+purpur_stairs|Escalier en purpur|stairs|end|aa7eaa..0.30|=
+quartz_block|Bloc de quartz|cube|nether|ece6df..0.12|=
+quartz_bricks|Briques de quartz|cube|nether|ebe5de..0.14|=
+quartz_pillar|Pilier de quartz|cube|nether|ebe6df..0.14|ece7e0..0.14
+quartz_slab|Dalle de quartz|slab|nether|ece6df..0.12|=
+quartz_stairs|Escalier en quartz|stairs|nether|ece6df..0.12|=
+rail|Rails|flat|rs|6e5a3c.979286.39.60|=
+raw_copper_block|Bloc de cuivre brut|cube|ore|7d6247.cc785d.37.57|=
+raw_gold_block|Bloc d'or brut|cube|ore|f6ca3a.be8020.44.60|=
+raw_iron_block|Bloc de fer brut|cube|ore|c9a58d.816848.48.60|=
+red_banner|Bannière rouge|miscbreak|color|b19058.7b5f35.28.42|=
+red_bed|Lit rouge|miscbreak|color|b23028..0.12|b19058.7b5f35.28.42
+red_candle|Bougie rouge|miscbreak|color|992724..0.32|=
+red_carpet|Tapis rouge|flat|color|a12723..0.13|=
+red_concrete|Béton rouge|cube|color|8e2121..0.1|=
+red_concrete_powder|Béton rouge en poudre|cube|color|a83633..0.11|=
+red_concrete_slab|Dalle de béton rouge|slab|stone|8e2121..0.1|=
+red_concrete_stairs|Escalier en béton rouge|stairs|stone|8e2121..0.1|=
+red_glazed_terracotta|Terre cuite émaillée rouge|cube|color|a42924.ce554c.43.43|=
+red_mushroom|Champignon rouge|plant|plant|e31c1e.c0c5a5.28.60|=
+red_mushroom_block|Bloc de champignon rouge|cube|plant|c82f2d..0.42|=
+red_nether_brick_slab|Dalle de briques rouges du Nether|slab|nether|460709..0.24|=
+red_nether_brick_stairs|Escalier en briques rouges du Nether|stairs|nether|460709..0.24|=
+red_nether_brick_wall|Muret de briques rouges du Nether|post|nether|460709..0.24|=
+red_nether_bricks|Briques rouges du Nether|cube|nether|460709..0.24|=
+red_poplar_leaves|Feuilles de peuplier rouges|clear|nature|772326.c33729.46.44|=
+red_sand|Sable rouge|cube|nature|bf6721..0.14|=
+red_sandstone|Grès rouge|cube|nature|b5621f..0.10|bb631d..0.25
+red_sandstone_slab|Dalle de grès rouge|slab|nature|b5621f..0.10|bb631d..0.25
+red_sandstone_stairs|Escalier en grès rouge|stairs|nature|b5621f..0.10|bb631d..0.25
+red_sandstone_wall|Muret de grès rouge|post|nature|bb631d..0.25|=
+red_shrub|Buisson rouge|plant|plant|601c0f.9a2c1e.44.34|=
+red_shulker_box|Boîte de Shulker rouge|miscbreak|color|8c1f1e..0.18|=
+red_stained_glass|Verre rouge|clear|color|993333..0.0|=
+red_stained_glass_pane|Vitre rouge|post|color|993333..0.0|=
+red_terracotta|Terre cuite rouge|cube|color|8f3d2f..0.4|=
+red_tulip|Tulipe rouge|plant|plant|3e931f.d32d2a.18.60|=
+red_wool|Laine rouge|cube|color|a12723..0.13|=
+red_wool_slab|Dalle de laine rouge|slab|stone|a12723..0.13|=
+red_wool_stairs|Escalier en laine rouge|stairs|stone|a12723..0.13|=
+redstone_ore|Minerai de redstone|cube|rs|817c7c.cf1717.14.60|=
+reinforced_deepslate|Ardoise des abîmes renforcée|cubefix|stone|414142.9aa98e.17.60|424649.9eaa90.39.60
+resin_block|Bloc de résine|cube|nature|e97621.c0450d.38.40|=
+resin_brick_slab|Dalle de briques de résine|slab|nature|ba4210.e97823.42.44|=
+resin_brick_stairs|Escalier en briques de résine|stairs|nature|ba4210.e97823.42.44|=
+resin_brick_wall|Muret de briques de résine|post|nature|ba4210.e97823.42.44|=
+resin_bricks|Briques de résine|cube|nature|ba4210.e97823.42.44|=
+resin_clump|Amas de résine|flat|nature|d45711.f49d2e.36.48|=
+respawn_anchor|Ancre de réapparition|cubefix|nether|100b17.452c6f.33.60|161120.492478.35.60
+rooted_dirt|Terre racineuse|cube|nature|a87c5f.755138.48.47|=
+rose_bush|Rosier|plant|plant|316b28.ba2921.35.60|=
+sand|Sable|cube|nature|dbcfa3..0.17|=
+sandstone|Grès|cube|nature|e0d6aa..0.10|e0daae.ceb884.43.33
+sandstone_slab|Dalle de grès|slab|nature|e0d6aa..0.10|e0daae.ceb884.43.33
+sandstone_stairs|Escalier en grès|stairs|nature|e0d6aa..0.10|e0daae.ceb884.43.33
+sandstone_wall|Muret de grès|post|nature|e0daae.ceb884.43.33|=
+scaffolding|Échafaudage|miscbreak|deco|956a40.c6a555.43.48|d2bb56.ab9546.45.41
+sculk|Sculk|cube|nature|0d1c22..0.21|=
+sculk_catalyst|Catalyseur de sculk|cubefix|nature|0d191f.2e8493.6.46|829488.0c1d23.45.60
+sculk_sensor|Capteur sculk|miscfix|rs|074654..0.25|0d171e.06414d.38.42
+sculk_shrieker|Hurleur sculk|miscfix|nature|c7cdaa..0.20|0e313b.a5b194.41.60
+sculk_vein|Veine de sculk|flat|nature|0a2228.044c5a.37.44|=
+sea_lantern|Lanterne aquatique|clear|deco|d4e4dc.5e9285.34.60|=
+sea_pickle|Cornichon de mer|miscbreak|plant|464a18.727d3a.45.60|=
+seagrass|Herbe aquatique|plant|plant|337e09..0.31|=
+shelf_mushroom|Polypore|misc|plant|c08248.dfb370.44.49|=
+short_dry_grass|Herbes courtes sèches|plant|plant|ae8c57.d6c496.33.50|=
+short_grass|Herbes courtes|plant|plant|536c33..0.22|=
+shroomlight|Champilampe|cube|nether|e56b16.fec07f.46.60|=
+shulker_box|Boîte de Shulker|miscbreak|color|8b618b..0.21|=
+skeleton_skull|Crâne de squelette|miscbreak|deco|513e33..0.29|=
+slime_block|Bloc de slime|misc|deco|70c05c..0.19|=
+small_amethyst_bud|Petit cristal d'améthyste|plant|plant|6e50a8.a07ce0.44.50|=
+small_dripleaf|Petite foliogoutte|miscbreak|plant|5b732e..0.28|=
+smithing_table|Table de forge|cube|deco|393b47..0.22|392527..0.37
+smoker|Fumoir|cubefix|deco|3d3a36.727272.46.58|58472f.79756f.45.54
+smooth_basalt|Basalte lisse|cube|nether|49484e..0.28|=
+smooth_quartz|Bloc de quartz lisse|cube|nether|ede6e0..0.6|=
+smooth_quartz_slab|Dalle de quartz lisse|slab|nether|ede6e0..0.6|=
+smooth_quartz_stairs|Escalier en quartz lisse|stairs|nether|ede6e0..0.6|=
+smooth_red_sandstone|Grès rouge lisse|cube|nature|b5621f..0.10|=
+smooth_red_sandstone_slab|Dalle de grès rouge lisse|slab|nature|b5621f..0.10|=
+smooth_red_sandstone_stairs|Escalier en grès rouge lisse|stairs|nature|b5621f..0.10|=
+smooth_sandstone|Grès lisse|cube|nature|e0d6aa..0.10|=
+smooth_sandstone_slab|Dalle de grès lisse|slab|nature|e0d6aa..0.10|=
+smooth_sandstone_stairs|Escalier en grès lisse|stairs|nature|e0d6aa..0.10|=
+smooth_stone|Roche lisse|cube|stone|a8a8a8.818181.23.31|=
+smooth_stone_slab|Dalle de roche lisse|slab|stone|a8a8a8.818181.23.31|9d9d9d.bdbdbd.34.37
+sniffer_egg|Oeuf de renifleur|miscbreak|deco|af4530.4d9e60.40.60|36764b.871e18.46.60
+snow|Neige|flat|nature|f9fefe..0.6|=
+snow_block|Bloc de neige|cube|nature|f9fefe..0.6|=
+soul_campfire|Feu de camp des âmes|miscfix|nether|313740.89704b.35.60|=
+soul_lantern|Lanterne des âmes|miscbreak|nether|3f495b.6ee2e7.17.60|=
+soul_sand|Sable des âmes|clear|nether|513e33..0.29|=
+soul_soil|Terre des âmes|cube|nether|4c3a2f..0.23|=
+soul_torch|Torche des âmes|miscbreak|nether|6d735a..0.60|=
+spawner|Générateur de créatures|clearfix|stone|202333.324f62.26.35|=
+sponge|Éponge|cube|stone|c4c04b..0.30|=
+spore_blossom|Fleur sporifère|miscbreak|plant|f071bb.9a4771.39.60|=
+spruce_button|Bouton en sapin|button|rs|735531..0.24|=
+spruce_door|Porte en sapin|door|rs|6a5031..0.33|6a5031..0.36
+spruce_fence|Barrière en sapin|post|wood|735531..0.24|=
+spruce_fence_gate|Portillon en sapin|misc|wood|735531..0.24|=
+spruce_hanging_sign|Pancarte suspendue en sapin|miscbreak|deco|745a35.394051.15.30|=
+spruce_leaves|Feuilles de sapin|clear|nature|385838.1c2d1c.29.27|=
+spruce_log|Bûche de sapin|cube|wood|6d502f..0.27|3b2611..0.16
+spruce_planks|Planches de sapin|cube|wood|735531..0.24|=
+spruce_pressure_plate|Plaque de pression en sapin|plate|rs|735531..0.24|=
+spruce_sapling|Pousse de sapin|plant|plant|2d3c25..0.31|=
+spruce_shelf|Étagère en sapin|miscfix|deco|685330..0.19|=
+spruce_sign|Pancarte en sapin|miscbreak|deco|795a34.4a341c.35.36|=
+spruce_slab|Dalle en sapin|slab|wood|735531..0.24|=
+spruce_stairs|Escalier en sapin|stairs|wood|735531..0.24|=
+spruce_trapdoor|Trappe en sapin|trapdoor|rs|684f30..0.26|=
+spruce_wood|Bois de sapin|cube|wood|3b2611..0.16|=
+stone_brick_slab|Dalle de pierre taillée|slab|stone|7a7a7a..0.33|=
+stone_brick_stairs|Escalier en pierre taillée|stairs|stone|7a7a7a..0.33|=
+stone_brick_wall|Muret de pierre taillée|post|stone|7a7a7a..0.33|=
+stone_bricks|Pierre taillée|cube|stone|7a7a7a..0.33|=
+stone_slab|Dalle de roche|slab|stone|7e7e7e..0.19|=
+stone_stairs|Escalier en roche|stairs|stone|7e7e7e..0.19|=
+stonecutter|Tailleur de pierre|misc|deco|7e7e7e.715c39.22.42|5a3b23.7c7c7c.49.60
+straw_bed|Lit de paille|miscbreak|ore|9b811a..0.30|=
+stripped_acacia_log|Bûche d'acacia écorcée|cube|wood|a65b34..0.17|af5d3c..0.12
+stripped_acacia_wood|Bois d'acacia écorcé|cube|wood|af5d3c..0.12|=
+stripped_bamboo_block|Bloc de bambou écorcé|cube|wood|998739.ddc663.38.60|b19e47.dcc460.39.41
+stripped_birch_log|Bûche de bouleau écorcée|cube|wood|bfac74..0.29|c5b076..0.18
+stripped_birch_wood|Bois de bouleau écorcé|cube|wood|c5b076..0.18|=
+stripped_cherry_log|Bûche de cerisier écorcée|cube|wood|e4b3ab.cc837f.30.35|d79195..0.13
+stripped_cherry_wood|Bois de cerisier écorcé|cube|wood|d79195..0.13|=
+stripped_crimson_hyphae|Hyphes carmin dénudées|cube|wood|89395a..0.14|=
+stripped_crimson_stem|Tige carmin dénudée|cube|wood|7a3853..0.20|89395a..0.14
+stripped_dark_oak_log|Bûche de chêne noir écorcée|cube|wood|422c17..0.13|493924..0.8
+stripped_dark_oak_wood|Bois de chêne noir écorcé|cube|wood|493924..0.8|=
+stripped_jungle_log|Bûche d'acajou écorcée|cube|wood|a67b52..0.20|ab8555..0.19
+stripped_jungle_wood|Bois d'acajou écorcé|cube|wood|ab8555..0.19|=
+stripped_mangrove_log|Bûche de palétuvier écorcée|cube|wood|6d2c2b..0.15|783630..0.7
+stripped_mangrove_wood|Bois de palétuvier écorcé|cube|wood|783630..0.7|=
+stripped_oak_log|Bûche de chêne écorcée|cube|wood|b08f58.886d3e.40.32|b19056..0.21
+stripped_oak_wood|Bois de chêne écorcé|cube|wood|b19056..0.21|=
+stripped_pale_oak_log|Bûche de chêne pâle écorcée|cube|wood|f3edeb.d5c8c8.27.30|f6eeed..0.15
+stripped_pale_oak_wood|Bois de chêne pâle écorcé|cube|wood|f6eeed..0.15|=
+stripped_poplar_log|Bûche de peuplier écorcée|cube|wood|988b81..0.19|a5998c..0.7
+stripped_poplar_wood|Bois de peuplier écorcé|cube|wood|a5998c..0.7|=
+stripped_spruce_log|Bûche de sapin écorcée|cube|wood|715732..0.16|745a34..0.13
+stripped_spruce_wood|Bois de sapin écorcé|cube|wood|745a34..0.13|=
+stripped_warped_hyphae|Hyphes biscornues dénudées|cube|wood|3a9794..0.17|=
+stripped_warped_stem|Tige biscornue dénudée|cube|wood|388b89.2b6559.27.30|3a9794..0.17
+sugar_cane|Canne à sucre|plant|plant|558f23..0.30|=
+sulfur|Soufre|cube|stone|beaf66..0.21|=
+sulfur_brick_slab|Dalle de soufre taillé|slab|stone|c9c063.ac8f53.50.39|=
+sulfur_brick_stairs|Escalier en soufre taillé|stairs|stone|c9c063.ac8f53.50.39|=
+sulfur_brick_wall|Muret de soufre taillé|post|stone|c9c063.ac8f53.50.39|=
+sulfur_bricks|Soufre taillé|cube|stone|c9c063.ac8f53.50.39|=
+sulfur_slab|Dalle de soufre|slab|stone|beaf66..0.21|=
+sulfur_spike|Pointe de soufre|misc|deco|a8955b.c7c163.47.33|=
+sulfur_stairs|Escalier en soufre|stairs|stone|beaf66..0.21|=
+sulfur_wall|Muret de soufre|post|stone|beaf66..0.21|=
+sunflower|Tournesol|plant|plant|4e952a.1c740f.42.36|=
+suspicious_gravel|Gravier suspect|cube|nature|75706f.949190.40.34|=
+suspicious_sand|Sable suspect|cube|nature|dacc9f..0.25|=
+sweet_berry_bush|Buisson à baies sucrées|plant|plant|2f5e3a.8c181b.23.60|=
+tall_dry_grass|Hautes herbes sèches|plant|plant|d5c495.b2915c.47.47|=
+tall_grass|Hautes herbes|plant|plant|495f2d..0.22|=
+target|Cible|cube|rs|f0e3d0.c73636.33.60|f4ece0.c73636.33.60
+terracotta|Terre cuite|cube|color|985e44..0.3|=
+tinted_glass|Verre teinté|clear|glass|2c272e..0.17|=
+tnt|TNT|cube|rs|c22e1b.515156.46.60|aa2822.d4d0d0.29.60
+torch|Torche|miscbreak|deco|8b7140..0.60|=
+torchflower|Torche-fleur|plant|plant|365351.e59841.27.60|=
+torchflower_crop|Plant de torche-fleur|plant|plant|658660.185136.47.60|=
+trapped_chest|Coffre piégé|miscfix|rs|b19058.7b5f35.28.42|=
+trial_spawner|Générateur des épreuves|clearfix|stone|263a4a.606f75.43.60|243343.6c6d6c.25.60
+tripwire|Fil de déclenchement|flat|rs|696969.9b9b9b.48.51|=
+tripwire_hook|Crochet|miscbreak|rs|b19058.7b5f35.28.42|=
+tube_coral|Corail tubulaire|plant|plant|3961e1.1e3b91.35.48|=
+tube_coral_block|Bloc de corail tubulaire|cube|plant|3860e1.2041a0.28.39|=
+tube_coral_fan|Gorgone de corail tubulaire|plant|plant|3965e2.20419e.25.40|=
+tuff|Tuf|cube|nature|60625c.88877e.30.36|=
+tuff_brick_slab|Dalle de tuf taillé|slab|stone|757771.4c534a.46.38|=
+tuff_brick_stairs|Escalier en tuf taillé|stairs|stone|757771.4c534a.46.38|=
+tuff_brick_wall|Muret de tuf taillé|post|stone|757771.4c534a.46.38|=
+tuff_bricks|Tuf taillé|cube|stone|757771.4c534a.46.38|=
+tuff_slab|Dalle de tuf|slab|stone|60625c.88877e.30.36|=
+tuff_stairs|Escalier en tuf|stairs|stone|60625c.88877e.30.36|=
+tuff_wall|Muret de tuf|post|stone|60625c.88877e.30.36|=
+turtle_egg|Oeuf de tortue|miscbreak|deco|f4eac6.429982.9.60|=
+twisting_vines|Lianes tortueuses|plant|plant|13a885.167072.45.35|=
+vault|Coffre-fort|miscfix|deco|23313c.596b70.36.53|212f37.7e6d5a.32.60
+verdant_froglight|Grelampe verdoyante|cube|stone|f5fcf5.c1e3bd.30.42|eaf8ea.a4d09b.33.60
+vine|Lianes|flat|plant|364e15..0.24|=
+warped_button|Bouton biscornu|button|rs|235850.398886.35.43|=
+warped_door|Porte biscornue|door|rs|319691.27625a.44.45|27625a.329490.42.43
+warped_fence|Barrière biscornue|post|wood|235850.398886.35.43|=
+warped_fence_gate|Portillon biscornu|misc|wood|235850.398886.35.43|=
+warped_fungus|Champignon biscornu|plant|plant|178877.9d4124.38.60|=
+warped_hanging_sign|Pancarte suspendue biscornue|miscbreak|nether|37948f.383e4f.15.43|=
+warped_hyphae|Hyphes biscornues|cube|wood|482946.146e62.27.45|=
+warped_nylium|Nylium biscornu|cube|nether|366756.158a86.32.41|582928.20736e.28.60
+warped_planks|Planches biscornues|cube|wood|235850.398886.35.43|=
+warped_pressure_plate|Plaque de pression biscornue|plate|rs|235850.398886.35.43|=
+warped_roots|Racines biscornues|plant|plant|148a7c..0.34|=
+warped_shelf|Étagère biscornue|miscfix|nether|338d86..0.28|=
+warped_sign|Pancarte biscornue|miscbreak|nether|294d4c.2d7e79.50.43|=
+warped_slab|Dalle biscornue|slab|wood|235850.398886.35.43|=
+warped_stairs|Escalier biscornu|stairs|wood|235850.398886.35.43|=
+warped_stem|Tige biscornue|cube|wood|348582.38444a.36.49|482946.146e62.27.45
+warped_trapdoor|Trappe biscornue|trapdoor|rs|276056.38918b.48.39|=
+warped_wart_block|Bloc de verrues biscornues|cube|nether|177879..0.23|=
+water|Eau|plant|nature|2c529e..0.19|=
+waxed_chiseled_copper|Cuivre sculpté ciré|cube|ore|c97154.9a5038.37.38|=
+waxed_copper_bars|Barreaux de cuivre ciré|post|ore|89422a.b46449.43.35|=
+waxed_copper_block|Bloc de cuivre ciré|cube|ore|c06c50..0.33|=
+waxed_copper_bulb|Ampoule en cuivre ciré|cube|rs|794223.c97155.45.59|=
+waxed_copper_chain|Chaîne en cuivre ciré|post|ore|984f37..0.25|=
+waxed_copper_chest|Coffre en cuivre ciré|miscfix|ore|c06c50..0.33|=
+waxed_copper_door|Porte en cuivre ciré|door|rs|d2795d.a15940.36.38|ce7558.995841.47.44
+waxed_copper_golem_statue|Statue de golem de cuivre ciré|miscfix|ore|c06c50..0.33|=
+waxed_copper_grate|Grille en cuivre ciré|clear|ore|c06c4f..0.33|=
+waxed_copper_lantern|Lanterne en cuivre ciré|miscbreak|ore|a1573d.9cdc9d.17.60|=
+waxed_copper_trapdoor|Trappe en cuivre ciré|trapdoor|rs|d57a5e.a2563d.44.39|=
+waxed_cut_copper|Cuivre taillé ciré|cube|ore|a85a41.d87c61.49.37|=
+waxed_cut_copper_slab|Dalle de cuivre taillé ciré|slab|ore|a85a41.d87c61.49.37|=
+waxed_cut_copper_stairs|Escalier en cuivre taillé ciré|stairs|ore|a85a41.d87c61.49.37|=
+waxed_exposed_chiseled_copper|Cuivre sculpté exposé ciré|cube|ore|ab7e6c.796956.33.36|=
+waxed_exposed_copper|Cuivre exposé ciré|cube|ore|a17e68..0.31|=
+waxed_exposed_copper_bars|Barreaux de cuivre exposé ciré|post|ore|776553.ae7c6b.28.34|=
+waxed_exposed_copper_bulb|Ampoule en cuivre exposé ciré|cube|rs|6c5e4c.b38271.38.49|=
+waxed_exposed_copper_chain|Chaîne en cuivre exposé ciré|post|ore|93725d.665849.46.29|=
+waxed_exposed_copper_chest|Coffre en cuivre exposé ciré|miscfix|ore|a17e68..0.31|=
+waxed_exposed_copper_door|Porte en cuivre exposé ciré|door|rs|bd8477.89725d.48.38|b38170.7d6b58.49.42
+waxed_exposed_copper_golem_statue|Statue de golem de cuivre exposé ciré|miscfix|ore|a17e68..0.31|=
+waxed_exposed_copper_grate|Grille en cuivre exposé ciré|clear|ore|947a60.c3877d.29.32|=
+waxed_exposed_copper_lantern|Lanterne en cuivre exposé ciré|miscbreak|ore|88745b.b8ae90.28.60|=
+waxed_exposed_copper_trapdoor|Trappe en cuivre exposé ciré|trapdoor|rs|b68573.84725a.42.37|=
+waxed_exposed_cut_copper|Cuivre taillé exposé ciré|cube|ore|83725a.b48271.48.35|=
+waxed_exposed_cut_copper_slab|Dalle de cuivre taillé exposé ciré|slab|ore|83725a.b48271.48.35|=
+waxed_exposed_cut_copper_stairs|Escalier en cuivre taillé exposé ciré|stairs|ore|83725a.b48271.48.35|=
+waxed_exposed_lightning_rod|Paratonnerre exposé ciré|miscbreak|rs|b88374.7b6855.40.41|=
+waxed_lightning_rod|Paratonnerre ciré|miscbreak|rs|d37a5c.a65940.32.32|=
+waxed_oxidized_chiseled_copper|Cuivre sculpté oxydé ciré|cube|ore|5eb592.41816d.37.39|=
+waxed_oxidized_copper|Cuivre oxydé ciré|cube|ore|52a385..0.35|=
+waxed_oxidized_copper_bars|Barreaux de cuivre oxydé ciré|post|ore|3b705c.509a7e.26.29|=
+waxed_oxidized_copper_bulb|Ampoule en cuivre oxydé ciré|cube|rs|386453.5aaf90.43.55|=
+waxed_oxidized_copper_chain|Chaîne en cuivre oxydé ciré|post|ore|3e7663..0.22|=
+waxed_oxidized_copper_chest|Coffre en cuivre oxydé ciré|miscfix|ore|52a385..0.35|=
+waxed_oxidized_copper_door|Porte en cuivre oxydé ciré|door|rs|5bb595.46846e.43.42|55a98c.3f6655.23.44
+waxed_oxidized_copper_golem_statue|Statue de golem de cuivre oxydé ciré|miscfix|ore|52a385..0.35|=
+waxed_oxidized_copper_grate|Grille en cuivre oxydé ciré|clear|ore|5ab394.488a6e.44.39|=
+waxed_oxidized_copper_lantern|Lanterne en cuivre oxydé ciré|miscbreak|ore|3c745e.71b68e.38.60|=
+waxed_oxidized_copper_trapdoor|Trappe en cuivre oxydé ciré|trapdoor|rs|498c72.5fb897.49.40|=
+waxed_oxidized_cut_copper|Cuivre taillé oxydé ciré|cube|ore|57a789.3a6e5a.23.40|=
+waxed_oxidized_cut_copper_slab|Dalle de cuivre taillé oxydé ciré|slab|ore|57a789.3a6e5a.23.40|=
+waxed_oxidized_cut_copper_stairs|Escalier en cuivre taillé oxydé ciré|stairs|ore|57a789.3a6e5a.23.40|=
+waxed_oxidized_lightning_rod|Paratonnerre oxydé ciré|miscbreak|rs|4f9a80..0.42|=
+waxed_weathered_chiseled_copper|Cuivre sculpté érodé ciré|cube|ore|6fac82.617c56.44.41|=
+waxed_weathered_copper|Cuivre érodé ciré|cube|ore|6c996e..0.33|=
+waxed_weathered_copper_bars|Barreaux de cuivre érodé ciré|post|ore|44695d.6b9460.43.34|=
+waxed_weathered_copper_bulb|Ampoule en cuivre érodé ciré|cube|rs|4d6455.70a177.44.47|=
+waxed_weathered_copper_chain|Chaîne en cuivre érodé ciré|post|ore|496d5c..0.25|=
+waxed_weathered_copper_chest|Coffre en cuivre érodé ciré|miscfix|ore|6c996e..0.33|=
+waxed_weathered_copper_door|Porte en cuivre érodé ciré|door|rs|6caa83.708157.48.39|6c8157.6aa87f.36.40
+waxed_weathered_copper_golem_statue|Statue de golem de cuivre érodé ciré|miscfix|ore|6c996e..0.33|=
+waxed_weathered_copper_grate|Grille en cuivre érodé ciré|clear|ore|6a996f..0.34|=
+waxed_weathered_copper_lantern|Lanterne en cuivre érodé ciré|miscbreak|ore|7ea46e.44695c.49.60|=
+waxed_weathered_copper_trapdoor|Trappe en cuivre érodé ciré|trapdoor|rs|6c8759.6ead85.48.37|=
+waxed_weathered_cut_copper|Cuivre taillé érodé ciré|cube|ore|6d916c..0.37|=
+waxed_weathered_cut_copper_slab|Dalle de cuivre taillé érodé ciré|slab|ore|6d916c..0.37|=
+waxed_weathered_cut_copper_stairs|Escalier en cuivre taillé érodé ciré|stairs|ore|6d916c..0.37|=
+waxed_weathered_lightning_rod|Paratonnerre érodé ciré|miscbreak|rs|6ea677.516e56.42.44|=
+weathered_chiseled_copper|Cuivre sculpté érodé|cube|ore|6fac82.617c56.44.41|=
+weathered_copper|Cuivre érodé|cube|ore|6c996e..0.33|=
+weathered_copper_bars|Barreaux de cuivre érodé|post|ore|44695d.6b9460.43.34|=
+weathered_copper_bulb|Ampoule en cuivre érodé|cube|rs|4d6455.70a177.44.47|=
+weathered_copper_chain|Chaîne en cuivre érodé|post|ore|496d5c..0.25|=
+weathered_copper_chest|Coffre en cuivre érodé|miscfix|ore|6c996e..0.33|=
+weathered_copper_door|Porte en cuivre érodé|door|rs|6caa83.708157.48.39|6c8157.6aa87f.36.40
+weathered_copper_golem_statue|Statue de golem de cuivre érodé|miscfix|ore|6c996e..0.33|=
+weathered_copper_grate|Grille en cuivre érodé|clear|ore|6a996f..0.34|=
+weathered_copper_lantern|Lanterne en cuivre érodé|miscbreak|ore|7ea46e.44695c.49.60|=
+weathered_copper_trapdoor|Trappe en cuivre érodé|trapdoor|rs|6c8759.6ead85.48.37|=
+weathered_cut_copper|Cuivre taillé érodé|cube|ore|6d916c..0.37|=
+weathered_cut_copper_slab|Dalle de cuivre taillé érodé|slab|ore|6d916c..0.37|=
+weathered_cut_copper_stairs|Escalier en cuivre taillé érodé|stairs|ore|6d916c..0.37|=
+weathered_lightning_rod|Paratonnerre érodé|miscbreak|rs|6ea677.516e56.42.44|=
+weeping_vines|Lianes pleureuses|plant|plant|690100..0.14|=
+wet_sponge|Éponge mouillée|cube|stone|bbc54b.939e3f.39.32|=
+wheat|Plants de blé|plant|plant|8f883e.d2b45d.36.51|=
+white_banner|Bannière blanche|miscbreak|color|b19058.7b5f35.28.42|=
+white_bed|Lit blanc|miscbreak|color|f4f5f5..0.14|b19058.7b5f35.28.42
+white_candle|Bougie blanche|miscbreak|color|eceeee.b6c1c3.48.60|=
+white_carpet|Tapis blanc|flat|color|eaeced..0.22|=
+white_concrete|Béton blanc|cube|color|cfd5d6..0.1|=
+white_concrete_powder|Béton blanc en poudre|cube|color|e2e3e4..0.14|=
+white_concrete_slab|Dalle de béton blanc|slab|stone|cfd5d6..0.1|=
+white_concrete_stairs|Escalier en béton blanc|stairs|stone|cfd5d6..0.1|=
+white_glazed_terracotta|Terre cuite émaillée blanche|cube|color|f7f0c9.3392cf.30.60|=
+white_shulker_box|Boîte de Shulker blanche|miscbreak|color|d8dddd..0.27|=
+white_stained_glass|Verre blanc|clear|color|ffffff..0.0|=
+white_stained_glass_pane|Vitre blanche|post|color|ffffff..0.0|=
+white_terracotta|Terre cuite blanche|cube|color|d2b2a1..0.3|=
+white_tulip|Tulipe blanche|plant|plant|429621.cddfdf.20.60|=
+white_wool|Laine blanche|cube|color|eaeced..0.22|=
+white_wool_slab|Dalle de laine blanche|slab|stone|eaeced..0.22|=
+white_wool_stairs|Escalier en laine blanche|stairs|stone|eaeced..0.22|=
+wildflowers|Fleurs sauvages|flat|plant|a9a9a9..0.21|=
+wither_rose|Rose de Wither|plant|plant|292d17..0.25|=
+wither_skeleton_skull|Crâne de Wither squelette|miscbreak|deco|513e33..0.29|=
+yellow_banner|Bannière jaune|miscbreak|color|b19058.7b5f35.28.42|=
+yellow_bed|Lit jaune|miscbreak|color|feca25..0.16|b19058.7b5f35.28.42
+yellow_candle|Bougie jaune|miscbreak|color|ebbb3d.b58c26.48.60|=
+yellow_carpet|Tapis jaune|flat|color|f9c628..0.17|=
+yellow_concrete|Béton jaune|cube|color|f1af15..0.2|=
+yellow_concrete_powder|Béton jaune en poudre|cube|color|e9c737..0.19|=
+yellow_concrete_slab|Dalle de béton jaune|slab|stone|f1af15..0.2|=
+yellow_concrete_stairs|Escalier en béton jaune|stairs|stone|f1af15..0.2|=
+yellow_glazed_terracotta|Terre cuite émaillée jaune|cube|color|dda42a.ffeda3.39.60|=
+yellow_poplar_leaves|Feuilles de peuplier jaunes|clear|nature|bc6427.f7ae2a.46.54|=
+yellow_shulker_box|Boîte de Shulker jaune|miscbreak|color|f8bd1d..0.13|=
+yellow_stained_glass|Verre jaune|clear|color|e5e533..0.0|=
+yellow_stained_glass_pane|Vitre jaune|post|color|e5e533..0.0|=
+yellow_terracotta|Terre cuite jaune|cube|color|ba8523..0.4|=
+yellow_wool|Laine jaune|cube|color|f9c628..0.17|=
+yellow_wool_slab|Dalle de laine jaune|slab|stone|f9c628..0.17|=
+yellow_wool_stairs|Escalier en laine jaune|stairs|stone|f9c628..0.17|=
+zombie_head|Tête de zombie|miscbreak|deco|513e33..0.29|=`;
+/* Bedrock : nom et états quand ils diffèrent de Java (= : même nom ; L : états au format Bedrock récent) */
+const MC_BEDROCK_DATA = `acacia_button>=>button_pressed_bit=b:0,facing_direction=i:2
+acacia_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+acacia_fence_gate>=>direction=i:2,in_wall_bit=b:0,open_bit=b:0
+acacia_hanging_sign>=>attached_bit=b:0,facing_direction=i:2,ground_sign_direction=i:0,hanging=b:1
+acacia_leaves>=>persistent_bit=b:0,update_bit=b:0
+acacia_log>=>pillar_axis=s:y
+acacia_pressure_plate>=>redstone_signal=i:0
+acacia_sapling>=>age_bit=b:0
+acacia_shelf>=>minecraft:cardinal_direction=s:north,powered_bit=b:0,powered_shelf_type=i:0>L
+acacia_sign>acacia_standing_sign>ground_sign_direction=i:8
+acacia_slab>=>minecraft:vertical_half=s:bottom
+acacia_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+acacia_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+acacia_wood>=>pillar_axis=s:y
+activator_rail>=>rail_data_bit=b:0,rail_direction=i:0
+amethyst_cluster>=>minecraft:block_face=s:up
+andesite_slab>stone_block_slab3>minecraft:vertical_half=s:bottom,stone_slab_type_3=s:andesite
+andesite_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+andesite_wall>cobblestone_wall>wall_block_type=s:andesite,wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+anvil>=>damage=s:undamaged,minecraft:cardinal_direction=s:north
+azalea_leaves>=>persistent_bit=b:0,update_bit=b:0
+bamboo>=>age_bit=b:0,bamboo_leaf_size=s:no_leaves,bamboo_stalk_thickness=s:thin
+bamboo_block>=>pillar_axis=s:y
+bamboo_button>=>button_pressed_bit=b:0,facing_direction=i:2
+bamboo_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+bamboo_fence_gate>=>direction=i:2,in_wall_bit=b:0,open_bit=b:0
+bamboo_hanging_sign>=>attached_bit=b:0,facing_direction=i:2,ground_sign_direction=i:0,hanging=b:1
+bamboo_mosaic_slab>=>minecraft:vertical_half=s:bottom
+bamboo_mosaic_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+bamboo_pressure_plate>=>redstone_signal=i:0
+bamboo_shelf>=>minecraft:cardinal_direction=s:north,powered_bit=b:0,powered_shelf_type=i:0>L
+bamboo_sign>bamboo_standing_sign>ground_sign_direction=i:8
+bamboo_slab>=>minecraft:vertical_half=s:bottom
+bamboo_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+bamboo_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+barrel>=>facing_direction=i:2,open_bit=b:0
+basalt>=>pillar_axis=s:y
+bedrock>=>infiniburn_bit=b:0
+bee_nest>=>direction=i:2,honey_level=i:0
+beehive>=>direction=i:2,honey_level=i:0
+beetroots>beetroot>growth=i:0
+bell>=>attachment=s:standing,direction=i:2,toggle_bit=b:0
+big_dripleaf>=>big_dripleaf_head=b:1,big_dripleaf_tilt=s:none,minecraft:cardinal_direction=s:north
+birch_button>=>button_pressed_bit=b:0,facing_direction=i:2
+birch_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+birch_fence_gate>=>direction=i:2,in_wall_bit=b:0,open_bit=b:0
+birch_hanging_sign>=>attached_bit=b:0,facing_direction=i:2,ground_sign_direction=i:0,hanging=b:1
+birch_leaves>=>persistent_bit=b:0,update_bit=b:0
+birch_log>=>pillar_axis=s:y
+birch_pressure_plate>=>redstone_signal=i:0
+birch_sapling>=>age_bit=b:0
+birch_shelf>=>minecraft:cardinal_direction=s:north,powered_bit=b:0,powered_shelf_type=i:0>L
+birch_sign>birch_standing_sign>ground_sign_direction=i:8
+birch_slab>=>minecraft:vertical_half=s:bottom
+birch_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+birch_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+birch_wood>=>pillar_axis=s:y
+black_banner>standing_banner>ground_sign_direction=i:8
+black_bed>bed>direction=i:2,head_piece_bit=b:0,occupied_bit=b:0
+black_candle>=>candles=i:0,lit=b:0
+black_concrete_slab>=>minecraft:vertical_half=s:bottom>L
+black_concrete_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+black_glazed_terracotta>=>facing_direction=i:2
+black_wool_slab>=>minecraft:vertical_half=s:bottom>L
+black_wool_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+blackstone_slab>=>minecraft:vertical_half=s:bottom
+blackstone_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+blackstone_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+blast_furnace>=>minecraft:cardinal_direction=s:north
+blue_banner>standing_banner>ground_sign_direction=i:8
+blue_bed>bed>direction=i:2,head_piece_bit=b:0,occupied_bit=b:0
+blue_candle>=>candles=i:0,lit=b:0
+blue_concrete_slab>=>minecraft:vertical_half=s:bottom>L
+blue_concrete_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+blue_glazed_terracotta>=>facing_direction=i:2
+blue_wool_slab>=>minecraft:vertical_half=s:bottom>L
+blue_wool_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+bone_block>=>deprecated=i:0,pillar_axis=s:y
+brain_coral_fan>=>coral_fan_direction=i:0
+brewing_stand>=>brewing_stand_slot_a_bit=b:0,brewing_stand_slot_b_bit=b:0,brewing_stand_slot_c_bit=b:0
+brick_slab>=>minecraft:vertical_half=s:bottom
+brick_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+brick_wall>cobblestone_wall>wall_block_type=s:brick,wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+bricks>brick_block>
+brown_banner>standing_banner>ground_sign_direction=i:8
+brown_bed>bed>direction=i:2,head_piece_bit=b:0,occupied_bit=b:0
+brown_candle>=>candles=i:0,lit=b:0
+brown_concrete_slab>=>minecraft:vertical_half=s:bottom>L
+brown_concrete_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+brown_glazed_terracotta>=>facing_direction=i:2
+brown_mushroom_block>=>huge_mushroom_bits=i:14
+brown_wool_slab>=>minecraft:vertical_half=s:bottom>L
+brown_wool_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+bubble_coral_fan>=>coral_fan_direction=i:0
+bush>=>>L
+cactus>=>age=i:0
+cactus_flower>=>>L
+cake>=>bite_counter=i:0
+calibrated_sculk_sensor>=>minecraft:cardinal_direction=s:north,sculk_sensor_phase=i:0
+campfire>=>extinguished=b:0,minecraft:cardinal_direction=s:north
+candle>=>candles=i:0,lit=b:0
+carrots>=>growth=i:0
+carved_pumpkin>=>minecraft:cardinal_direction=s:north
+cauldron>=>cauldron_liquid=s:water,fill_level=i:0
+cave_vines>=>growing_plant_age=i:0
+cherry_button>=>button_pressed_bit=b:0,facing_direction=i:2
+cherry_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+cherry_fence_gate>=>direction=i:2,in_wall_bit=b:0,open_bit=b:0
+cherry_hanging_sign>=>attached_bit=b:0,facing_direction=i:2,ground_sign_direction=i:0,hanging=b:1
+cherry_leaves>=>persistent_bit=b:0,update_bit=b:0
+cherry_log>=>pillar_axis=s:y
+cherry_pressure_plate>=>redstone_signal=i:0
+cherry_sapling>=>age_bit=b:0
+cherry_shelf>=>minecraft:cardinal_direction=s:north,powered_bit=b:0,powered_shelf_type=i:0>L
+cherry_sign>cherry_standing_sign>ground_sign_direction=i:8
+cherry_slab>=>minecraft:vertical_half=s:bottom
+cherry_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+cherry_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+cherry_wood>=>pillar_axis=s:y,stripped_bit=b:0
+chest>=>minecraft:cardinal_direction=s:north
+chipped_anvil>anvil>damage=s:slightly_damaged,minecraft:cardinal_direction=s:north
+chiseled_bookshelf>=>books_stored=i:0,direction=i:2
+chiseled_cinnabar>=>>L
+chiseled_quartz_block>quartz_block>chisel_type=s:chiseled,pillar_axis=s:y
+chiseled_red_sandstone>red_sandstone>sand_stone_type=s:heiroglyphs
+chiseled_resin_bricks>=>>L
+chiseled_sandstone>sandstone>sand_stone_type=s:heiroglyphs
+chiseled_stone_bricks>stonebrick>stone_brick_type=s:chiseled
+chiseled_sulfur>=>>L
+chorus_flower>=>age=i:0
+cinnabar>=>>L
+cinnabar_brick_slab>=>minecraft:vertical_half=s:bottom>L
+cinnabar_brick_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+cinnabar_brick_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1>L
+cinnabar_bricks>=>>L
+cinnabar_slab>=>minecraft:vertical_half=s:bottom>L
+cinnabar_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+cinnabar_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1>L
+closed_eyeblossom>=>>L
+coarse_dirt>dirt>dirt_type=s:coarse
+cobbled_deepslate_slab>=>minecraft:vertical_half=s:bottom
+cobbled_deepslate_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+cobbled_deepslate_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+cobblestone_slab>=>minecraft:vertical_half=s:bottom
+cobblestone_stairs>stone_stairs>upside_down_bit=b:0,weirdo_direction=i:3
+cobblestone_wall>=>wall_block_type=s:cobblestone,wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+cobweb>web>
+cocoa>=>age=i:0,direction=i:2
+composter>=>composter_fill_level=i:0
+copper_bars>=>minecraft:connection_east=b:0,minecraft:connection_north=b:0,minecraft:connection_south=b:0,minecraft:connection_west=b:0>L
+copper_bulb>=>lit=b:0,powered_bit=b:0
+copper_chain>=>pillar_axis=s:y>L
+copper_chest>=>minecraft:cardinal_direction=s:north>L
+copper_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+copper_golem_statue>=>minecraft:cardinal_direction=s:north>L
+copper_lantern>=>hanging=b:0>L
+copper_torch>=>torch_facing_direction=s:top>L
+copper_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+cracked_stone_bricks>stonebrick>stone_brick_type=s:cracked
+crafter>=>crafting=b:0,orientation=s:north_up,triggered_bit=b:0
+creaking_heart>=>creaking_heart_state=s:uprooted,natural=b:0,pillar_axis=s:y>L
+creeper_head>skull>facing_direction=i:1
+crimson_button>=>button_pressed_bit=b:0,facing_direction=i:2
+crimson_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+crimson_fence_gate>=>direction=i:2,in_wall_bit=b:0,open_bit=b:0
+crimson_hanging_sign>=>attached_bit=b:0,facing_direction=i:2,ground_sign_direction=i:0,hanging=b:1
+crimson_hyphae>=>pillar_axis=s:y
+crimson_pressure_plate>=>redstone_signal=i:0
+crimson_shelf>=>minecraft:cardinal_direction=s:north,powered_bit=b:0,powered_shelf_type=i:0>L
+crimson_sign>crimson_standing_sign>ground_sign_direction=i:8
+crimson_slab>=>minecraft:vertical_half=s:bottom
+crimson_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+crimson_stem>=>pillar_axis=s:y
+crimson_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+cut_copper_slab>=>minecraft:vertical_half=s:bottom
+cut_copper_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+cut_red_sandstone>red_sandstone>sand_stone_type=s:cut
+cut_red_sandstone_slab>stone_block_slab4>minecraft:vertical_half=s:bottom,stone_slab_type_4=s:cut_red_sandstone
+cut_sandstone>sandstone>sand_stone_type=s:cut
+cut_sandstone_slab>stone_block_slab4>minecraft:vertical_half=s:bottom,stone_slab_type_4=s:cut_sandstone
+cyan_banner>standing_banner>ground_sign_direction=i:8
+cyan_bed>bed>direction=i:2,head_piece_bit=b:0,occupied_bit=b:0
+cyan_candle>=>candles=i:0,lit=b:0
+cyan_concrete_slab>=>minecraft:vertical_half=s:bottom>L
+cyan_concrete_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+cyan_glazed_terracotta>=>facing_direction=i:2
+cyan_wool_slab>=>minecraft:vertical_half=s:bottom>L
+cyan_wool_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+damaged_anvil>anvil>damage=s:very_damaged,minecraft:cardinal_direction=s:north
+dandelion>yellow_flower>
+dark_oak_button>=>button_pressed_bit=b:0,facing_direction=i:2
+dark_oak_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+dark_oak_fence_gate>=>direction=i:2,in_wall_bit=b:0,open_bit=b:0
+dark_oak_hanging_sign>=>attached_bit=b:0,facing_direction=i:2,ground_sign_direction=i:0,hanging=b:1
+dark_oak_leaves>=>persistent_bit=b:0,update_bit=b:0
+dark_oak_log>=>pillar_axis=s:y
+dark_oak_pressure_plate>=>redstone_signal=i:0
+dark_oak_sapling>=>age_bit=b:0
+dark_oak_shelf>=>minecraft:cardinal_direction=s:north,powered_bit=b:0,powered_shelf_type=i:0>L
+dark_oak_sign>darkoak_standing_sign>ground_sign_direction=i:8
+dark_oak_slab>=>minecraft:vertical_half=s:bottom
+dark_oak_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+dark_oak_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+dark_oak_wood>=>pillar_axis=s:y
+dark_prismarine>prismarine>prismarine_block_type=s:dark
+dark_prismarine_slab>stone_block_slab2>minecraft:vertical_half=s:bottom,stone_slab_type_2=s:prismarine_dark
+dark_prismarine_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+dead_brain_coral_fan>=>coral_fan_direction=i:0
+dead_bubble_coral_fan>=>coral_fan_direction=i:0
+dead_bush>deadbush>
+dead_fire_coral_fan>=>coral_fan_direction=i:0
+dead_horn_coral_fan>=>coral_fan_direction=i:0
+dead_tube_coral_fan>=>coral_fan_direction=i:0
+decorated_pot>=>direction=i:0
+deepslate>=>pillar_axis=s:y
+deepslate_brick_slab>=>minecraft:vertical_half=s:bottom
+deepslate_brick_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+deepslate_brick_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+deepslate_tile_slab>=>minecraft:vertical_half=s:bottom
+deepslate_tile_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+deepslate_tile_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+detector_rail>=>rail_data_bit=b:0,rail_direction=i:0
+diorite_slab>stone_block_slab3>minecraft:vertical_half=s:bottom,stone_slab_type_3=s:diorite
+diorite_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+diorite_wall>cobblestone_wall>wall_block_type=s:diorite,wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+dirt>=>dirt_type=s:normal
+dirt_path>grass_path>
+dispenser>=>facing_direction=i:2,triggered_bit=b:0
+dragon_head>skull>facing_direction=i:1
+dried_ghast>=>minecraft:cardinal_direction=s:north,rehydration_level=i:0>L
+dropper>=>facing_direction=i:2,triggered_bit=b:0
+end_portal_frame>=>end_portal_eye_bit=b:0,minecraft:cardinal_direction=s:north
+end_rod>=>facing_direction=i:1
+end_stone_brick_slab>stone_block_slab3>minecraft:vertical_half=s:bottom,stone_slab_type_3=s:end_stone_brick
+end_stone_brick_stairs>end_brick_stairs>upside_down_bit=b:0,weirdo_direction=i:3
+end_stone_brick_wall>cobblestone_wall>wall_block_type=s:end_brick,wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+end_stone_bricks>end_bricks>
+ender_chest>=>minecraft:cardinal_direction=s:north
+exposed_copper_bars>=>minecraft:connection_east=b:0,minecraft:connection_north=b:0,minecraft:connection_south=b:0,minecraft:connection_west=b:0>L
+exposed_copper_bulb>=>lit=b:0,powered_bit=b:0
+exposed_copper_chain>=>pillar_axis=s:y>L
+exposed_copper_chest>=>minecraft:cardinal_direction=s:north>L
+exposed_copper_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+exposed_copper_golem_statue>=>minecraft:cardinal_direction=s:north>L
+exposed_copper_lantern>=>hanging=b:0>L
+exposed_copper_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+exposed_cut_copper_slab>=>minecraft:vertical_half=s:bottom
+exposed_cut_copper_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+exposed_lightning_rod>=>facing_direction=i:1,powered_bit=b:0>L
+farmland>=>moisturized_amount=i:0
+fire_coral_fan>=>coral_fan_direction=i:0
+firefly_bush>=>>L
+flower_pot>=>update_bit=b:0
+flowering_azalea_leaves>azalea_leaves_flowered>persistent_bit=b:0,update_bit=b:0
+frogspawn>frog_spawn>
+furnace>=>minecraft:cardinal_direction=s:north
+glow_lichen>=>multi_face_direction_bits=i:0
+golden_dandelion>=>>L
+granite_slab>stone_block_slab3>minecraft:vertical_half=s:bottom,stone_slab_type_3=s:granite
+granite_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+granite_wall>cobblestone_wall>wall_block_type=s:granite,wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+gray_banner>standing_banner>ground_sign_direction=i:8
+gray_bed>bed>direction=i:2,head_piece_bit=b:0,occupied_bit=b:0
+gray_candle>=>candles=i:0,lit=b:0
+gray_concrete_slab>=>minecraft:vertical_half=s:bottom>L
+gray_concrete_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+gray_glazed_terracotta>=>facing_direction=i:2
+gray_wool_slab>=>minecraft:vertical_half=s:bottom>L
+gray_wool_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+green_banner>standing_banner>ground_sign_direction=i:8
+green_bed>bed>direction=i:2,head_piece_bit=b:0,occupied_bit=b:0
+green_candle>=>candles=i:0,lit=b:0
+green_concrete_slab>=>minecraft:vertical_half=s:bottom>L
+green_concrete_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+green_glazed_terracotta>=>facing_direction=i:2
+green_wool_slab>=>minecraft:vertical_half=s:bottom>L
+green_wool_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+grindstone>=>attachment=s:side,direction=i:2
+hay_block>=>deprecated=i:0,pillar_axis=s:y
+heavy_weighted_pressure_plate>=>redstone_signal=i:0
+horn_coral_fan>=>coral_fan_direction=i:0
+infested_chiseled_stone_bricks>monster_egg>monster_egg_stone_type=s:chiseled_stone_brick
+infested_cobblestone>monster_egg>monster_egg_stone_type=s:cobblestone
+infested_cracked_stone_bricks>monster_egg>monster_egg_stone_type=s:cracked_stone_brick
+infested_deepslate>=>pillar_axis=s:y
+infested_mossy_stone_bricks>monster_egg>monster_egg_stone_type=s:mossy_stone_brick
+infested_stone>monster_egg>monster_egg_stone_type=s:stone
+infested_stone_bricks>monster_egg>monster_egg_stone_type=s:stone_brick
+iron_chain>chain>pillar_axis=s:y
+jack_o_lantern>lit_pumpkin>minecraft:cardinal_direction=s:north
+jungle_button>=>button_pressed_bit=b:0,facing_direction=i:2
+jungle_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+jungle_fence_gate>=>direction=i:2,in_wall_bit=b:0,open_bit=b:0
+jungle_hanging_sign>=>attached_bit=b:0,facing_direction=i:2,ground_sign_direction=i:0,hanging=b:1
+jungle_leaves>=>persistent_bit=b:0,update_bit=b:0
+jungle_log>=>pillar_axis=s:y
+jungle_pressure_plate>=>redstone_signal=i:0
+jungle_sapling>=>age_bit=b:0
+jungle_shelf>=>minecraft:cardinal_direction=s:north,powered_bit=b:0,powered_shelf_type=i:0>L
+jungle_sign>jungle_standing_sign>ground_sign_direction=i:8
+jungle_slab>=>minecraft:vertical_half=s:bottom
+jungle_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+jungle_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+jungle_wood>=>pillar_axis=s:y
+kelp>=>kelp_age=i:0
+ladder>=>facing_direction=i:2
+lantern>=>hanging=b:0
+large_amethyst_bud>=>minecraft:block_face=s:up
+large_fern>=>upper_block_bit=b:0
+lava>=>liquid_depth=i:0
+leaf_litter>=>growth=i:0,minecraft:cardinal_direction=s:north>L
+lectern>=>minecraft:cardinal_direction=s:north,powered_bit=b:0
+light_blue_banner>standing_banner>ground_sign_direction=i:8
+light_blue_bed>bed>direction=i:2,head_piece_bit=b:0,occupied_bit=b:0
+light_blue_candle>=>candles=i:0,lit=b:0
+light_blue_concrete_slab>=>minecraft:vertical_half=s:bottom>L
+light_blue_concrete_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+light_blue_glazed_terracotta>=>facing_direction=i:2
+light_blue_wool_slab>=>minecraft:vertical_half=s:bottom>L
+light_blue_wool_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+light_gray_banner>standing_banner>ground_sign_direction=i:8
+light_gray_bed>bed>direction=i:2,head_piece_bit=b:0,occupied_bit=b:0
+light_gray_candle>=>candles=i:0,lit=b:0
+light_gray_concrete_slab>=>minecraft:vertical_half=s:bottom>L
+light_gray_concrete_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+light_gray_glazed_terracotta>silver_glazed_terracotta>facing_direction=i:2
+light_gray_wool_slab>=>minecraft:vertical_half=s:bottom>L
+light_gray_wool_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+light_weighted_pressure_plate>=>redstone_signal=i:0
+lightning_rod>=>facing_direction=i:1
+lilac>=>upper_block_bit=b:0
+lily_pad>waterlily>
+lime_banner>standing_banner>ground_sign_direction=i:8
+lime_bed>bed>direction=i:2,head_piece_bit=b:0,occupied_bit=b:0
+lime_candle>=>candles=i:0,lit=b:0
+lime_concrete_slab>=>minecraft:vertical_half=s:bottom>L
+lime_concrete_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+lime_glazed_terracotta>=>facing_direction=i:2
+lime_wool_slab>=>minecraft:vertical_half=s:bottom>L
+lime_wool_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+loom>=>direction=i:2
+magenta_banner>standing_banner>ground_sign_direction=i:8
+magenta_bed>bed>direction=i:2,head_piece_bit=b:0,occupied_bit=b:0
+magenta_candle>=>candles=i:0,lit=b:0
+magenta_concrete_slab>=>minecraft:vertical_half=s:bottom>L
+magenta_concrete_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+magenta_glazed_terracotta>=>facing_direction=i:2
+magenta_wool_slab>=>minecraft:vertical_half=s:bottom>L
+magenta_wool_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+magma_block>magma>
+mangrove_button>=>button_pressed_bit=b:0,facing_direction=i:2
+mangrove_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+mangrove_fence_gate>=>direction=i:2,in_wall_bit=b:0,open_bit=b:0
+mangrove_hanging_sign>=>attached_bit=b:0,facing_direction=i:2,ground_sign_direction=i:0,hanging=b:1
+mangrove_leaves>=>persistent_bit=b:0,update_bit=b:0
+mangrove_log>=>pillar_axis=s:y
+mangrove_pressure_plate>=>redstone_signal=i:0
+mangrove_propagule>=>hanging=b:0,propagule_stage=i:0
+mangrove_shelf>=>minecraft:cardinal_direction=s:north,powered_bit=b:0,powered_shelf_type=i:0>L
+mangrove_sign>mangrove_standing_sign>ground_sign_direction=i:8
+mangrove_slab>=>minecraft:vertical_half=s:bottom
+mangrove_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+mangrove_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+mangrove_wood>=>pillar_axis=s:y,stripped_bit=b:0
+medium_amethyst_bud>=>minecraft:block_face=s:up
+melon>melon_block>
+melon_stem>=>facing_direction=i:0,growth=i:0
+mossy_cobblestone_slab>stone_block_slab2>minecraft:vertical_half=s:bottom,stone_slab_type_2=s:mossy_cobblestone
+mossy_cobblestone_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+mossy_cobblestone_wall>cobblestone_wall>wall_block_type=s:mossy_cobblestone,wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+mossy_stone_brick_slab>stone_block_slab4>minecraft:vertical_half=s:bottom,stone_slab_type_4=s:mossy_stone_brick
+mossy_stone_brick_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+mossy_stone_brick_wall>cobblestone_wall>wall_block_type=s:mossy_stone_brick,wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+mossy_stone_bricks>stonebrick>stone_brick_type=s:mossy
+mud_brick_slab>=>minecraft:vertical_half=s:bottom
+mud_brick_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+mud_brick_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+muddy_mangrove_roots>=>pillar_axis=s:y
+mushroom_stem>red_mushroom_block>huge_mushroom_bits=i:15
+nether_brick_slab>=>minecraft:vertical_half=s:bottom
+nether_brick_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+nether_brick_wall>cobblestone_wall>wall_block_type=s:nether_brick,wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+nether_bricks>nether_brick>
+nether_quartz_ore>quartz_ore>
+nether_wart>=>age=i:0
+oak_door>wooden_door>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+oak_fence_gate>fence_gate>direction=i:2,in_wall_bit=b:0,open_bit=b:0
+oak_hanging_sign>=>attached_bit=b:0,facing_direction=i:2,ground_sign_direction=i:0,hanging=b:1
+oak_leaves>=>persistent_bit=b:0,update_bit=b:0
+oak_log>=>pillar_axis=s:y
+oak_pressure_plate>wooden_pressure_plate>redstone_signal=i:0
+oak_sapling>=>age_bit=b:0
+oak_shelf>=>minecraft:cardinal_direction=s:north,powered_bit=b:0,powered_shelf_type=i:0>L
+oak_sign>standing_sign>ground_sign_direction=i:8
+oak_slab>=>minecraft:vertical_half=s:bottom
+oak_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+oak_trapdoor>trapdoor>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+oak_wood>=>pillar_axis=s:y
+ochre_froglight>=>pillar_axis=s:y
+open_eyeblossom>=>>L
+orange_banner>standing_banner>ground_sign_direction=i:8
+orange_bed>bed>direction=i:2,head_piece_bit=b:0,occupied_bit=b:0
+orange_candle>=>candles=i:0,lit=b:0
+orange_concrete_slab>=>minecraft:vertical_half=s:bottom>L
+orange_concrete_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+orange_glazed_terracotta>=>facing_direction=i:2
+orange_poplar_leaves>=>persistent_bit=b:0,update_bit=b:0>L
+orange_wool_slab>=>minecraft:vertical_half=s:bottom>L
+orange_wool_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+oxidized_copper_bars>=>minecraft:connection_east=b:0,minecraft:connection_north=b:0,minecraft:connection_south=b:0,minecraft:connection_west=b:0>L
+oxidized_copper_bulb>=>lit=b:0,powered_bit=b:0
+oxidized_copper_chain>=>pillar_axis=s:y>L
+oxidized_copper_chest>=>minecraft:cardinal_direction=s:north>L
+oxidized_copper_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+oxidized_copper_golem_statue>=>minecraft:cardinal_direction=s:north>L
+oxidized_copper_lantern>=>hanging=b:0>L
+oxidized_copper_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+oxidized_cut_copper_slab>=>minecraft:vertical_half=s:bottom
+oxidized_cut_copper_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+oxidized_lightning_rod>=>facing_direction=i:1,powered_bit=b:0>L
+pale_hanging_moss>=>tip=b:1>L
+pale_moss_block>=>>L
+pale_moss_carpet>=>pale_moss_carpet_side_east=s:none,pale_moss_carpet_side_north=s:none,pale_moss_carpet_side_south=s:none,pale_moss_carpet_side_west=s:none,upper_block_bit=b:1>L
+pale_oak_button>=>button_pressed_bit=b:0,facing_direction=i:2>L
+pale_oak_door>=>door_hinge_bit=b:0,minecraft:cardinal_direction=s:east,open_bit=b:0,upper_block_bit=b:0>L
+pale_oak_fence>=>minecraft:connection_east=b:0,minecraft:connection_north=b:0,minecraft:connection_south=b:0,minecraft:connection_west=b:0>L
+pale_oak_fence_gate>=>in_wall_bit=b:0,minecraft:cardinal_direction=s:north,open_bit=b:0>L
+pale_oak_hanging_sign>=>attached_bit=b:0,facing_direction=i:2,ground_sign_direction=i:0,hanging=b:1>L
+pale_oak_leaves>=>persistent_bit=b:0,update_bit=b:0>L
+pale_oak_log>=>pillar_axis=s:y>L
+pale_oak_planks>=>>L
+pale_oak_pressure_plate>=>redstone_signal=i:0>L
+pale_oak_sapling>=>age_bit=b:0>L
+pale_oak_shelf>=>minecraft:cardinal_direction=s:north,powered_bit=b:0,powered_shelf_type=i:0>L
+pale_oak_sign>pale_oak_standing_sign>ground_sign_direction=i:8>L
+pale_oak_slab>=>minecraft:vertical_half=s:bottom>L
+pale_oak_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+pale_oak_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0>L
+pale_oak_wood>=>pillar_axis=s:y>L
+pearlescent_froglight>=>pillar_axis=s:y
+peony>=>upper_block_bit=b:0
+petrified_oak_slab>=>minecraft:vertical_half=s:bottom
+piglin_head>skull>facing_direction=i:1
+pink_banner>standing_banner>ground_sign_direction=i:8
+pink_bed>bed>direction=i:2,head_piece_bit=b:0,occupied_bit=b:0
+pink_candle>=>candles=i:0,lit=b:0
+pink_concrete_slab>=>minecraft:vertical_half=s:bottom>L
+pink_concrete_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+pink_glazed_terracotta>=>facing_direction=i:2
+pink_petals>=>growth=i:0,minecraft:cardinal_direction=s:north
+pink_wool_slab>=>minecraft:vertical_half=s:bottom>L
+pink_wool_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+pitcher_crop>=>growth=i:0,upper_block_bit=b:0
+player_head>skull>facing_direction=i:1
+pointed_dripstone>=>dripstone_thickness=s:tip,hanging=b:0
+polished_andesite_slab>stone_block_slab3>minecraft:vertical_half=s:bottom,stone_slab_type_3=s:polished_andesite
+polished_andesite_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+polished_basalt>=>pillar_axis=s:y
+polished_blackstone_brick_slab>=>minecraft:vertical_half=s:bottom
+polished_blackstone_brick_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+polished_blackstone_brick_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+polished_blackstone_button>=>button_pressed_bit=b:0,facing_direction=i:2
+polished_blackstone_pressure_plate>=>redstone_signal=i:0
+polished_blackstone_slab>=>minecraft:vertical_half=s:bottom
+polished_blackstone_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+polished_blackstone_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+polished_cinnabar>=>>L
+polished_cinnabar_slab>=>minecraft:vertical_half=s:bottom>L
+polished_cinnabar_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+polished_cinnabar_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1>L
+polished_deepslate_slab>=>minecraft:vertical_half=s:bottom
+polished_deepslate_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+polished_deepslate_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+polished_diorite_slab>stone_block_slab3>minecraft:vertical_half=s:bottom,stone_slab_type_3=s:polished_diorite
+polished_diorite_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+polished_granite_slab>stone_block_slab3>minecraft:vertical_half=s:bottom,stone_slab_type_3=s:polished_granite
+polished_granite_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+polished_sulfur>=>>L
+polished_sulfur_slab>=>minecraft:vertical_half=s:bottom>L
+polished_sulfur_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+polished_sulfur_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1>L
+polished_tuff_slab>=>minecraft:vertical_half=s:bottom
+polished_tuff_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+polished_tuff_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+poplar_button>=>button_pressed_bit=b:0,facing_direction=i:2>L
+poplar_door>=>door_hinge_bit=b:0,minecraft:cardinal_direction=s:east,open_bit=b:0,upper_block_bit=b:0>L
+poplar_fence>=>minecraft:connection_east=b:0,minecraft:connection_north=b:0,minecraft:connection_south=b:0,minecraft:connection_west=b:0>L
+poplar_fence_gate>=>in_wall_bit=b:0,minecraft:cardinal_direction=s:north,open_bit=b:0>L
+poplar_hanging_sign>=>attached_bit=b:0,facing_direction=i:2,ground_sign_direction=i:0,hanging=b:1>L
+poplar_log>=>pillar_axis=s:y>L
+poplar_planks>=>>L
+poplar_pressure_plate>=>redstone_signal=i:0>L
+poplar_sapling>=>age_bit=b:0>L
+poplar_shelf>=>minecraft:cardinal_direction=s:north,powered_bit=b:0,powered_shelf_type=i:0>L
+poplar_sign>poplar_standing_sign>ground_sign_direction=i:8>L
+poplar_slab>=>minecraft:vertical_half=s:bottom>L
+poplar_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+poplar_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0>L
+poplar_wood>=>pillar_axis=s:y>L
+potatoes>=>growth=i:0
+potent_sulfur>=>potent_sulfur_state=s:dry>L
+prismarine>=>prismarine_block_type=s:default
+prismarine_brick_slab>stone_block_slab2>minecraft:vertical_half=s:bottom,stone_slab_type_2=s:prismarine_brick
+prismarine_brick_stairs>prismarine_bricks_stairs>upside_down_bit=b:0,weirdo_direction=i:3
+prismarine_bricks>prismarine>prismarine_block_type=s:bricks
+prismarine_slab>stone_block_slab2>minecraft:vertical_half=s:bottom,stone_slab_type_2=s:prismarine_rough
+prismarine_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+prismarine_wall>cobblestone_wall>wall_block_type=s:prismarine,wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+pumpkin>=>minecraft:cardinal_direction=s:north
+pumpkin_stem>=>facing_direction=i:0,growth=i:0
+purple_banner>standing_banner>ground_sign_direction=i:8
+purple_bed>bed>direction=i:2,head_piece_bit=b:0,occupied_bit=b:0
+purple_candle>=>candles=i:0,lit=b:0
+purple_concrete_slab>=>minecraft:vertical_half=s:bottom>L
+purple_concrete_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+purple_glazed_terracotta>=>facing_direction=i:2
+purple_wool_slab>=>minecraft:vertical_half=s:bottom>L
+purple_wool_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+purpur_block>=>chisel_type=s:default,pillar_axis=s:y
+purpur_pillar>purpur_block>chisel_type=s:lines,pillar_axis=s:y
+purpur_slab>stone_block_slab2>minecraft:vertical_half=s:bottom,stone_slab_type_2=s:purpur
+purpur_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+quartz_block>=>chisel_type=s:default,pillar_axis=s:y
+quartz_pillar>quartz_block>chisel_type=s:lines,pillar_axis=s:y
+quartz_slab>=>minecraft:vertical_half=s:bottom
+quartz_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+rail>=>rail_direction=i:0
+red_banner>standing_banner>ground_sign_direction=i:8
+red_bed>bed>direction=i:2,head_piece_bit=b:0,occupied_bit=b:0
+red_candle>=>candles=i:0,lit=b:0
+red_concrete_slab>=>minecraft:vertical_half=s:bottom>L
+red_concrete_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+red_glazed_terracotta>=>facing_direction=i:2
+red_mushroom_block>=>huge_mushroom_bits=i:14
+red_nether_brick_slab>stone_block_slab2>minecraft:vertical_half=s:bottom,stone_slab_type_2=s:red_nether_brick
+red_nether_brick_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+red_nether_brick_wall>cobblestone_wall>wall_block_type=s:red_nether_brick,wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+red_nether_bricks>red_nether_brick>
+red_poplar_leaves>=>persistent_bit=b:0,update_bit=b:0>L
+red_sand>sand>sand_type=s:red
+red_sandstone>=>sand_stone_type=s:default
+red_sandstone_slab>stone_block_slab2>minecraft:vertical_half=s:bottom,stone_slab_type_2=s:red_sandstone
+red_sandstone_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+red_sandstone_wall>cobblestone_wall>wall_block_type=s:red_sandstone,wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+red_shrub>=>>L
+red_wool_slab>=>minecraft:vertical_half=s:bottom>L
+red_wool_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+resin_block>=>>L
+resin_brick_slab>=>minecraft:vertical_half=s:bottom>L
+resin_brick_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+resin_brick_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1>L
+resin_bricks>=>>L
+resin_clump>=>multi_face_direction_bits=i:0>L
+respawn_anchor>=>respawn_anchor_charge=i:0
+rooted_dirt>dirt_with_roots>
+rose_bush>=>upper_block_bit=b:0
+sand>=>sand_type=s:normal
+sandstone>=>sand_stone_type=s:default
+sandstone_slab>=>minecraft:vertical_half=s:bottom
+sandstone_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+sandstone_wall>cobblestone_wall>wall_block_type=s:sandstone,wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+scaffolding>=>stability=i:7,stability_check=b:1
+sculk_catalyst>=>bloom=b:0
+sculk_sensor>=>sculk_sensor_phase=i:0
+sculk_shrieker>=>active=b:0,can_summon=b:0
+sculk_vein>=>multi_face_direction_bits=i:0
+sea_pickle>=>cluster_count=i:0,dead_bit=b:0
+seagrass>=>sea_grass_type=s:default
+shelf_mushroom>=>growth=i:0,minecraft:cardinal_direction=s:north>L
+short_dry_grass>=>>L
+shulker_box>undyed_shulker_box>
+skeleton_skull>skull>facing_direction=i:1
+slime_block>slime>
+small_amethyst_bud>=>minecraft:block_face=s:up
+small_dripleaf>small_dripleaf_block>minecraft:cardinal_direction=s:north,upper_block_bit=b:0
+smoker>=>minecraft:cardinal_direction=s:north
+smooth_quartz>quartz_block>chisel_type=s:smooth,pillar_axis=s:y
+smooth_quartz_slab>stone_block_slab4>minecraft:vertical_half=s:bottom,stone_slab_type_4=s:smooth_quartz
+smooth_quartz_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+smooth_red_sandstone>red_sandstone>sand_stone_type=s:smooth
+smooth_red_sandstone_slab>stone_block_slab3>minecraft:vertical_half=s:bottom,stone_slab_type_3=s:smooth_red_sandstone
+smooth_red_sandstone_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+smooth_sandstone>sandstone>sand_stone_type=s:smooth
+smooth_sandstone_slab>stone_block_slab2>minecraft:vertical_half=s:bottom,stone_slab_type_2=s:smooth_sandstone
+smooth_sandstone_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+smooth_stone_slab>=>minecraft:vertical_half=s:bottom
+sniffer_egg>=>cracked_state=s:no_cracks
+snow>snow_layer>covered_bit=b:0,height=i:0
+snow_block>snow>
+soul_campfire>=>extinguished=b:0,minecraft:cardinal_direction=s:north
+soul_lantern>=>hanging=b:0
+soul_torch>=>torch_facing_direction=s:top
+spawner>mob_spawner>
+sponge>=>sponge_type=s:dry
+spruce_button>=>button_pressed_bit=b:0,facing_direction=i:2
+spruce_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+spruce_fence_gate>=>direction=i:2,in_wall_bit=b:0,open_bit=b:0
+spruce_hanging_sign>=>attached_bit=b:0,facing_direction=i:2,ground_sign_direction=i:0,hanging=b:1
+spruce_leaves>=>persistent_bit=b:0,update_bit=b:0
+spruce_log>=>pillar_axis=s:y
+spruce_pressure_plate>=>redstone_signal=i:0
+spruce_sapling>=>age_bit=b:0
+spruce_shelf>=>minecraft:cardinal_direction=s:north,powered_bit=b:0,powered_shelf_type=i:0>L
+spruce_sign>spruce_standing_sign>ground_sign_direction=i:8
+spruce_slab>=>minecraft:vertical_half=s:bottom
+spruce_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+spruce_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+spruce_wood>=>pillar_axis=s:y
+stone_brick_slab>=>minecraft:vertical_half=s:bottom
+stone_brick_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+stone_brick_wall>cobblestone_wall>wall_block_type=s:stone_brick,wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+stone_bricks>stonebrick>stone_brick_type=s:default
+stone_slab>stone_block_slab4>minecraft:vertical_half=s:bottom,stone_slab_type_4=s:stone
+stone_stairs>normal_stone_stairs>upside_down_bit=b:0,weirdo_direction=i:3
+stonecutter>stonecutter_block>minecraft:cardinal_direction=s:north
+straw_bed>=>head_piece_bit=b:0,minecraft:cardinal_direction=s:north,occupied_bit=b:0>L
+stripped_acacia_log>=>pillar_axis=s:y
+stripped_acacia_wood>=>pillar_axis=s:y
+stripped_bamboo_block>=>pillar_axis=s:y
+stripped_birch_log>=>pillar_axis=s:y
+stripped_birch_wood>=>pillar_axis=s:y
+stripped_cherry_log>=>pillar_axis=s:y
+stripped_cherry_wood>=>pillar_axis=s:y
+stripped_crimson_hyphae>=>pillar_axis=s:y
+stripped_crimson_stem>=>pillar_axis=s:y
+stripped_dark_oak_log>=>pillar_axis=s:y
+stripped_dark_oak_wood>=>pillar_axis=s:y
+stripped_jungle_log>=>pillar_axis=s:y
+stripped_jungle_wood>=>pillar_axis=s:y
+stripped_mangrove_log>=>pillar_axis=s:y
+stripped_mangrove_wood>=>pillar_axis=s:y
+stripped_oak_log>=>pillar_axis=s:y
+stripped_oak_wood>=>pillar_axis=s:y
+stripped_pale_oak_log>=>pillar_axis=s:y>L
+stripped_pale_oak_wood>=>pillar_axis=s:y>L
+stripped_poplar_log>=>pillar_axis=s:y>L
+stripped_poplar_wood>=>pillar_axis=s:y>L
+stripped_spruce_log>=>pillar_axis=s:y
+stripped_spruce_wood>=>pillar_axis=s:y
+stripped_warped_hyphae>=>pillar_axis=s:y
+stripped_warped_stem>=>pillar_axis=s:y
+sugar_cane>reeds>age=i:0
+sulfur>=>>L
+sulfur_brick_slab>=>minecraft:vertical_half=s:bottom>L
+sulfur_brick_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+sulfur_brick_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1>L
+sulfur_bricks>=>>L
+sulfur_slab>=>minecraft:vertical_half=s:bottom>L
+sulfur_spike>=>dripstone_thickness=s:tip,hanging=b:0>L
+sulfur_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+sulfur_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1>L
+sunflower>=>upper_block_bit=b:0
+suspicious_gravel>=>brushed_progress=i:0,hanging=b:0
+suspicious_sand>=>brushed_progress=i:0,hanging=b:0
+sweet_berry_bush>=>growth=i:0
+tall_dry_grass>=>>L
+tall_grass>=>upper_block_bit=b:0
+terracotta>hardened_clay>
+tnt>=>allow_underwater_bit=b:0,explode_bit=b:0
+torch>=>torch_facing_direction=s:top
+torchflower_crop>=>growth=i:0
+trapped_chest>=>minecraft:cardinal_direction=s:north
+trial_spawner>=>ominous=b:0,trial_spawner_state=i:0
+tripwire>trip_wire>attached_bit=b:0,disarmed_bit=b:0,powered_bit=b:0,suspended_bit=b:1
+tripwire_hook>=>attached_bit=b:0,direction=i:2,powered_bit=b:0
+tube_coral_fan>=>coral_fan_direction=i:0
+tuff_brick_slab>=>minecraft:vertical_half=s:bottom
+tuff_brick_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+tuff_brick_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+tuff_slab>=>minecraft:vertical_half=s:bottom
+tuff_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+tuff_wall>=>wall_connection_type_east=s:none,wall_connection_type_north=s:none,wall_connection_type_south=s:none,wall_connection_type_west=s:none,wall_post_bit=b:1
+turtle_egg>=>cracked_state=s:no_cracks,turtle_egg_count=s:one_egg
+twisting_vines>=>twisting_vines_age=i:0
+vault>=>minecraft:cardinal_direction=s:north,ominous=b:0,vault_state=s:inactive
+verdant_froglight>=>pillar_axis=s:y
+vine>=>vine_direction_bits=i:0
+warped_button>=>button_pressed_bit=b:0,facing_direction=i:2
+warped_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+warped_fence_gate>=>direction=i:2,in_wall_bit=b:0,open_bit=b:0
+warped_hanging_sign>=>attached_bit=b:0,facing_direction=i:2,ground_sign_direction=i:0,hanging=b:1
+warped_hyphae>=>pillar_axis=s:y
+warped_pressure_plate>=>redstone_signal=i:0
+warped_shelf>=>minecraft:cardinal_direction=s:north,powered_bit=b:0,powered_shelf_type=i:0>L
+warped_sign>warped_standing_sign>ground_sign_direction=i:8
+warped_slab>=>minecraft:vertical_half=s:bottom
+warped_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+warped_stem>=>pillar_axis=s:y
+warped_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+water>=>liquid_depth=i:0
+waxed_copper_bars>=>minecraft:connection_east=b:0,minecraft:connection_north=b:0,minecraft:connection_south=b:0,minecraft:connection_west=b:0>L
+waxed_copper_block>waxed_copper>
+waxed_copper_bulb>=>lit=b:0,powered_bit=b:0
+waxed_copper_chain>=>pillar_axis=s:y>L
+waxed_copper_chest>=>minecraft:cardinal_direction=s:north>L
+waxed_copper_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+waxed_copper_golem_statue>=>minecraft:cardinal_direction=s:north>L
+waxed_copper_lantern>=>hanging=b:0>L
+waxed_copper_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+waxed_cut_copper_slab>=>minecraft:vertical_half=s:bottom
+waxed_cut_copper_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+waxed_exposed_copper_bars>=>minecraft:connection_east=b:0,minecraft:connection_north=b:0,minecraft:connection_south=b:0,minecraft:connection_west=b:0>L
+waxed_exposed_copper_bulb>=>lit=b:0,powered_bit=b:0
+waxed_exposed_copper_chain>=>pillar_axis=s:y>L
+waxed_exposed_copper_chest>=>minecraft:cardinal_direction=s:north>L
+waxed_exposed_copper_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+waxed_exposed_copper_golem_statue>=>minecraft:cardinal_direction=s:north>L
+waxed_exposed_copper_lantern>=>hanging=b:0>L
+waxed_exposed_copper_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+waxed_exposed_cut_copper_slab>=>minecraft:vertical_half=s:bottom
+waxed_exposed_cut_copper_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+waxed_exposed_lightning_rod>=>facing_direction=i:1,powered_bit=b:0>L
+waxed_lightning_rod>=>facing_direction=i:1,powered_bit=b:0>L
+waxed_oxidized_copper_bars>=>minecraft:connection_east=b:0,minecraft:connection_north=b:0,minecraft:connection_south=b:0,minecraft:connection_west=b:0>L
+waxed_oxidized_copper_bulb>=>lit=b:0,powered_bit=b:0
+waxed_oxidized_copper_chain>=>pillar_axis=s:y>L
+waxed_oxidized_copper_chest>=>minecraft:cardinal_direction=s:north>L
+waxed_oxidized_copper_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+waxed_oxidized_copper_golem_statue>=>minecraft:cardinal_direction=s:north>L
+waxed_oxidized_copper_lantern>=>hanging=b:0>L
+waxed_oxidized_copper_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+waxed_oxidized_cut_copper_slab>=>minecraft:vertical_half=s:bottom
+waxed_oxidized_cut_copper_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+waxed_oxidized_lightning_rod>=>facing_direction=i:1,powered_bit=b:0>L
+waxed_weathered_copper_bars>=>minecraft:connection_east=b:0,minecraft:connection_north=b:0,minecraft:connection_south=b:0,minecraft:connection_west=b:0>L
+waxed_weathered_copper_bulb>=>lit=b:0,powered_bit=b:0
+waxed_weathered_copper_chain>=>pillar_axis=s:y>L
+waxed_weathered_copper_chest>=>minecraft:cardinal_direction=s:north>L
+waxed_weathered_copper_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+waxed_weathered_copper_golem_statue>=>minecraft:cardinal_direction=s:north>L
+waxed_weathered_copper_lantern>=>hanging=b:0>L
+waxed_weathered_copper_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+waxed_weathered_cut_copper_slab>=>minecraft:vertical_half=s:bottom
+waxed_weathered_cut_copper_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+waxed_weathered_lightning_rod>=>facing_direction=i:1,powered_bit=b:0>L
+weathered_copper_bars>=>minecraft:connection_east=b:0,minecraft:connection_north=b:0,minecraft:connection_south=b:0,minecraft:connection_west=b:0>L
+weathered_copper_bulb>=>lit=b:0,powered_bit=b:0
+weathered_copper_chain>=>pillar_axis=s:y>L
+weathered_copper_chest>=>minecraft:cardinal_direction=s:north>L
+weathered_copper_door>=>direction=i:3,door_hinge_bit=b:0,open_bit=b:0,upper_block_bit=b:0
+weathered_copper_golem_statue>=>minecraft:cardinal_direction=s:north>L
+weathered_copper_lantern>=>hanging=b:0>L
+weathered_copper_trapdoor>=>direction=i:3,open_bit=b:0,upside_down_bit=b:0
+weathered_cut_copper_slab>=>minecraft:vertical_half=s:bottom
+weathered_cut_copper_stairs>=>upside_down_bit=b:0,weirdo_direction=i:3
+weathered_lightning_rod>=>facing_direction=i:1,powered_bit=b:0>L
+weeping_vines>=>weeping_vines_age=i:0
+wet_sponge>sponge>sponge_type=s:wet
+wheat>=>growth=i:0
+white_banner>standing_banner>ground_sign_direction=i:8
+white_bed>bed>direction=i:2,head_piece_bit=b:0,occupied_bit=b:0
+white_candle>=>candles=i:0,lit=b:0
+white_concrete_slab>=>minecraft:vertical_half=s:bottom>L
+white_concrete_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+white_glazed_terracotta>=>facing_direction=i:2
+white_wool_slab>=>minecraft:vertical_half=s:bottom>L
+white_wool_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+wildflowers>=>growth=i:0,minecraft:cardinal_direction=s:north>L
+wither_skeleton_skull>skull>facing_direction=i:1
+yellow_banner>standing_banner>ground_sign_direction=i:8
+yellow_bed>bed>direction=i:2,head_piece_bit=b:0,occupied_bit=b:0
+yellow_candle>=>candles=i:0,lit=b:0
+yellow_concrete_slab>=>minecraft:vertical_half=s:bottom>L
+yellow_concrete_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+yellow_glazed_terracotta>=>facing_direction=i:2
+yellow_poplar_leaves>=>persistent_bit=b:0,update_bit=b:0>L
+yellow_wool_slab>=>minecraft:vertical_half=s:bottom>L
+yellow_wool_stairs>=>minecraft:corner=s:none,upside_down_bit=b:0,weirdo_direction=i:3>L
+zombie_head>skull>facing_direction=i:1`;
+
+/* ---------- Enregistrement du catalogue dans le registre des blocs ----------
+   Chaque bloc devient un type « mc:<id> » avec le comportement de sa famille.
+   Portes, trappes, boutons, plaques et rails réutilisent le composant redstone
+   existant (« alias ») et gardent leur identifiant Minecraft dans b.id. */
+const MC = {};                       // id Minecraft → infos (nom, famille, couleurs, Bedrock)
+const MC_BY_BEDROCK = {};            // nom Bedrock → id Java
+const MC_CATS = [['mc_rs', 'Redstone : autres blocs'], ['mc_plant', 'Plantes'], ['mc_wood', 'Bois'], ['mc_stone', 'Pierre et briques'],
+  ['mc_color', 'Couleurs'], ['mc_glass', 'Verre'], ['mc_ore', 'Minerais et métaux'], ['mc_nature', 'Nature'], ['mc_nether', 'Nether'],
+  ['mc_end', 'End'], ['mc_deco', 'Décoration et utilitaires']];
+const MC_CLASS = {
+  cube:      { cond: true, top: true, side: true, move: 'push', desc: 'Bloc plein et opaque : conduit le signal et porte la poudre.' },
+  cubefix:   { cond: true, top: true, side: true, move: 'immovable', desc: 'Bloc plein et opaque, impossible à pousser (il contient des données).' },
+  clear:     { top: true, move: 'push', desc: 'Bloc transparent : ne conduit pas le signal.' },
+  clearfix:  { top: true, move: 'immovable', desc: 'Bloc transparent, impossible à pousser.' },
+  plant:     { needs: 'floor', move: 'break', desc: 'Plante : il lui faut un sol, un piston la casse.' },
+  flat:      { needs: 'floor', move: 'break', desc: 'Bloc plat posé au sol : un piston le casse.' },
+  slab:      { move: 'push', desc: 'Dalle (moitié basse) : ne conduit pas le signal, ne porte pas la poudre.' },
+  stairs:    { rot: 'h4', move: 'push', desc: 'Escalier : ne conduit pas le signal. R pour le tourner.' },
+  post:      { move: 'push', desc: 'Barrière, muret ou vitre : se relie à ses voisins, ne conduit pas le signal.' },
+  misc:      { move: 'push', desc: 'Bloc décoratif : ne conduit pas le signal.' },
+  miscfix:   { move: 'immovable', desc: 'Bloc utilitaire : ne conduit pas le signal, impossible à pousser.' },
+  miscbreak: { move: 'break', desc: 'Bloc fragile : un piston le casse.' },
+};
+const MC_ALIAS = { door: () => 'door', trapdoor: () => 'trapdoor', plate: () => 'plate', rail: () => 'rail',
+  button: id => /blackstone|stone/.test(id) ? 'button_stone' : 'button_wood' };
+const DYES = ['white', 'orange', 'magenta', 'light_blue', 'yellow', 'lime', 'pink', 'gray', 'light_gray', 'cyan', 'purple', 'blue', 'brown', 'green', 'red', 'black'];
+const SKULLS = ['skeleton_skull', 'wither_skeleton_skull', 'zombie_head', 'player_head', 'creeper_head', 'dragon_head', 'piglin_head'];
+const hexRgb = h => h ? [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)] : null;
+function parseMcColor(s) { const [a, b, r, v] = s.split('.'); return { c1: hexRgb(a), c2: b ? hexRgb(b) : null, r: +r || 0, v: +v || 0 }; }
+function parseBrStates(s) {
+  const out = {};
+  for (const kv of s.split(',')) { const i = kv.indexOf('='), k = kv.slice(0, i), ty = kv[i + 1], v = kv.slice(i + 3); out[k] = ty === 's' ? ['string', v] : [ty === 'b' ? 'byte' : 'int', +v]; }
+  return out;
+}
+function registerCatalog() {
+  for (const line of MC_DATA.split('\n')) {
+    const [id, fr, cls, cat, top, side] = line.split('|');
+    const info = { id, fr, cls, cat, top: parseMcColor(top), fluid: id === 'water' || id === 'lava' };
+    info.side = side === '=' ? info.top : parseMcColor(side);
+    MC[id] = info;
+    const key = 'mc:' + id, alias = MC_ALIAS[cls];
+    if (alias) { info.alias = alias(id); BT[key] = { ...BT[info.alias], name: fr, cat: 'mc_' + cat, mc: info, alias: info.alias, hidden: false }; }
+    else BT[key] = { name: fr, cat: 'mc_' + cat, mc: info, ...MC_CLASS[cls] };
+  }
+  for (const line of MC_BEDROCK_DATA.split('\n')) {
+    const [id, name, st, latest] = line.split('>');
+    if (!MC[id]) continue;
+    MC[id].br = [name === '=' ? id : name, st ? parseBrStates(st) : null, latest === 'L'];
+  }
+  for (const id in MC) { const bn = MC[id].br ? MC[id].br[0] : id; (MC_BY_BEDROCK[bn] = MC_BY_BEDROCK[bn] || []).push(id); }
+}
+/* Bloc Java correspondant à un état Bedrock : parmi les blocs qui partagent ce nom, celui dont les états collent le mieux */
+function javaFromBedrock(name, S = {}) {
+  const ids = MC_BY_BEDROCK[name]; if (!ids) return null;
+  if (ids.length === 1) return ids[0];
+  let best = ids[0], bs = -1;
+  for (const id of ids) {
+    const tpl = MC[id].br && MC[id].br[1] || {}; let sc = 0;
+    for (const k in tpl) if (S[k] !== undefined && String(S[k]) === String(tpl[k][1])) sc += /type|color|block_type|wood|stone_slab/.test(k) ? 10 : 1;
+    if (sc > bs) { bs = sc; best = id; }
+  }
+  return best;
+}
+/* Type de palette d'un bloc posé (les variantes gardent leur identifiant Minecraft) */
+const typeKey = b => b.id && !BT[b.t].mc && BT['mc:' + b.id] ? 'mc:' + b.id : b.t;
+const blockName = b => BT[typeKey(b)].name;
+/* =====================================================================
    1. CONSTANTES ET UTILITAIRES
    Axes : x vers l'Est, z vers le Sud, y vers le haut.
    ===================================================================== */
@@ -615,6 +2573,8 @@ const BT = {
   piston_head:  { name: 'Tête de piston', hidden: true, move: 'immovable' },
   door_top:     { name: 'Porte en fer (haut)', hidden: true, move: 'break' },
 };
+registerCatalog();                     // + tous les blocs posables de Minecraft (catalogue)
+CATS.push(...MC_CATS);
 const ROT_OPTS = { h4: [N, E, S, O], all6: [N, E, S, O, U, D], att5: [D, N, E, S, O], att6: [D, N, E, S, O, U], axis: [0, 1] };
 const DEFAULT_F = { repeater: E, comparator: E, piston: E, sticky: E, observer: O, torch: D, lever: D, button_stone: D, button_wood: D, rail: 1, trapdoor: N, door: S };
 const isPiston = b => b && (b.t === 'piston' || b.t === 'sticky');
@@ -623,7 +2583,7 @@ const NOTE_NAMES = ['Fa♯', 'Sol', 'Sol♯', 'La', 'La♯', 'Si', 'Do', 'Do♯'
 /* =====================================================================
    3. MONDE : stockage creux des blocs
    ===================================================================== */
-const SAVE_KEYS = ['f', 'on', 'lvl', 'd', 'm', 'p', 'ext', 'dot', 'lock', 'burnt', 'sticky', 'tpl'];
+const SAVE_KEYS = ['f', 'on', 'lvl', 'd', 'm', 'p', 'ext', 'dot', 'lock', 'burnt', 'sticky', 'tpl', 'id'];
 const BOOL_KEYS = new Set(['on', 'ext', 'dot', 'lock', 'burnt', 'sticky', 'tpl']);
 
 function mk(t, x, y, z, props) {
@@ -642,7 +2602,7 @@ function ser(b) {
 function deser(o) {
   if (!BT[o.t]) return null;
   const b = mk(o.t, o.x | 0, o.y | 0, o.z | 0);
-  for (const k of SAVE_KEYS) if (o[k] !== undefined) b[k] = BOOL_KEYS.has(k) ? !!o[k] : (+o[k] || 0);
+  for (const k of SAVE_KEYS) if (o[k] !== undefined) b[k] = k === 'id' ? (MC[o.id] ? String(o.id) : undefined) : BOOL_KEYS.has(k) ? !!o[k] : (+o[k] || 0);
   if (b.t === 'repeater') b.d = clamp(b.d || 1, 1, 4);
   if (b.t === 'torch' && o.on === undefined) b.on = false;
   return b;
@@ -1055,6 +3015,10 @@ const Sim = {
         }
         case 'trapdoor': case 'hopper': {
           const p = this.received(b) > 0;
+          if (b.id && t === 'trapdoor') {                       // bois/cuivre : ne réagit qu'aux changements de signal (ouverture à la main possible)
+            const was = b._wp; b._wp = p;
+            if (was === undefined || p === was) break;
+          }
           if (p !== b.on) { b.on = p; this.touch(b); if (t === 'trapdoor') Sfx.door(); }
           break;
         }
@@ -1066,6 +3030,7 @@ const Sim = {
         case 'door': {
           const top = W.get(b.x, b.y + 1, b.z);
           const p = this.received(b) > 0 || (top && top.t === 'door_top' && this.received(top) > 0);
+          if (b.id) { const was = b._wp; b._wp = p; if (was === undefined || p === was) break; }   // bois/cuivre : sur front de signal
           if (p !== b.on) { b.on = p; if (top) top.on = p; this.touch(b); Sfx.door(); }
           break;
         }
@@ -1325,6 +3290,7 @@ const Ed = {
      s'accrochent automatiquement au bloc voisin si le choix courant est impossible). */
   resolve(t, x, y, z) {
     const def = BT[t], pref = this.orient[t] ?? 0;
+    if (def.alias) t = def.alias;           // variante d'un composant (porte en chêne…) : mêmes règles
     if (!inRange(x, y, z)) return { f: pref, ok: false };
     const free = !W.get(x, y, z) && (t !== 'door' || (y + 1 < MAXY && !W.get(x, y + 1, z)));
     if (def.needs === 'att') {
@@ -1336,10 +3302,13 @@ const Ed = {
   place(t, x, y, z) {
     const r = this.resolve(t, x, y, z);
     if (!r.ok) return false;
-    const b = mk(t, x, y, z, { f: r.f });
+    const id = BT[t].alias ? BT[t].mc.id : undefined;
+    if (id) t = BT[t].alias;
+    const b = mk(t, x, y, z, { f: r.f, id });
+    if (id) b._wp = false;                  // posée maintenant : un signal déjà présent l'ouvre
     if (t === 'daylight') b.lvl = daylightLevel(Sim.time, 0);
     W.add(b);
-    if (t === 'door') W.add(mk('door_top', x, y + 1, z, { f: r.f }));
+    if (t === 'door') W.add(mk('door_top', x, y + 1, z, { f: r.f, id }));
     return true;
   },
   erase(x, y, z) {
@@ -1360,8 +3329,13 @@ const Ed = {
   configure(b) {
     switch (b.t) {
       case 'lever': case 'button_stone': case 'button_wood': return Sim.use(b);
-      case 'door_top': case 'door': case 'trapdoor':
-        UI.toast('Le fer ne s’ouvre qu’avec un signal de redstone.'); return false;
+      case 'door_top': case 'door': case 'trapdoor': {
+        const d = b.t === 'door_top' ? (W.get(b.x, b.y - 1, b.z) || b) : b;
+        if (!d.id) { UI.toast('Le fer ne s’ouvre qu’avec un signal de redstone.'); return false; }
+        d.on = !d.on; d.hand = d.on;                           // bois ou cuivre : s'ouvre à la main
+        if (d.t === 'door') { const up = W.get(d.x, d.y + 1, d.z); if (up && up.t === 'door_top') up.on = d.on; }
+        Sim.touch(d); R.dirty = true; return true;
+      }
       case 'repeater': case 'comparator': case 'note': case 'hopper': case 'daylight': case 'dust': break;
       default: return false;
     }
@@ -1731,6 +3705,9 @@ function flash(g, b, x, y, s, now, col) {
 /* Dessine le bloc b dans la case (x, y) de taille s. fx = effets (halos). */
 function drawBlock(g, b, x, y, s, now, fx) {
   const cx = x + s / 2, cy = y + s / 2;
+  if (BT[b.t].alias) b = { ...b, t: BT[b.t].alias, id: BT[b.t].mc.id };     // aperçu d'une variante (porte en chêne…)
+  if (b.id && !BT[b.t].mc && MC[b.id]) return drawTinted(g, b, x, y, s, now, fx);
+  if (BT[b.t].mc) return drawMc(g, b, x, y, s);
   switch (b.t) {
     case 'solid': tex(g, 'stone', x, y, s); poweredMark(g, b, x, y, s); break;
     case 'obsidian': tex(g, 'obsidian', x, y, s); poweredMark(g, b, x, y, s); break;
@@ -1912,7 +3889,7 @@ function lodColor(b) {
   if (b.t === 'lamp') return b.on ? '#f6c46b' : '#5e3e24';
   if ((b.t === 'torch' || b.t === 'repeater' || b.t === 'lever' || b.t === 'observer' || b.t === 'rail') && b.on) return '#ff4a26';
   if (b.t === 'comparator' && b.lvl) return '#ff4a26';
-  return LOD_COL[b.t] || '#777';
+  return LOD_COL[b.t] || mcLod(b) || '#777';
 }
 /* Niveau affiché sur un bloc (mode « niveaux de puissance ») */
 function blockLevel(b) {
@@ -2320,6 +4297,7 @@ const Iso = {
         else boxQ(b.f, 0, 0, 16, 3, 0, 16, all(T.iron));
         break;
       case 'door': case 'door_top': boxQ(b.on ? (b.f + 1) % 4 : b.f, 0, 0, 16, 3, 0, 16, all(b.t === 'door' ? T.doorBot : T.doorTop)); break;
+      default: if (BT[b.t].mc) mcIso(this, g, b, box, boxQ, cullFull, x, y, z, a);
     }
   },
   image() {
@@ -2345,7 +4323,13 @@ function itemIcon(t, size = 64) {
   if (ICON_CACHE.has(key)) return ICON_CACHE.get(key);
   const c = cnv(size, size), g = c.getContext('2d');
   g.imageSmoothingEnabled = false;
-  if (ITEM_SPRITE[t]) {
+  const mc = BT[t].mc;
+  if (mc && mc.alias) {                                    // variante : icône du composant, teintée
+    g.drawImage(itemIcon(mc.alias, size), 0, 0); const k = mc.top.c1;
+    g.globalCompositeOperation = 'source-atop'; g.fillStyle = `rgba(${k[0]},${k[1]},${k[2]},.55)`; g.fillRect(0, 0, size, size); g.globalCompositeOperation = 'source-over';
+  } else if (mc && mc.cls === 'plant' && !mc.fluid) {
+    const m = Math.round(size * 0.08); g.drawImage(mcTex(mc.id, 'sprite'), m, m, size - 2 * m, size - 2 * m);
+  } else if (ITEM_SPRITE[t]) {
     const m = Math.round(size * 0.08);
     g.drawImage(TEX[ITEM_SPRITE[t]], m, m, size - 2 * m, size - 2 * m);
   } else {
@@ -2362,7 +4346,8 @@ function itemIcon(t, size = 64) {
     const a = size * 0.38;
     Iso.rot = 0; Iso.zoom = a / 16; Iso.D = 1; Iso.noCull = true;
     // hauteur visible du modèle (fraction de bloc) pour le centrer verticalement
-    const hf = { plate: 0.06, button_stone: 0.12, button_wood: 0.12, trapdoor: 0.19, repeater: 0.45, comparator: 0.45, daylight: 0.375 }[t] || 1;
+    const hf = { plate: 0.06, button_stone: 0.12, button_wood: 0.12, trapdoor: 0.19, repeater: 0.45, comparator: 0.45, daylight: 0.375 }[t]
+      || (mc && { flat: 0.07, slab: 0.5, misc: 0.88, miscfix: 0.88, miscbreak: 0.88 }[mc.cls]) || 1;
     Iso.ox = size / 2; Iso.oy = size / 2 - (a - 1.15 * a * hf) / 2;
     Iso.block(g, b, a, 0, []);
     g.setTransform(1, 0, 0, 1, 0, 0);
@@ -2371,6 +4356,128 @@ function itemIcon(t, size = 64) {
   ICON_CACHE.set(key, c);
   return c;
 }
+
+/* =====================================================================
+   RENDU DES BLOCS DU CATALOGUE
+   Textures 16×16 générées à partir des deux teintes de chaque face
+   (couleur principale, couleur d'accent, part d'accent, grain).
+   ===================================================================== */
+function mcSeed(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return h >>> 0; }
+const greenness = c => c ? c[1] - (c[0] + c[2]) / 2 : -999;
+function mcTex(id, face) {
+  const name = 'mc:' + id + ':' + face;
+  if (TEX[name]) return TEX[name];
+  const m = MC[id], col = face === 'side' ? m.side : m.top, cls = m.cls;
+  return genTex(name, mcSeed(name), P => {
+    const { c1, c2, r, v } = col, rnd = P.rnd;
+    if (face === 'sprite') {                                   // plante vue de face (feuilles + fleur)
+      const stem = c2 && greenness(c2) > greenness(c1) ? c2 : c1, head = c2 && stem === c2 ? c1 : c2;
+      const dark = [stem[0] * .72, stem[1] * .72, stem[2] * .72];
+      const blades = head ? 3 : 5;
+      for (let k = 0; k < blades; k++) {
+        let x = 3 + Math.floor((k + .5) * 10 / blades) + (rnd() * 2 | 0), top = head ? 6 + (rnd() * 3 | 0) : 2 + (rnd() * 6 | 0);
+        for (let y = 15; y >= top; y--) { P.set(x, y, (y + k) % 3 ? stem : dark); if (rnd() < .22) x += rnd() < .5 ? -1 : 1; x = clamp(x, 1, 14); }
+      }
+      if (head) {
+        const cx = 6 + (rnd() * 3 | 0), cy = 2 + (rnd() * 2 | 0);
+        for (let j = 0; j < 4; j++) for (let i = 0; i < 4; i++) if ((i > 0 && i < 3) || (j > 0 && j < 3)) P.set(cx + i - 1, cy + j, (i + j) % 3 ? head : [head[0] * .8, head[1] * .8, head[2] * .8]);
+        for (let y = cy + 4; y < 9; y++) P.set(cx, y, stem);
+      }
+      return;
+    }
+    const amp = 6 + v * 0.9, alpha = /^clear/.test(cls) ? 120 : m.fluid ? 190 : 255;
+    for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const d = (rnd() - .5) * amp; P.set(x, y, [c1[0] + d, c1[1] + d, c1[2] + d], alpha); }
+    if (c2) {
+      const n = Math.round(256 * r / 100 / 1.6);
+      for (let k = 0; k < n; k++) {
+        const x = rnd() * 16 | 0, y = rnd() * 16 | 0, d = (rnd() - .5) * amp * .6, c = [c2[0] + d, c2[1] + d, c2[2] + d];
+        P.set(x, y, c, Math.max(alpha, 200)); if (rnd() < .6) P.set(x + (rnd() < .5 ? 1 : 0), y + (rnd() < .5 ? 0 : 1), c, Math.max(alpha, 200));
+      }
+    }
+    if (/^clear/.test(cls)) { const e = [Math.min(255, c1[0] + 70), Math.min(255, c1[1] + 70), Math.min(255, c1[2] + 70)]; for (let i = 0; i < 16; i++) { P.set(i, 0, e, 230); P.set(i, 15, e, 230); P.set(0, i, e, 230); P.set(15, i, e, 230); } P.set(3, 3, e, 230); P.set(4, 2, e, 230); }
+    if (m.fluid) for (let k = 0; k < 6; k++) { const y = rnd() * 16 | 0, x0 = rnd() * 12 | 0; for (let x = x0; x < x0 + 4; x++) P.set(x, y, [c1[0] + 40, c1[1] + 40, c1[2] + 40], 210); }
+  });
+}
+const mcRgb = c => rgb(c[0], c[1], c[2]);
+/* Les barrières, murets et vitres se relient aux voisins pleins ou de la même famille */
+function mcConnects(b, d) {
+  const dd = DIRS[d], n = W.get(b.x + dd[0], b.y, b.z + dd[2]);
+  if (!n || n.mv) return false;
+  const m = BT[n.t].mc;
+  return (m && (m.cls === 'post' || /^cube|^clear/.test(m.cls))) || !!BT[n.t].cond || n.t === 'glass';
+}
+/* Vue du dessus */
+function drawMc(g, b, x, y, s) {
+  const m = BT[b.t].mc, id = m.id, cls = m.cls, top = 'mc:' + id + ':top';
+  switch (cls) {
+    case 'cube': case 'cubefix': case 'clear': case 'clearfix': mcTex(id, 'top'); tex(g, top, x, y, s); break;
+    case 'plant':
+      if (m.fluid) { mcTex(id, 'top'); tex(g, top, x, y, s); }
+      else { mcTex(id, 'sprite'); tex(g, 'mc:' + id + ':sprite', x, y, s); }
+      break;
+    case 'flat': mcTex(id, 'top'); g.globalAlpha *= .9; tex(g, top, x, y, s); g.globalAlpha /= .9; g.strokeStyle = 'rgba(0,0,0,.12)'; g.lineWidth = 1; g.strokeRect(x + .5, y + .5, s - 1, s - 1); break;
+    case 'slab':
+      mcTex(id, 'top'); tex(g, top, x, y, s);
+      g.fillStyle = 'rgba(255,255,255,.22)'; g.fillRect(x, y + s / 2, s, s / 2);
+      g.fillStyle = 'rgba(0,0,0,.25)'; g.fillRect(x, y + s / 2 - Math.max(1, s / 32), s, Math.max(1, s / 16));
+      break;
+    case 'stairs':
+      mcTex(id, 'top'); tex(g, top, x, y, s);
+      pr(g, x, y, s, b.f, 0, 8, 16, 8, 'rgba(0,0,0,.22)'); pr(g, x, y, s, b.f, 0, 8, 16, 1, 'rgba(0,0,0,.35)');
+      break;
+    case 'post': {
+      mcTex(id, 'top');
+      for (const d of [N, E, S, O]) if (mcConnects(b, d)) prTex(g, top, x, y, s, d, 6, 0, 4, 7);
+      prTex(g, top, x, y, s, 0, 5, 5, 6, 6);
+      g.strokeStyle = 'rgba(0,0,0,.25)'; g.lineWidth = 1; const k = s / 16; g.strokeRect(x + 5 * k + .5, y + 5 * k + .5, 6 * k - 1, 6 * k - 1);
+      break;
+    }
+    default: {                                                  // décor : bloc plus petit, coins arrondis
+      mcTex(id, 'top'); const k = s / 16;
+      g.save(); rr(g, x + 2 * k, y + 2 * k, 12 * k, 12 * k, 3 * k); g.clip(); tex(g, top, x, y, s); g.restore();
+      g.strokeStyle = 'rgba(0,0,0,.22)'; g.lineWidth = 1; rr(g, x + 2 * k + .5, y + 2 * k + .5, 12 * k - 1, 12 * k - 1, 3 * k); g.stroke();
+    }
+  }
+}
+/* Variante d'un composant (porte en chêne, bouton en bouleau…) : dessin du composant, teinté dans sa matière */
+const TINT_CV = cnv(64, 64), TINT_G = TINT_CV.getContext('2d');
+function drawTinted(g, b, x, y, s, now, fx) {
+  const S = Math.max(1, Math.ceil(s));
+  if (TINT_CV.width < S) { TINT_CV.width = TINT_CV.height = S; }
+  const t = TINT_G; t.setTransform(1, 0, 0, 1, 0, 0); t.globalCompositeOperation = 'source-over'; t.clearRect(0, 0, S, S); t.imageSmoothingEnabled = false;
+  drawBlock(t, { ...b, id: undefined }, 0, 0, s, now, false);
+  const c = MC[b.id].top.c1;
+  t.globalCompositeOperation = 'source-atop'; t.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},.55)`; t.fillRect(0, 0, S, S);
+  t.globalCompositeOperation = 'source-over';
+  g.drawImage(TINT_CV, 0, 0, S, S, x, y, S, S);
+}
+/* Vue 3D */
+function mcIso(I, g, b, box, boxQ, cull, x, y, z, a) {
+  const m = BT[b.t].mc, id = m.id, cls = m.cls;
+  const top = mcTex(id, 'top'), side = mcTex(id, 'side'), tf = f => f === 'U' ? top : side;
+  switch (cls) {
+    case 'cube': case 'cubefix': box(0, 0, 0, 16, 16, 16, tf, cull); break;
+    case 'clear': case 'clearfix': box(0, 0, 0, 16, 16, 16, tf, I.noCull ? null : d => { const dd = DIRS[d], n = W.get(b.x + dd[0], b.y + dd[1], b.z + dd[2]); return !!(n && !n.mv && (n.t === b.t || OPAQUE.has(n.t))); }); break;
+    case 'plant': {
+      if (m.fluid) { box(0, 0, 0, 16, 14, 16, tf); break; }
+      const spr = mcTex(id, 'sprite');
+      I.face(g, spr, 0, 0, 16, 16, [x + .12, y + 1, z + .12], [.76, 0, .76], [0, -1, 0], a, 0);
+      I.face(g, spr, 0, 0, 16, 16, [x + .88, y + 1, z + .12], [-.76, 0, .76], [0, -1, 0], a, .12);
+      break;
+    }
+    case 'flat': box(0, 0, 0, 16, 1, 16, tf); break;
+    case 'slab': box(0, 0, 0, 16, 8, 16, tf, cull); break;
+    case 'stairs': box(0, 0, 0, 16, 8, 16, tf); boxQ(b.f, 0, 0, 16, 8, 8, 16, tf); break;
+    case 'post': {
+      box(6, 0, 6, 10, 16, 10, tf);
+      for (const d of [N, E, S, O]) if (mcConnects(b, d)) { boxQ(d, 7, 0, 2, 6, 6, 9, tf); boxQ(d, 7, 0, 2, 6, 12, 15, tf); }
+      break;
+    }
+    default: box(2, 0, 2, 14, 14, 14, tf);
+  }
+}
+for (const t in BT) if (BT[t].mc && /^cube/.test(BT[t].mc.cls)) OPAQUE.add(t);
+function mcLod(b) { const m = BT[b.t].mc || (b.id && MC[b.id]); return m ? mcRgb(m.top.c1) : null; }
 
 /* =====================================================================
    12 bis. BIBLIOTHÈQUE DE SCHÉMAS (presets) — tous vérifiés par simulation
@@ -2804,7 +4911,7 @@ const RECIPE = { dust: { r: 1 }, repeater: { r: 3 }, comparator: { r: 3, q: 1 },
   hopper: { i: 5 }, trapdoor: { i: 4 }, door: { i: 2 } };
 function bomData() {
   const cnt = {};
-  for (const b of W.all()) { if (BT[b.t].hidden) continue; cnt[b.t] = (cnt[b.t] || 0) + 1; }
+  for (const b of W.all()) { if (BT[b.t].hidden) continue; const k = typeKey(b); cnt[k] = (cnt[k] || 0) + 1; }
   const rows = Object.keys(BT).filter(t => cnt[t]).map(t => ({ t, n: cnt[t] }));
   const raw = {};
   for (const r of rows) { const rc = RECIPE[r.t]; if (!rc) continue; for (const k in rc) raw[k] = (raw[k] || 0) + rc[k] * r.n; }
@@ -2873,17 +4980,29 @@ const UI = {
   },
   buildPalette(filter = '') {
     const root = $('palette'); root.innerHTML = '';
-    const f = filter.trim().toLowerCase();
-    for (const [cat, label] of CATS) {
-      const items = Object.keys(BT).filter(t => BT[t].cat === cat && !BT[t].hidden && (!f || BT[t].name.toLowerCase().includes(f)));
-      if (!items.length) continue;
-      const grid = el('div', { class: 'pal' });
+    const norm = v => v.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/_/g, ' ');
+    const f = norm(filter.trim());
+    const fill = (grid, items) => {
       for (const t of items) {
-        const btn = el('button', { class: 'pal-item', title: BT[t].name + ' — ' + BT[t].desc, 'data-t': t, onclick: () => this.pickType(t) }, iconCanvas(t), el('span', null, BT[t].name));
+        const btn = el('button', { class: 'pal-item', title: BT[t].name + ' — ' + (BT[t].desc || ''), 'data-t': t, onclick: () => this.pickType(t) }, iconCanvas(t), el('span', null, BT[t].name));
         grid.append(btn);
       }
-      root.append(el('div', { class: 'cat' }, el('h3', null, label), grid));
+      this.markPalette();
+    };
+    let shown = 0;
+    for (const [cat, label] of CATS) {
+      const items = Object.keys(BT).filter(t => BT[t].cat === cat && !BT[t].hidden && (!f || norm(BT[t].name).includes(f) || (BT[t].mc && norm(BT[t].mc.id).includes(f))));
+      if (!items.length) continue;
+      const grid = el('div', { class: 'pal' });
+      if (!cat.startsWith('mc_')) { fill(grid, items); root.append(el('div', { class: 'cat' }, el('h3', null, label), grid)); continue; }
+      // catalogue Minecraft : catégories repliées, icônes dessinées à l'ouverture
+      const open = !!f && shown < 120;
+      const det = el('details', { class: 'cat mc-cat' }, el('summary', null, label, el('small', null, String(items.length))), grid);
+      if (open) { det.open = true; fill(grid, items.slice(0, 120 - shown)); shown += items.length; }
+      det.addEventListener('toggle', () => { if (det.open && !grid.childElementCount) fill(grid, items); });
+      root.append(det);
     }
+    if (!root.childElementCount) root.append(el('p', { class: 'muted', style: 'margin:4px;font-size:12px' }, 'Aucun bloc ne correspond.'));
     this.markPalette();
   },
   markPalette() { document.querySelectorAll('.pal-item').forEach(b => b.classList.toggle('sel', b.dataset.t === this.current() && this.tool === 'build')); },
@@ -3018,7 +5137,7 @@ const UI = {
     if (BT[b.t].cond && b.pw) rows.push(['Alimentation', b.sp ? 'forte' : 'faible (par la poudre)']);
     const o = this.orientName(b.t, b.f); if (o) rows.unshift(['Orientation', o]);
     rows.push(['Position', `${b.x}, ${b.y}, ${b.z}`]);
-    return { title: BT[b.t].name, pw, rows };
+    return { title: blockName(b), pw, rows };
   },
   showTip(b) {
     if (b.dead) { this.hideTip(); return; }
@@ -3110,12 +5229,12 @@ const UI = {
     if (b.t === 'piston_head') { const d = DIRS[b.f]; b = W.get(b.x - d[0], b.y - d[1], b.z - d[2]) || b; }
     if (b.t === 'door_top') b = W.get(b.x, b.y - 1, b.z) || b;
     if (BT[b.t].hidden) return;
-    this.pickType(b.t);
+    this.pickType(typeKey(b));
     if (BT[b.t].rot) Ed.orient[b.t] = b.f;
     if (b.t === 'repeater') Ed.extra.repeater = { d: b.d };
     if (b.t === 'comparator') Ed.extra.comparator = { m: b.m };
     if (b.t === 'note') Ed.extra.note = { p: b.p };
-    this.toast('Pipette : ' + BT[b.t].name);
+    this.toast('Pipette : ' + blockName(b));
   },
   stroke(c, fn) {
     // tracé continu sans trou entre deux positions de souris (Bresenham)
@@ -3606,17 +5725,28 @@ function mcBlock(b, target) {
       be: { id: ['string', 'minecraft:comparator'], OutputSignal: ['int', b.lvl] } };
     case 'torch': return b.f === D || b.f === U ? { name: 'redstone_torch', props: { lit: on } } : { name: 'redstone_wall_torch', props: { facing: MC_DIR[OPP[b.f]], lit: on } };
     case 'lever': return { name: 'lever', props: { face: attachFace(b.f), facing: attachFacing(b.f), powered: on } };
-    case 'button_stone': return { name: 'stone_button', props: { face: attachFace(b.f), facing: attachFacing(b.f), powered: on } };
-    case 'button_wood': return { name: 'oak_button', props: { face: attachFace(b.f), facing: attachFacing(b.f), powered: on } };
-    case 'plate': return { name: 'stone_pressure_plate', props: { powered: on } };
+    case 'button_stone': return { name: b.id || 'stone_button', props: { face: attachFace(b.f), facing: attachFacing(b.f), powered: on } };
+    case 'button_wood': return { name: b.id || 'oak_button', props: { face: attachFace(b.f), facing: attachFacing(b.f), powered: on } };
+    case 'plate': return /weighted/.test(b.id || '') ? { name: b.id, props: { power: b.on ? '15' : '0' } } : { name: b.id || 'stone_pressure_plate', props: { powered: on } };
     case 'piston': case 'sticky': return { name: b.t === 'sticky' ? 'sticky_piston' : 'piston', props: { extended: tf(b.ext), facing: MC_DIR[b.f] } };
     case 'piston_head': return { name: 'piston_head', props: { facing: MC_DIR[b.f], short: 'false', type: b.sticky ? 'sticky' : 'normal' } };
     case 'observer': return { name: 'observer', props: { facing: MC_DIR[b.f], powered: on } };
-    case 'rail': return { name: 'powered_rail', props: { powered: on, shape: b.f ? 'east_west' : 'north_south' } };
-    case 'trapdoor': return { name: 'iron_trapdoor', props: { facing: MC_DIR[OPP[b.f]], half: 'bottom', open: on, powered: on } };
-    case 'door': case 'door_top': return { name: 'iron_door', props: { facing: MC_DIR[OPP[b.f]], half: b.t === 'door' ? 'lower' : 'upper', hinge: 'left', open: on, powered: on } };
+    case 'rail': return { name: b.id || 'powered_rail', props: { powered: on, shape: b.f ? 'east_west' : 'north_south' } };
+    case 'trapdoor': return { name: b.id || 'iron_trapdoor', props: { facing: MC_DIR[OPP[b.f]], half: 'bottom', open: on, powered: on } };
+    case 'door': case 'door_top': return { name: b.id || 'iron_door', props: { facing: MC_DIR[OPP[b.f]], half: b.t === 'door' ? 'lower' : 'upper', hinge: 'left', open: on, powered: on } };
   }
+  if (BT[b.t].mc) return mcCatalogBlock(b, BT[b.t].mc);
   return { name: 'stone' };
+}
+/* Blocs du catalogue : état par défaut, sauf orientation des escaliers, dalle du bas, feuilles persistantes, cultures mûres */
+const MC_MAX_AGE = { wheat: 7, carrots: 7, potatoes: 7, beetroots: 3, nether_wart: 3, sweet_berry_bush: 3, cocoa: 2, melon_stem: 7, pumpkin_stem: 7, pitcher_crop: 4, torchflower_crop: 1 };
+function mcCatalogBlock(b, m) {
+  const id = m.id;
+  if (m.cls === 'stairs') return { name: id, props: { facing: MC_DIR[b.f], half: 'bottom', shape: 'straight' } };
+  if (m.cls === 'slab') return { name: id, props: { type: 'bottom' } };
+  if (/_leaves$/.test(id)) return { name: id, props: { persistent: 'true' } };
+  if (MC_MAX_AGE[id] !== undefined) return { name: id, props: { age: String(MC_MAX_AGE[id]) } };
+  return { name: id };
 }
 function stateKey(c) {
   const p = c.props ? Object.keys(c.props).sort().map(k => k + '=' + c.props[k]) : [];
@@ -3819,7 +5949,8 @@ function mcfunctionText(exp) {
   const top = oy + Y - 1;
   if (exp.air) fill(0, top, 'minecraft:air');
   if (exp.floor) fill(-1, -1, 'minecraft:stone');
-  const ordered = exp.cells.slice().sort((a, b) => (MC_FULL.has(b.name) - MC_FULL.has(a.name)) || a.y - b.y || a.z - b.z || a.x - b.x);
+  const full = n => MC_FULL.has(n) || !!(MC[n] && /^(cube|clear)/.test(MC[n].cls));
+  const ordered = exp.cells.slice().sort((a, b) => (full(b.name) - full(a.name)) || a.y - b.y || a.z - b.z || a.x - b.x);
   for (const c of ordered) {
     if (exp.floor && c.y === 0) continue;                                    // déjà posé par /fill
     L.push(`setblock ~${c.x + 1} ~${c.y + oy} ~${c.z + 1} ${c.key}${c.be ? snbt(['compound', (({ id, ...r }) => r)(c.be)]) : ''}`);
@@ -4009,6 +6140,7 @@ Object.assign(UI, {
    États de blocs : Bedrock 1.21.0 (le jeu met à jour les plus récents).
    ===================================================================== */
 const BR_VERSION = 18153475;                 // 1.21.0.3, version des états de blocs
+const BR_VERSION_LATEST = 18168865;          // états au format Bedrock récent (blocs ajoutés après 1.21.0)
 const BR_CHUNK_VERSION = 40;                 // format de chunk 1.18.30 → 1.21.x
 const BR_GROUND = -61;                       // dernière couche (herbe) du monde plat
 const BR_LAYERS = ['minecraft:bedrock', 'minecraft:dirt', 'minecraft:dirt', 'minecraft:grass_block'];
@@ -4019,8 +6151,24 @@ const BR_PISTON_DIR = { down: 0, up: 1, south: 2, north: 3, east: 4, west: 5 };
 const BR_BUTTON_DIR = { north: 2, south: 3, west: 4, east: 5 };
 function javaToBedrock(c) {
   const P = c.props || {}, t = v => v === 'true', be = c.be || {};
-  const B = (name, states = {}, ent = null) => ({ name: 'minecraft:' + name, states, be: ent });
+  const B = (name, states = {}, ent = null) => ({ name: 'minecraft:' + name, states, be: ent, latest: !!(MC[c.name] && MC[c.name].br && MC[c.name].br[2]) });
   const BE = (id, extra = {}) => ({ id: ['string', id], isMovable: ['byte', 1], ...extra });
+  // blocs du catalogue : état Bedrock par défaut, complété avec l'état Java
+  const m = MC[c.name], tpl = m && m.br && m.br[1] ? { ...m.br[1] } : {}, brN = m && m.br ? m.br[0] : c.name;
+  const setIf = (k, v) => { if (tpl[k]) tpl[k] = [tpl[k][0], tpl[k][0] === 'string' ? String(v) : +v]; };
+  if (m && m.alias) {
+    switch (m.alias) {
+      case 'button_wood': case 'button_stone':
+        setIf('button_pressed_bit', t(P.powered)); setIf('facing_direction', P.face === 'ceiling' ? 0 : P.face === 'floor' ? 1 : BR_BUTTON_DIR[P.facing]); return B(brN, tpl);
+      case 'plate': setIf('redstone_signal', P.power !== undefined ? +P.power : t(P.powered) ? 15 : 0); return B(brN, tpl);
+      case 'trapdoor':
+        setIf('direction', { east: 0, west: 1, south: 2, north: 3 }[P.facing]); setIf('open_bit', t(P.open)); setIf('upside_down_bit', P.half === 'top'); return B(brN, tpl);
+      case 'door':
+        setIf('direction', { east: 0, south: 1, west: 2, north: 3 }[P.facing]); setIf('minecraft:cardinal_direction', { east: 'south', south: 'west', west: 'north', north: 'east' }[P.facing]);
+        setIf('door_hinge_bit', P.hinge === 'right'); setIf('open_bit', t(P.open)); setIf('upper_block_bit', P.half === 'upper'); return B(brN, tpl);
+      case 'rail': setIf('rail_data_bit', t(P.powered)); setIf('rail_direction', P.shape === 'east_west' ? 1 : 0); return B(brN, tpl);
+    }
+  }
   switch (c.name) {
     case 'air': return null;
     case 'stone': case 'glass': case 'obsidian': case 'redstone_block': return B(c.name);
@@ -4061,6 +6209,17 @@ function javaToBedrock(c) {
     case 'powered_rail': return B('golden_rail', { rail_data_bit: brByte(t(P.powered)), rail_direction: brInt(P.shape === 'east_west' ? 1 : 0) });
     case 'iron_trapdoor': return B('iron_trapdoor', { direction: brInt({ east: 0, west: 1, south: 2, north: 3 }[P.facing]), open_bit: brByte(t(P.open)), upside_down_bit: brByte(P.half === 'top') });
     case 'iron_door': return B('iron_door', { direction: brInt({ east: 0, south: 1, west: 2, north: 3 }[P.facing]), door_hinge_bit: brByte(P.hinge === 'right'), open_bit: brByte(t(P.open)), upper_block_bit: brByte(P.half === 'upper') });
+  }
+  if (m) {
+    // couleur ou type gardés dans une entité de bloc en Bedrock
+    const dye = DYES.indexOf(c.name.replace(/_(banner|bed)$/, ''));
+    if (/_banner$/.test(c.name) && dye >= 0) return B(brN, tpl, BE('Banner', { Base: ['int', 15 - dye], Type: ['int', 0] }));
+    if (/_bed$/.test(c.name) && dye >= 0) return B(brN, tpl, BE('Bed', { color: ['byte', dye] }));
+    if (SKULLS.includes(c.name)) return B(brN, tpl, BE('Skull', { SkullType: ['byte', SKULLS.indexOf(c.name)], Rotation: ['float', 0], MouthMoving: ['byte', 0] }));
+    setIf('weirdo_direction', { east: 0, west: 1, south: 2, north: 3 }[P.facing]);     // escaliers
+    setIf('persistent_bit', 1);                                                      // feuilles posées à la main
+    if (P.age) { setIf('growth', 7); setIf('age', +P.age); }                          // cultures mûres
+    return B(brN, tpl);
   }
   return B('stone');
 }
@@ -4114,7 +6273,7 @@ function brChunkKey(cx, cz, tag, y) {
 }
 function brPaletteEntry(e) {
   const states = {}; for (const k of Object.keys(e.states).sort()) states[k] = e.states[k];
-  return nbtLE({ name: ['string', e.name], states: ['compound', states], version: ['int', BR_VERSION] });
+  return nbtLE({ name: ['string', e.name], states: ['compound', states], version: ['int', e.latest ? BR_VERSION_LATEST : BR_VERSION] });
 }
 /* Sous-chunk version 9 : une couche, indices XZY tassés dans des mots de 32 bits */
 function brSubchunk(cy, ids, palette) {
@@ -4141,7 +6300,7 @@ function mcworldEntries(exp) {
     if (b.be) ch.bes.push(nbtLE({ ...b.be, x: ['int', x], y: ['int', y], z: ['int', z] }));
   }
   const entries = [], palCache = new Map();
-  const palBytes = b => { const key = b.name + JSON.stringify(b.states); let p = palCache.get(key); if (!p) palCache.set(key, p = brPaletteEntry(b)); return [key, p]; };
+  const palBytes = b => { const key = b.name + JSON.stringify(b.states) + (b.latest ? 'L' : ''); let p = palCache.get(key); if (!p) palCache.set(key, p = brPaletteEntry(b)); return [key, p]; };
   const layer = BR_LAYERS.map(n => ({ name: n, states: n === 'minecraft:dirt' ? { dirt_type: ['string', 'normal'] } : n === 'minecraft:bedrock' ? { infiniburn_bit: ['byte', 0] } : {} }));
   for (const ch of chunks.values()) {
     let top = -64; for (const k of ch.blocks.keys()) top = Math.max(top, +k.split(':')[1]);
@@ -4345,7 +6504,7 @@ function fromJavaBlock(rawName, P = {}, be) {
     case 'redstone_torch': return ex('torch', { f: D, on: P.lit !== 'false' });
     case 'redstone_wall_torch': return ex('torch', { f: OPP[Math.max(0, dir(P.facing))], on: P.lit !== 'false' });
     case 'lever': return ex('lever', { f: attach(), on: tr(P.powered) });
-    case 'stone_button': case 'polished_blackstone_button': return ex('button_stone', { f: attach(), on: tr(P.powered) });
+    case 'stone_button': return ex('button_stone', { f: attach(), on: tr(P.powered) });
     case 'stone_pressure_plate': return ex('plate', { on: tr(P.powered) });
     case 'piston': case 'sticky_piston': return ex(name === 'piston' ? 'piston' : 'sticky', { f: Math.max(0, dir(P.facing)), ext: tr(P.extended) });
     case 'piston_head': return ex('piston_head', { f: Math.max(0, dir(P.facing)), sticky: P.type === 'sticky' });
@@ -4353,6 +6512,19 @@ function fromJavaBlock(rawName, P = {}, be) {
     case 'powered_rail': return ex('rail', { f: /east|west/.test(P.shape || '') ? 1 : 0, on: tr(P.powered) });
     case 'iron_trapdoor': return ex('trapdoor', { f: OPP[Math.max(0, dir(P.facing))], on: tr(P.open) });
     case 'iron_door': return ex(P.half === 'upper' ? 'door_top' : 'door', { f: OPP[Math.max(0, dir(P.facing))], on: tr(P.open) });
+  }
+  // blocs du catalogue : reproduits à l'identique
+  const m = MC[name];
+  if (m) {
+    const id = name;
+    switch (m.alias) {
+      case 'door': return ex(P.half === 'upper' ? 'door_top' : 'door', { f: OPP[Math.max(0, dir(P.facing))], on: tr(P.open), id });
+      case 'trapdoor': return ex('trapdoor', { f: OPP[Math.max(0, dir(P.facing))], on: tr(P.open), id });
+      case 'button_wood': case 'button_stone': return ex(m.alias, { f: attach(), on: tr(P.powered), id });
+      case 'plate': return ex('plate', { on: tr(P.powered) || +P.power > 0, id });
+      case 'rail': return ex('rail', { f: /east|west/.test(P.shape || '') ? 1 : 0, on: tr(P.powered), id });
+    }
+    return ex('mc:' + id, m.cls === 'stairs' ? { f: Math.max(0, dir(P.facing)) } : {});
   }
   // proches cousins, convertis au plus juste
   if (WOOD_BUTTON.test(name)) return ex('button_wood', { f: attach(), on: tr(P.powered) });
@@ -4719,7 +6891,7 @@ const BR_FACING = ['down', 'up', 'north', 'south', 'west', 'east'];     // facin
 const BR_OPP = { north: 'south', south: 'north', east: 'west', west: 'east', up: 'down', down: 'up' };
 const bBit = v => v === 1 || v === true || v === '1' || v === 'true' || v === '1b';
 function bedrockToJava(rawName, S = {}, be) {
-  const n = String(rawName).replace(/^minecraft:/, ''), sig = +S.redstone_signal || 0;
+  let n = String(rawName).replace(/^minecraft:/, ''); const sig = +S.redstone_signal || 0;
   const card = () => S['minecraft:cardinal_direction'] || BR_CARD[+S.direction & 3] || 'north';
   const face6 = (tbl) => typeof S['minecraft:facing_direction'] === 'string' ? S['minecraft:facing_direction'] : tbl[+S.facing_direction] || tbl[0];
   switch (n) {
@@ -4758,6 +6930,17 @@ function bedrockToJava(rawName, S = {}, be) {
     case 'trapdoor': return ['oak_trapdoor', trapProps(S)];
     case 'wooden_pressure_plate': return ['oak_pressure_plate', { powered: String(sig > 0) }];
   }
+  // nom Bedrock connu du catalogue → id Java (planches, laine, plantes…)
+  if (be && n === 'standing_banner' && be.Base !== undefined) return [DYES[15 - (+be.Base & 15)] + '_banner', {}];
+  if (be && n === 'bed' && be.color !== undefined) return [DYES[+be.color & 15] + '_bed', {}];
+  if (be && n === 'skull' && be.SkullType !== undefined && SKULLS[+be.SkullType]) return [SKULLS[+be.SkullType], {}];
+  const jid = javaFromBedrock(n, S);
+  if (jid && !MC[jid].alias) {
+    const P = {};
+    const wd = S.weirdo_direction; if (wd !== undefined) P.facing = ['east', 'west', 'south', 'north'][+wd & 3];
+    return [jid, P];
+  }
+  if (jid) n = jid;
   if (/_button$/.test(n)) return [n, btnProps(S)];
   if (/_pressure_plate$/.test(n)) return [n, { powered: String(sig > 0), power: sig }];
   if (/_door$/.test(n)) return [n, doorProps(S)];
