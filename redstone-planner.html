@@ -4408,16 +4408,16 @@ function itemIcon(t, size = 64) {
       case 'button_stone': case 'button_wood': b.f = D; break;
       case 'trapdoor': b.on = false; break;
     }
-    const save = { rot: Iso.rot, zoom: Iso.zoom, ox: Iso.ox, oy: Iso.oy, D: Iso.D, noCull: Iso.noCull };
+    const save = { yawA: Iso.yawA, elev: Iso.elev, zoom: Iso.zoom, ox: Iso.ox, oy: Iso.oy, D: Iso.D, noCull: Iso.noCull };
     const a = size * 0.38;
-    Iso.rot = 0; Iso.zoom = a / 16; Iso.D = 1; Iso.noCull = true;
+    Iso.setAngles(Math.PI / 4, Math.PI / 6); Iso.zoom = a / 16; Iso.D = 1; Iso.noCull = true;
     // hauteur visible du modèle (fraction de bloc) pour le centrer verticalement
     const hf = { plate: 0.06, button_stone: 0.12, button_wood: 0.12, trapdoor: 0.19, repeater: 0.45, comparator: 0.45, daylight: 0.375 }[t]
       || (mc && { flat: 0.07, slab: 0.5, misc: 0.88, miscfix: 0.88, miscbreak: 0.88 }[mc.cls]) || 1;
     Iso.ox = size / 2; Iso.oy = size / 2 - (a - 1.15 * a * hf) / 2;
     Iso.block(g, b, a, 0, []);
     g.setTransform(1, 0, 0, 1, 0, 0);
-    Object.assign(Iso, save);
+    { const { yawA, elev, ...rest } = save; Object.assign(Iso, rest); Iso.setAngles(yawA, elev); }
   }
   ICON_CACHE.set(key, c);
   return c;
@@ -4544,6 +4544,82 @@ function mcIso(I, g, b, box, boxQ, cull, x, y, z, a) {
 }
 for (const t in BT) if (BT[t].mc && /^cube/.test(BT[t].mc.cls)) OPAQUE.add(t);
 function mcLod(b) { const m = BT[b.t].mc || (b.id && MC[b.id]); return m ? mcRgb(m.top.c1) : null; }
+
+/* =====================================================================
+   VUE 3D : ROTATION LIBRE
+   Angle horizontal continu (yawA) et inclinaison réglable (elev).
+   À l'angle par défaut (45°, 30°), l'image est celle des quarts de tour.
+   ===================================================================== */
+Object.assign(Iso, {
+  yawA: Math.PI / 4, elev: Math.PI / 6, anim: null,
+  setAngles(yaw, elev) {
+    this.yawA = yaw; this.elev = clamp(elev, 0.12, 1.45);
+    this._c = Math.cos(yaw); this._s = Math.sin(yaw);
+    this._kw = Math.sin(this.elev); this._ky = 1.15 * Math.cos(this.elev) / Math.cos(Math.PI / 6);
+    this._sidesKey = null;
+  },
+  uw(x, z) { return [x * this._c - z * this._s, x * this._s + z * this._c]; },
+  rotP(x, z) { const u = x * this._c - z * this._s, w = x * this._s + z * this._c; return [(u + w) / Math.SQRT2, (w - u) / Math.SQRT2]; },
+  P(X, Y, Z, a) { return [this.ox + (X - Z) * a, this.oy + (X + Z) * a * this._kw - Y * a * this._ky]; },
+  /* point du plan horizontal d'altitude Y sous le point d'écran (mx, my) */
+  unproject(mx, my, Y) {
+    const a = this.a(), dXZ = (mx - this.ox) / a, sXZ = (my - this.oy + Y * a * this._ky) / (a * this._kw);
+    const u = dXZ / Math.SQRT2, w = sXZ / Math.SQRT2;
+    return [u * this._c + w * this._s, -u * this._s + w * this._c];
+  },
+  sides() {
+    if (this._sidesKey === this.yawA) return this._sides;
+    const out = [];
+    for (const d of [N, E, S, O]) { const n = DIRS[d], [u, w] = this.uw(n[0], n[2]); if (w > 1e-6) out.push([d, 0.3 + 0.12 * u]); }
+    this._sidesKey = this.yawA; this._sides = out; return out;
+  },
+  sorted() {
+    const key = W.version + ':' + Sim.structVer + ':' + this.yawA.toFixed(4) + ':' + this.elev.toFixed(4) + ':' + (this.cut ? UI.layer : -1);
+    if (this.order && this.orderKey === key) return this.order;
+    const ce = Math.cos(this.elev), se = Math.sin(this.elev), arr = [];
+    for (const b of W.all()) {
+      if (this.cut && b.y > UI.layer) continue;
+      const [u, w] = this.uw(b.x + 0.5, b.z + 0.5);
+      arr.push({ b, k: w * ce + (b.y + 0.5) * se, y: b.y, X: u });
+    }
+    arr.sort((p, q) => p.k - q.k || p.y - q.y || p.X - q.X);
+    this.order = arr; this.orderKey = key;
+    return arr;
+  },
+  /* centre de rotation : le milieu du circuit */
+  pivot() { const bb = W.bounds(); return bb ? [(bb.x0 + bb.x1 + 1) / 2, (bb.y0 + bb.y1 + 1) / 2, (bb.z0 + bb.z1 + 1) / 2] : [0.5, 0, 0.5]; },
+  /* tourner en gardant le centre du circuit au même endroit à l'écran */
+  orbit(yaw, elev, piv = this.pivot()) {
+    const a = this.a(), s0 = this.pt(piv[0], piv[1], piv[2], a);
+    this.setAngles(yaw, elev);
+    const s1 = this.pt(piv[0], piv[1], piv[2], a);
+    this.ox += s0[0] - s1[0]; this.oy += s0[1] - s1[1];
+    R.dirty = true;
+  },
+  /* quart de tour animé (boutons ⟲ ⟳) */
+  spin(dir) {
+    const from = this.yawA, step = Math.PI / 2;
+    const to = (Math.round((from - Math.PI / 4) / step) + dir) * step + Math.PI / 4;
+    this.anim = { from, to, t0: performance.now(), piv: this.pivot() }; R.dirty = true;
+  },
+  stepAnim(now) {
+    const an = this.anim; if (!an) return;
+    const t = Math.min(1, (now - an.t0) / 320), e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+    this.orbit(an.from + (an.to - an.from) * e, this.elev, an.piv);
+    if (t >= 1) this.anim = null; else R.dirty = true;
+  },
+});
+delete Iso.rot;
+Object.defineProperty(Iso, 'rot', {
+  get() { return ((Math.round((this.yawA - Math.PI / 4) / (Math.PI / 2)) % 4) + 4) % 4; },
+  set(v) { this.setAngles(Math.PI / 4 + v * Math.PI / 2, this.elev); },
+  configurable: true,
+});
+Iso.setAngles(Math.PI / 4, Math.PI / 6);
+{
+  const draw0 = Iso.draw;
+  Iso.draw = function (g, w, h, now, bg) { if (bg !== false && g === R.g) this.stepAnim(now); return draw0.call(this, g, w, h, now, bg); };
+}
 
 /* =====================================================================
    12 bis. BIBLIOTHÈQUE DE SCHÉMAS (presets) — tous vérifiés par simulation
@@ -5031,6 +5107,7 @@ function iconCanvas(t, size = 64) {
   return c;
 }
 
+const LONG_PRESS_MS = 450;          // appui long = sélection
 const UI = {
   tool: 'build', slot: 0, layer: 0, view: '2d', speed: 3, showLevels: false,
   hotbar: ['lever', 'dust', 'repeater', 'comparator', 'torch', 'lamp', 'solid', 'sticky', 'button_stone'],
@@ -5119,7 +5196,7 @@ const UI = {
   setView(v) {
     this.view = v;
     $('view2d').classList.toggle('on', v === '2d'); $('viewIso').classList.toggle('on', v === 'iso');
-    $('isoCtl').hidden = v !== 'iso'; $('selBar').hidden = v === 'iso' || !this.sel; this.isoHover = null;
+    $('isoCtl').hidden = v !== 'iso'; $('selBar').hidden = !this.sel; this.isoHover = null;
     $('cv').style.cursor = v === 'iso' ? 'grab' : '';
     this.hideTip();
     if (v === 'iso' && !Iso.fitted) { Iso.fit(R.w, R.h); Iso.fitted = true; }
@@ -5291,6 +5368,30 @@ const UI = {
 
   /* ---------- Souris ---------- */
   pos(e) { const r = $('cv').getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; },
+  /* action de l'outil sur une case (au relâchement ou au début d'un tracé) */
+  startAction(c, e) {
+    const Y = this.layer;
+    switch (this.tool) {
+      case 'erase': Edit.begin('Gomme'); Ed.erase(c.x, Y, c.z); Sim.settle(); this.drag = { kind: 'erase', last: c }; break;
+      case 'hand': this.interact(c, e, false); break;
+      case 'build': {
+        if (W.get(c.x, Y, c.z)) { this.interact(c, e, false); break; }
+        Edit.begin('Poser ' + BT[this.current()].name.toLowerCase());
+        if (!Ed.place2(this.current(), c.x, Y, c.z)) this.explainInvalid(this.current(), c.x, Y, c.z);
+        Sim.settle(); this.drag = { kind: 'paint', last: c };
+        break;
+      }
+    }
+    this.layerInfo(); R.dirty = true;
+  },
+  /* appui long : début d'une sélection qui couvre tous les étages */
+  startLongSel(c) {
+    this.selAll = true; $('selAll').classList.add('on');
+    this.setSel({ x0: c.x, z0: c.z, x1: c.x, z1: c.z, all: true });
+    try { navigator.vibrate && navigator.vibrate(15); } catch (e) { /* ignore */ }
+    this.toast('Sélection : glisse pour l’agrandir · Suppr efface tout, à tous les étages');
+    R.dirty = true;
+  },
   interact(c, e, right) {
     const b = W.get(c.x, this.layer, c.z);
     if (!b) return;
@@ -5347,25 +5448,25 @@ const UI = {
         if (lost) this.toast(lost + ' bloc(s) sans support retiré(s).');
         this.layerInfo(); return;
       }
-      switch (this.tool) {
-        case 'select': this.setSel({ x0: c.x, z0: c.z, x1: c.x, z1: c.z, all: this.selAll }); this.drag = { kind: 'sel', ax: c.x, az: c.z }; break;
-        case 'erase': Edit.begin('Gomme'); Ed.erase(c.x, Y, c.z); Sim.settle(); this.drag = { kind: 'erase', last: c }; break;
-        case 'hand': this.interact(c, e, false); break;
-        case 'build': {
-          if (W.get(c.x, Y, c.z)) { this.interact(c, e, false); break; }
-          Edit.begin('Poser ' + BT[this.current()].name.toLowerCase());
-          if (!Ed.place2(this.current(), c.x, Y, c.z)) this.explainInvalid(this.current(), c.x, Y, c.z);
-          Sim.settle(); this.drag = { kind: 'paint', last: c };
-          break;
-        }
-      }
+      if (this.tool === 'select') { this.setSel({ x0: c.x, z0: c.z, x1: c.x, z1: c.z, all: this.selAll }); this.drag = { kind: 'sel', ax: c.x, az: c.z }; R.dirty = true; return; }
+      // l'action part au relâchement ou dès qu'on bouge ; un appui long immobile sélectionne une zone
+      const here = W.get(c.x, Y, c.z);
+      if (here && here.t === 'plate' && this.tool !== 'erase') { this.startAction(c, e); return; }   // plaque : enfoncée tant qu'on appuie
+      const pend = { kind: 'pending', c, sx: m.x, sy: m.y, shift: e.shiftKey };
+      this.drag = pend;
+      pend.timer = setTimeout(() => { if (this.drag === pend) { this.drag = { kind: 'sel', ax: c.x, az: c.z, long: true }; this.startLongSel(c); } }, LONG_PRESS_MS);
       R.dirty = true;
     });
     cv.addEventListener('pointermove', e => {
       const m = this.pos(e); this.mouse = { ...m, in: true };
-      const d = this.drag;
+      let d = this.drag;
       if (this.view === 'iso') { this.isoMove(m); return; }
       const c = R.cellAt(m.x, m.y);
+      if (d && d.kind === 'pending') {
+        if (c.x === d.c.x && c.z === d.c.z && Math.hypot(m.x - d.sx, m.y - d.sy) < 8) return;
+        clearTimeout(d.timer); this.drag = null; this.startAction(d.c, { shiftKey: d.shift }); d = this.drag;   // on a bougé : tracé normal
+        this.hover = d && d.last ? d.last : this.hover;
+      }
       const changed = !this.hover || c.x !== this.hover.x || c.z !== this.hover.z;
       this.hover = c;
       if (d) {
@@ -5386,8 +5487,12 @@ const UI = {
     });
     const up = e => {
       if (this.view === 'iso') { this.isoUp(e, this.pos(e)); return; }
-      const d = this.drag; this.drag = null; cv.classList.remove('pan');
+      let d = this.drag; this.drag = null; cv.classList.remove('pan');
       if (!d) return;
+      if (d.kind === 'pending') {                                  // simple clic
+        clearTimeout(d.timer); this.startAction(d.c, { shiftKey: d.shift });
+        d = this.drag; this.drag = null; if (!d) { R.dirty = true; this.refreshTip(); return; }
+      }
       if (d.kind === 'rpan' && !d.moved) { const c = d.c; if (this.pasting) { this.pasting = false; this.status(); } else this.interact(c, e, true); }
       if (d.kind === 'plate') Sim.plateUp(d.b);
       if (d.kind === 'paint' || d.kind === 'erase') Edit.commit();
@@ -5443,8 +5548,8 @@ const UI = {
     $('selRot').onclick = () => { if (this.sel) this.setSel(Ed.rotateSel(this.sel, this.layer)); };
     $('selDel').onclick = () => { if (this.sel) { Ed.deleteSel(this.sel, this.layer); this.layerInfo(); } };
     // 3D
-    $('isoRotL').onclick = () => { Iso.rot = (Iso.rot + 3) % 4; Iso.fit(R.w, R.h); R.dirty = true; };
-    $('isoRotR').onclick = () => { Iso.rot = (Iso.rot + 1) % 4; Iso.fit(R.w, R.h); R.dirty = true; };
+    $('isoRotL').onclick = () => Iso.spin(-1);
+    $('isoRotR').onclick = () => Iso.spin(1);
     $('isoCut').onclick = () => { Iso.cut = !Iso.cut; $('isoCut').classList.toggle('on', Iso.cut); R.dirty = true; };
     $('isoFit').onclick = () => { Iso.fit(R.w, R.h); R.dirty = true; };
     // Options
@@ -5715,7 +5820,7 @@ function frame(now) {
   }
   if (ticked || (frame.n = (frame.n || 0) + 1) % 30 === 0) UI.tickChanged();
   if (UI._layerDirty) { UI._layerDirty = false; UI.layerInfo(); }
-  const animated = Sim.moving.length || (Sim.poweredDust && !UI.reduceMotion) || Sim.unstableUntil > Sim.T || UI.sel || UI.flashUntil > now;
+  const animated = Iso.anim || (UI.view === 'iso' && UI.sel) || Sim.moving.length || (Sim.poweredDust && !UI.reduceMotion) || Sim.unstableUntil > Sim.T || UI.sel || UI.flashUntil > now;
   const isoBusy = UI.view === 'iso' && !R.dirty && now - (frame.isoAt || 0) < 90;   // la 3D se redessine au plus ~11 fois/s pendant la simulation
   if (UI.view === 'fp') { if (FP.on) FP.frame(now); }
   else if ((R.dirty || ticked || animated) && !isoBusy) {
@@ -7324,10 +7429,7 @@ Iso.pick = function (mx, my) {
     return { b, face, target: t, attach: face === U ? D : OPP[face] };
   }
   // rien sous la souris : on vise le sol de l'étage courant
-  const a = this.a(), Y = UI.layer, u = (mx - this.ox) / a, v = 2 * (my - this.oy + Y * a * 1.15) / a;
-  const X = (u + v) / 2, Z = (v - u) / 2;
-  let x, z;
-  switch (this.rot) { case 0: x = X; z = Z; break; case 1: x = Z; z = -X; break; case 2: x = -X; z = -Z; break; default: x = -Z; z = X; }
+  const Y = UI.layer, [x, z] = this.unproject(mx, my, Y);
   const t = { x: Math.floor(x), y: Y, z: Math.floor(z) };
   return inRange(t.x, t.y, t.z) ? { b: null, face: U, target: t, attach: D } : null;
 };
@@ -7337,13 +7439,31 @@ Object.assign(UI, {
   /* actionne/règle un bloc précis (les fonctions 2D travaillent sur l'étage courant) */
   atBlock(b, fn) { const L = this.layer; this.layer = b.y; try { return fn({ x: b.x, z: b.z }); } finally { this.layer = L; } },
   isoDown(e, m) {
-    this.drag = { kind: 'iso', sx: m.x, sy: m.y, ox: Iso.ox, oy: Iso.oy, button: e.button, moved: false, shift: e.shiftKey };
+    const d = this.drag = { kind: 'iso', sx: m.x, sy: m.y, lx: m.x, ly: m.y, ox: Iso.ox, oy: Iso.oy, button: e.button, moved: false, shift: e.shiftKey };
+    Iso.anim = null;
+    // appui long (sans bouger) : sélection d'une zone, sur tous les étages
+    if (e.button === 0 && !this.pasting) d.timer = setTimeout(() => {
+      if (this.drag !== d || d.moved) return;
+      const h = Iso.pick(d.sx, d.sy); if (!h) return;
+      const c = h.b ? { x: h.b.x, z: h.b.z } : { x: h.target.x, z: h.target.z };
+      this.drag = { kind: 'isosel', ax: c.x, az: c.z };
+      this.startLongSel(c);
+    }, LONG_PRESS_MS);
   },
   isoMove(m) {
     const d = this.drag;
+    if (d && d.kind === 'isosel') {
+      const h = Iso.pick(m.x, m.y);
+      if (h) { const c = h.b ? { x: h.b.x, z: h.b.z } : { x: h.target.x, z: h.target.z }; this.setSel({ x0: Math.min(d.ax, c.x), z0: Math.min(d.az, c.z), x1: Math.max(d.ax, c.x), z1: Math.max(d.az, c.z), all: true }); }
+      return;
+    }
     if (d && d.kind === 'iso') {
-      if (!d.moved && Math.hypot(m.x - d.sx, m.y - d.sy) > 4) { d.moved = true; $('cv').style.cursor = 'grabbing'; this.isoHover = null; }
-      if (d.moved) { Iso.ox = d.ox + m.x - d.sx; Iso.oy = d.oy + m.y - d.sy; R.dirty = true; }
+      if (!d.moved && Math.hypot(m.x - d.sx, m.y - d.sy) > 4) { d.moved = true; clearTimeout(d.timer); $('cv').style.cursor = 'grabbing'; this.isoHover = null; }
+      if (d.moved) {
+        if (d.button === 2) Iso.orbit(Iso.yawA + (m.x - d.lx) * 0.008, Iso.elev + (m.y - d.ly) * 0.006);   // clic droit glissé : tourner autour
+        else { Iso.ox = d.ox + m.x - d.sx; Iso.oy = d.oy + m.y - d.sy; R.dirty = true; }                  // clic gauche glissé : déplacer
+        d.lx = m.x; d.ly = m.y;
+      }
       return;
     }
     if (d && d.kind === 'plate') return;
@@ -7353,6 +7473,8 @@ Object.assign(UI, {
   isoUp(e, m) {
     const d = this.drag; this.drag = null; $('cv').style.cursor = 'grab';
     if (!d) return;
+    clearTimeout(d.timer);
+    if (d.kind === 'isosel') { R.dirty = true; return; }
     if (d.kind === 'plate') { Sim.plateUp(d.b); R.dirty = true; return; }
     if (d.kind !== 'iso' || d.moved) return;
     const h = Iso.pick(m.x, m.y);
@@ -7397,8 +7519,20 @@ Object.assign(UI, {
   Iso.draw = function (g, w, h, now, bg = true) {
     draw0.call(this, g, w, h, now, bg);
     const hv = UI.isoHover;
-    if (!bg || g !== R.g || UI.view !== 'iso' || !hv || UI.drag || !UI.mouse.in) return;
+    if (!bg || g !== R.g || UI.view !== 'iso') return;
     const a = this.a(), D_ = this.D;
+    if (UI.sel) {                                              // sélection : une boîte sur toute la hauteur utilisée
+      const s = UI.sel; let y0 = MAXY, y1 = -1;
+      for (const b of W.all()) if (b.x >= s.x0 && b.x <= s.x1 && b.z >= s.z0 && b.z <= s.z1) { y0 = Math.min(y0, b.y); y1 = Math.max(y1, b.y); }
+      if (y1 < 0) { y0 = UI.layer; y1 = UI.layer; }
+      const P = (X, Y, Z) => this.pt(X, Y, Z, a), X0 = s.x0, X1 = s.x1 + 1, Z0 = s.z0, Z1 = s.z1 + 1, Y0 = y0, Y1 = y1 + 1;
+      const c = [P(X0, Y0, Z0), P(X1, Y0, Z0), P(X1, Y0, Z1), P(X0, Y0, Z1), P(X0, Y1, Z0), P(X1, Y1, Z0), P(X1, Y1, Z1), P(X0, Y1, Z1)];
+      g.setTransform(D_, 0, 0, D_, 0, 0); g.fillStyle = 'rgba(255,59,48,.08)'; g.beginPath(); for (const i of [0, 1, 2, 3]) g.lineTo(c[i][0], c[i][1]); g.fill();
+      g.setLineDash([6, 4]); g.lineDashOffset = -now / 60; g.strokeStyle = 'rgba(255,59,48,.9)'; g.lineWidth = 1.5; g.beginPath();
+      for (const [i, j] of [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]]) { g.moveTo(c[i][0], c[i][1]); g.lineTo(c[j][0], c[j][1]); }
+      g.stroke(); g.setLineDash([]); R.dirty = true;
+    }
+    if (!hv || UI.drag || !UI.mouse.in) return;
     const cube = (x, y, z, col) => {
       g.setTransform(D_, 0, 0, D_, 0, 0);
       const P = (X, Y, Z) => this.pt(X, Y, Z, a), c = [];
@@ -7407,6 +7541,7 @@ Object.assign(UI, {
       for (const [i, j] of [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]]) { g.moveTo(c[i][0], c[i][1]); g.lineTo(c[j][0], c[j][1]); }
       g.stroke();
     };
+    if (UI.drag && UI.drag.kind === 'isosel') return;
     if (UI.tool === 'erase' || UI.tool === 'hand' || (hv.b && USABLE.has(hv.b.t) && UI.tool === 'build')) {
       if (hv.b) cube(hv.b.x, hv.b.y, hv.b.z, UI.tool === 'erase' ? 'rgba(255,59,48,.95)' : 'rgba(29,29,31,.7)');
       return;
@@ -7542,14 +7677,14 @@ const FP = {
   },
   build(now) {
     this.n = 0;
-    const sv = { face: Iso.face, sides: Iso.sides, rot: Iso.rot, noCull: Iso.noCull };
-    Iso.capture = true; Iso.rot = 0; Iso.noCull = false;
+    const sv = { face: Iso.face, sides: Iso.sides, noCull: Iso.noCull }, ang = [Iso.yawA, Iso.elev];
+    Iso.capture = true; Iso.setAngles(Math.PI / 4, Math.PI / 6); Iso.noCull = false;
     Iso.sides = () => [[N, .2], [E, .32], [S, .2], [O, .32]];
     Iso.face = (g, t, sx, sy, sw, sh, O_, U_, V_, a, shade) => this.quad(t, sx, sy, sw, sh, O_, U_, V_, shade);
     const glows = [];
     try {
       for (const b of W.all()) { if (b.dead) continue; glows.length = 0; Iso.block(this.dummy, b, 16, now, glows); if (b.t === 'lever') this.leverHandle(b); }
-    } finally { Object.assign(Iso, sv); Iso.capture = false; Iso._sidesRot = -1; }
+    } finally { Object.assign(Iso, sv); Iso.capture = false; Iso.setAngles(ang[0], ang[1]); }
     const gl = this.gl;
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buf); gl.bufferData(gl.ARRAY_BUFFER, this.verts.subarray(0, this.n * 9), gl.DYNAMIC_DRAW);
     if (this.atlasDirty) { gl.bindTexture(gl.TEXTURE_2D, this.atex); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.atlas); this.atlasDirty = false; }
