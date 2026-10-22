@@ -533,7 +533,7 @@ body.fp-mode:not(.fp-pal) #sidebar { display: none; }
       <div class="fp-info glass" id="fpInfo"></div>
       <div class="fp-help glass" id="fpHelp">
         <b>Vue joueur</b>
-        <span class="fp-desk">Clique pour jouer · <kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> se déplacer · souris : regarder · <kbd>Espace</kbd> sauter (deux fois : voler) · <kbd>Maj</kbd> descendre<br>Clic gauche : casser · clic droit : poser ou actionner · molette : choisir un bloc · <kbd>E</kbd> palette · <kbd>Échap</kbd> libérer la souris</span>
+        <span class="fp-desk">Clique pour jouer · <kbd>Z</kbd><kbd>Q</kbd><kbd>S</kbd><kbd>D</kbd> se déplacer · souris : regarder · <kbd>Maj</kbd> sprinter · <kbd>C</kbd> s’accroupir · <kbd>Espace</kbd> sauter (deux fois : voler)<br>Clic gauche : casser · clic droit : poser ou actionner (accroupi : poser) · molette : choisir un bloc · <kbd>E</kbd> palette · <kbd>Échap</kbd> libérer la souris</span>
         <span class="fp-tch">Joystick : se déplacer · glisse : regarder · touche : poser ou actionner · appui long : casser</span>
       </div>
       <div class="fp-touch" id="fpJoy" aria-label="Se déplacer"><i></i></div>
@@ -541,7 +541,7 @@ body.fp-mode:not(.fp-pal) #sidebar { display: none; }
         <button class="glass" id="fpPal" aria-label="Palette">▦</button>
         <button class="glass" id="fpBreak" aria-label="Casser">⛏</button>
         <button class="glass" id="fpFly" aria-label="Voler">✈</button>
-        <button class="glass" id="fpDown" aria-label="Descendre">▼</button>
+        <button class="glass" id="fpDown" aria-label="S’accroupir / descendre">▼</button>
         <button class="glass" id="fpJump" aria-label="Sauter / monter">▲</button>
       </div>
     </div>
@@ -7433,7 +7433,7 @@ Object.assign(UI, {
    Maj (descendre en vol), clic gauche casser, clic droit poser/actionner,
    clic molette pipette, molette/1-9 barre rapide, E palette.
    ===================================================================== */
-const FP_EYE = 1.62, FP_H = 1.8, FP_R = 0.3, FP_REACH = 6;
+const FP_EYE = 1.62, FP_H = 1.8, FP_EYE_C = 1.27, FP_H_C = 1.5, FP_R = 0.3, FP_REACH = 6;   // debout / accroupi (C)
 const m4 = {
   persp(fov, asp, n, f) { const t = 1 / Math.tan(fov / 2), r = 1 / (n - f); return [t / asp, 0, 0, 0, 0, t, 0, 0, 0, 0, (n + f) * r, -1, 0, 0, 2 * n * f * r, 0]; },
   look(e, c, up) {
@@ -7468,7 +7468,7 @@ function fpBoxes(b) {
 }
 const FP = {
   on: false, gl: null, ready: false, pos: [0, 0, 5], vel: [0, 0, 0], yaw: 0, pitch: -0.25, fly: false, ground: false, started: false,
-  keys: new Set(), locked: false, noLock: false, last: 0, dirty: true, lastBuild: 0, lastT: -1, lastStruct: -1, n: 0, hit: null,
+  keys: new Set(), crouch: false, eyeH: FP_EYE, locked: false, noLock: false, last: 0, dirty: true, lastBuild: 0, lastT: -1, lastStruct: -1, n: 0, hit: null,
   tex: new Map(), atlasDirty: true, shelf: { x: 0, y: 8, h: 0 }, joy: [0, 0], touchUp: false, touchDown: false, mouseHold: null,
   init() {
     if (this.gl !== null) return !!this.gl;
@@ -7556,11 +7556,11 @@ const FP = {
     this.lastBuild = now; this.dirty = false;
   },
   /* ---------- Joueur ---------- */
-  eye() { return [this.pos[0], this.pos[1] + FP_EYE, this.pos[2]]; },
+  eye() { return [this.pos[0], this.pos[1] + this.eyeH, this.pos[2]]; },
   dir() { const cp = Math.cos(this.pitch); return [Math.sin(this.yaw) * cp, Math.sin(this.pitch), -Math.cos(this.yaw) * cp]; },
-  collides(x, y, z) {
+  collides(x, y, z, hgt) {
     if (y < 0) return true;
-    const x0 = x - FP_R, x1 = x + FP_R, y0 = y, y1 = y + FP_H, z0 = z - FP_R, z1 = z + FP_R;
+    const x0 = x - FP_R, x1 = x + FP_R, y0 = y, y1 = y + (hgt || (this.crouch ? FP_H_C : FP_H)), z0 = z - FP_R, z1 = z + FP_R;
     for (let bx = Math.floor(x0); bx <= Math.floor(x1); bx++) for (let by = Math.floor(y0) - 1; by <= Math.floor(y1); by++) for (let bz = Math.floor(z0); bz <= Math.floor(z1); bz++) {
       const b = W.get(bx, by, bz); if (!b || b.mv) continue;
       for (const q of fpBoxes(b)) if (x0 < q[3] && x1 > q[0] && y0 < q[4] && y1 > q[1] && z0 < q[5] && z1 > q[2]) return true;
@@ -7573,9 +7573,15 @@ const FP = {
     const str = (k.has('KeyD') || k.has('ArrowRight') ? 1 : 0) - (k.has('KeyA') || k.has('ArrowLeft') ? 1 : 0) + this.joy[0];
     const sy = Math.sin(this.yaw), cy = Math.cos(this.yaw);
     let mx = sy * fwd + cy * str, mz = -cy * fwd + sy * str; const l = Math.hypot(mx, mz); if (l > 1) { mx /= l; mz /= l; }
-    const speed = this.fly ? (this.sprint ? 21 : 10.9) : (this.sprint ? 5.6 : 4.3);
+    const p = this.pos, cKey = k.has('KeyC') || this.touchDown;
+    // C : accroupi (au sol) ; on reste accroupi tant qu'un plafond empêche de se relever
+    this.crouch = !this.fly && (cKey || (this.crouch && this.collides(p[0], p[1], p[2], FP_H)));
+    this.eyeH += ((this.crouch ? FP_EYE_C : FP_EYE) - this.eyeH) * Math.min(1, dt * 14);
+    // Maj : sprint (ou double appui vers l'avant)
+    const run = (k.has('ShiftLeft') || k.has('ShiftRight') || this.sprint) && fwd > 0 && !this.crouch;
+    const speed = this.fly ? (run ? 21 : 10.9) : this.crouch ? 1.3 : run ? 5.6 : 4.3;
     this.vel[0] = mx * speed; this.vel[2] = mz * speed;
-    const up = k.has('Space') || this.touchUp, down = k.has('ShiftLeft') || k.has('ShiftRight') || this.touchDown;
+    const up = k.has('Space') || this.touchUp, down = cKey;
     if (this.fly) this.vel[1] = (up ? 8 : 0) - (down ? 8 : 0);
     else {
       this.vel[1] -= 32 * dt;
@@ -7583,10 +7589,10 @@ const FP = {
       if (this.vel[1] < -60) this.vel[1] = -60;
     }
     if (!fwd) this.sprint = false;
-    const p = this.pos;
     for (const ax of [1, 0, 2]) {
       const d = this.vel[ax] * dt; if (!d) continue;
       const np = p.slice(); np[ax] += d;
+      if (ax !== 1 && this.crouch && this.ground && p[1] > 0 && !this.collides(np[0], np[1] - 0.6, np[2], 0.6)) continue;   // accroupi : on ne tombe pas du bord
       if (!this.collides(np[0], np[1], np[2])) { p[ax] = np[ax]; if (ax === 1) this.ground = false; continue; }
       if (ax !== 1 && this.ground && !this.collides(np[0], np[1] + 0.6, np[2]) && !this.collides(p[0], p[1] + 0.6, p[2])) { p[1] += 0.6; p[ax] = np[ax]; continue; }   // marche (dalle, escalier)
       if (ax === 1) {                                                  // pose sur le bloc, ou tête contre le plafond
@@ -7640,8 +7646,8 @@ const FP = {
     else if (base === 'door' || base === 'trapdoor') f = OPP[hz];
     else if (base === 'rail') f = hz % 2;
     // pas de bloc solide dans le joueur
-    const probe = mk(base, x, y, z, { f: f ?? 0 }), p = this.pos;
-    if (fpBoxes(probe).some(q => p[0] - FP_R < q[3] && p[0] + FP_R > q[0] && p[1] < q[4] && p[1] + FP_H > q[1] && p[2] - FP_R < q[5] && p[2] + FP_R > q[2])) return;
+    const probe = mk(base, x, y, z, { f: f ?? 0 }), p = this.pos, ph = this.crouch ? FP_H_C : FP_H;
+    if (fpBoxes(probe).some(q => p[0] - FP_R < q[3] && p[0] + FP_R > q[0] && p[1] < q[4] && p[1] + ph > q[1] && p[2] - FP_R < q[5] && p[2] + FP_R > q[2])) return;
     const save = Ed.orient[t];
     if (f !== null && ROT_OPTS[bd.rot] && ROT_OPTS[bd.rot].includes(f)) Ed.orient[t] = f;
     Edit.begin('Poser ' + def.name.toLowerCase());
@@ -7756,7 +7762,7 @@ const FP = {
     if (document.body.classList.contains('fp-pal')) document.body.classList.remove('fp-pal');
     if (FP.locked) {                                            // souris capturée : actions de Minecraft
       if (e.button === 0) { FP.breakBlock(); FP.mouseHold = { t: performance.now() }; }
-      else if (e.button === 2) FP.useOrPlace(e.shiftKey || FP.keys.has('ShiftLeft'));
+      else if (e.button === 2) FP.useOrPlace(FP.crouch);
       else if (e.button === 1) { e.preventDefault(); FP.pick(); }
       return;
     }
@@ -7781,7 +7787,7 @@ const FP = {
     if (!drag) return; clearTimeout(drag.timer);
     if (!drag.moved && !drag.done) {
       if (drag.touch) FP.useOrPlace(false);
-      else if (drag.button === 0) FP.breakBlock(); else if (drag.button === 2) FP.useOrPlace(drag.shift); else if (drag.button === 1) FP.pick();
+      else if (drag.button === 0) FP.breakBlock(); else if (drag.button === 2) FP.useOrPlace(FP.crouch); else if (drag.button === 1) FP.pick();
     }
     drag = null;
   };
@@ -7795,14 +7801,14 @@ const FP = {
     if (UI.modal) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;                     // Ctrl+Z, Ctrl+Y… restent aux raccourcis habituels
     const c = e.code;
-    const own = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'ShiftLeft', 'ShiftRight', 'KeyE', 'KeyF', 'KeyQ'];
+    const own = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'ShiftLeft', 'ShiftRight', 'KeyC', 'KeyE', 'KeyF', 'KeyQ'];
     if (/^Digit[1-9]$/.test(c)) { UI.selectSlot(+c.slice(5) - 1); e.preventDefault(); e.stopImmediatePropagation(); return; }
     if (!own.includes(c)) return;
     e.preventDefault(); e.stopImmediatePropagation();
     if (e.repeat) return;
     if (c === 'Space') {
       const t = performance.now();
-      if (t - lastSpace < 300) { FP.fly = !FP.fly; FP.vel[1] = 0; FP.jumpReq = 0; lastSpace = 0; UI.toast(FP.fly ? 'Vol activé (double espace pour atterrir)' : 'Vol désactivé'); }
+      if (t - lastSpace < 300) { FP.fly = !FP.fly; FP.vel[1] = 0; FP.jumpReq = 0; lastSpace = 0; UI.toast(FP.fly ? 'Vol activé : Espace monte, C descend (double espace pour atterrir)' : 'Vol désactivé'); }
       else { lastSpace = t; FP.jumpReq = t; }
     }
     if (c === 'KeyW' || c === 'ArrowUp') { const t = performance.now(); if (t - lastFwd < 280) FP.sprint = true; lastFwd = t; }
