@@ -327,6 +327,28 @@ table.bom canvas { width: 26px; height: 26px; vertical-align: middle; image-rend
 .ls-master { text-align: center; padding: 16px; border-radius: 18px; background: linear-gradient(135deg, rgba(255, 204, 0, .2), rgba(255, 59, 48, .1)); }
 .ls-master b { display: block; font-size: 15px; color: #7a4a00; }
 
+/* ---------- Analyse du plan ---------- */
+.ai-goal { width: 100%; resize: vertical; min-height: 54px; padding: 9px 12px; border-radius: 14px; border: 0; background: #fff; font: 12.5px/1.45 var(--ui); outline: none; box-shadow: 0 0 0 .5px var(--sep); }
+.ai-goal:focus { box-shadow: 0 0 0 2px var(--accent-soft), 0 0 0 1px var(--accent); }
+.ai-status { margin: 0; font-size: 12.5px; color: var(--secondary); display: flex; gap: 8px; align-items: center; }
+.ai-status::before { content: ""; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--fill-3); border-top-color: var(--accent); animation: spin .8s linear infinite; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.ai-note { margin: 0; font-size: 12px; }
+.ai-sec h3 { margin: 0 0 4px; font-size: 13px; font-weight: 600; }
+.ai-sec p { margin: 0; line-height: 1.55; color: #3a3a3c; }
+.ai-card { padding: 12px 14px; border-radius: 18px; background: var(--fill-2); display: grid; gap: 7px; }
+.ai-card .hd { display: flex; gap: 8px; align-items: baseline; }
+.ai-card .hd b { font-size: 13.5px; }
+.ai-card p { margin: 0; font-size: 12.5px; line-height: 1.5; }
+.ai-tag { font: 600 10.5px var(--ui); padding: 2px 8px; border-radius: 999px; background: var(--fill); color: var(--secondary); white-space: nowrap; }
+.ai-card.erreur .ai-tag { background: var(--accent-soft); color: var(--accent-ink); }
+.ai-card.attention .ai-tag { background: rgba(255, 149, 0, .14); color: #9a5a00; }
+.ai-card.conseil .ai-tag { background: rgba(52, 199, 89, .14); color: #1e7a3a; }
+.ai-tests summary { cursor: pointer; font-size: 12.5px; font-weight: 600; color: var(--secondary); }
+.ai-tests pre { white-space: pre-wrap; font: 11px/1.5 var(--mono); background: var(--fill-2); padding: 10px; border-radius: 12px; margin: 6px 0 0; max-height: 260px; overflow: auto; }
+.ai-offer { display: flex; align-items: center; gap: 10px; pointer-events: auto; padding: 6px 6px 6px 16px; }
+.ai-offer .btn { height: 32px; }
+
 /* ---------- Bibliothèque ---------- */
 .dialog.library { width: min(1000px, 100%); }
 .lib-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
@@ -429,7 +451,7 @@ table.bom canvas { width: 26px; height: 26px; vertical-align: middle; image-rend
 @media (max-width: 1180px) { .lbl-mid { display: none; } #topbar .brand span { display: none; } #topbar .brand { padding: 0 6px; } .speed input { width: 56px; } }
 @media (max-width: 760px) {
   #topbar { gap: 6px; left: 8px; right: 8px; }
-  #topbar .brand, .speed, #grpUndo, #btnStep { display: none; }
+  #topbar .brand, .speed, #grpUndo, #btnStep, #btnAnalyse { display: none; }
   #topbar .btn.icon, #topbar .btn { width: 34px; height: 34px; padding: 0; }
   .seg button { min-width: 38px; height: 34px; padding: 0 8px; }
   .grp { padding: 3px; }
@@ -541,6 +563,7 @@ table.bom canvas { width: 26px; height: 26px; vertical-align: middle; image-rend
     <div class="grp glass">
       <button class="btn" id="btnLessons" title="Leçons de redstone"><svg class="i" data-i="cap"></svg><span class="lbl-mid">Leçons</span></button>
       <button class="btn" id="btnLibrary" title="Bibliothèque de schémas"><svg class="i" data-i="book"></svg><span class="lbl-mid">Bibliothèque</span></button>
+      <button class="btn" id="btnAnalyse" title="Analyser le plan avec Claude : erreurs et corrections"><svg class="i" data-i="spark"></svg><span class="lbl-mid">Analyser</span></button>
       <button class="btn mc-btn" id="btnMc" title="Exporter vers Minecraft (Java et Bedrock)"><svg class="i" data-i="pick"></svg><span class="lbl-mid">Minecraft</span></button>
     </div>
     <div class="grp glass seg" role="group" aria-label="Vue">
@@ -4923,6 +4946,8 @@ const stacks = n => n < 64 ? '' : Math.floor(n / 64) + ' pile' + (n >= 128 ? 's'
    15. INTERFACE
    ===================================================================== */
 const ICONS = {
+  spark: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
   more: '<circle cx="5.5" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="18.5" cy="12" r="1.6" fill="currentColor" stroke="none"/>',
   gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/>',
   menu: '<path d="M4 6h16M4 12h16M4 18h16"/>', play: '<path d="M7 4.5v15l12-7.5z" fill="currentColor" stroke="none"/>',
@@ -5167,6 +5192,12 @@ const UI = {
   /* ---------- Superposition : fantôme, sélection, collage ---------- */
   drawOverlay(g, cs, sx, sz, now) {
     const Y = this.layer;
+    if (this.hl && now < this.hl.until) {                 // blocs montrés par l'analyse
+      const a = 0.55 + 0.45 * Math.sin(now / 140);
+      g.lineWidth = 3; g.strokeStyle = `rgba(255,59,48,${a})`; g.fillStyle = 'rgba(255,59,48,.12)';
+      for (const [x, y, z] of this.hl.cells) if (y === Y) { const px = sx(x), pz = sz(z); g.fillRect(px, pz, cs, cs); g.strokeRect(px - 2, pz - 2, cs + 4, cs + 4); }
+      R.dirty = true;
+    }
     if (this.sel) {
       const s = this.sel, x = sx(s.x0), z = sz(s.z0), w = sx(s.x1 + 1) - x, h = sz(s.z1 + 1) - z;
       g.fillStyle = 'rgba(224,68,58,0.08)'; g.fillRect(x, z, w, h);
@@ -5583,7 +5614,7 @@ const UI = {
     let data;
     try { data = JSON.parse(txt); } catch (e) { throw new Error('Le texte n’est pas un JSON valide.'); }
     const n = loadData(data, { undoable: true, label: 'Importer' });
-    R.fit(); Iso.fitted = false; this.layerInfo(); this.toast(n + ' blocs importés.');
+    R.fit(); Iso.fitted = false; this.layerInfo(); this.offerAnalysis(n + ' blocs importés.');
   },
   bomDialog() {
     const { rows, raw } = bomData();
@@ -7096,7 +7127,7 @@ Object.assign(UI, {
     const best = [...per].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0];
     this.setLayer(best ? best[0] : 0); this.setSel(null); R.fit(); Iso.fitted = false; if (this.view === 'iso') { Iso.fit(R.w, R.h); Iso.fitted = true; }
     this.layerInfo(); R.dirty = true;
-    this.toast(`${imp.title} importé : ${cells.length} blocs. Ctrl+Z pour revenir.`);
+    this.offerAnalysis(`${imp.title} importé : ${cells.length} blocs. Ctrl+Z pour revenir.`);
   },
   /* Monde scanné : liste des circuits trouvés + zone manuelle */
   showWorld(world, status) {
@@ -7154,7 +7185,7 @@ function viewInsets() {
   const top = $('topbar').getBoundingClientRect(); i.t = top.bottom;
   const side = box('sidebar'); if (side && side.left >= 0 && side.right < W_ / 2) i.l = side.right;
   const dock = box('dock') || box('isoCtl'); if (dock) i.b = H_ - dock.top;
-  const right = box('lessons') || box('layerCtl'); if (right && right.left > W_ / 2) i.r = W_ - right.left;
+  const right = box('lessons') || box('aiPanel') || box('layerCtl'); if (right && right.left > W_ / 2) i.r = W_ - right.left;
   return i;
 }
 {
@@ -7185,6 +7216,7 @@ Object.assign(UI, {
   },
   moreMenu(anchor) {
     this.openMenu(anchor, [
+      { label: 'Analyser le plan', sub: 'Claude trouve les erreurs et propose des corrections', icon: 'spark', run: () => this.analysePanel(true) },
       { label: 'Importer…', sub: 'Monde Java ou Bedrock, schéma, JSON', icon: 'upload', run: () => this.importDialog() },
       { label: 'Exporter en JSON', sub: 'Tout le circuit, réimportable', icon: 'file', run: () => this.exportJson() },
       { label: 'Image PNG', sub: 'Vue isométrique 3D du circuit', icon: 'image', run: () => this.exportPng(true) },
@@ -7202,6 +7234,413 @@ document.addEventListener('pointerdown', e => {
   const s = $('settings');
   if (!s.hidden && !s.contains(e.target) && !e.target.closest('.menu') && !e.target.closest('#btnMore')) UI.toggleSettings(false);
 });
+
+/* =====================================================================
+   22. ANALYSE DU PLAN (vérification automatique + Claude)
+   - un « bac à sable » : copie du monde et de la simulation, pour essayer
+     sans jamais toucher au plan de l'utilisateur ;
+   - des vérifications automatiques (supports, répéteurs dans le vide…) ;
+   - un banc d'essai : chaque levier/bouton est actionné, on note ce qui réagit ;
+   - une description texte du plan que Claude lit, et un outil « tester »
+     pour qu'il vérifie ses corrections avant de les proposer.
+   ===================================================================== */
+const DIR_WORD = ['nord', 'est', 'sud', 'ouest', 'haut', 'bas'];
+const dirFromWord = w => { const i = DIR_WORD.indexOf(String(w || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')); return i; };
+const INPUT_T = new Set(['lever', 'button_stone', 'button_wood', 'plate']);
+const OUTPUT_T = new Set(['lamp', 'piston', 'sticky', 'door', 'trapdoor', 'rail', 'note', 'command']);
+const COMPONENT_T = new Set(['lever', 'button_stone', 'button_wood', 'plate', 'rblock', 'torch', 'daylight', 'dust', 'repeater', 'comparator', 'observer', 'hopper', 'command', 'lamp', 'piston', 'sticky', 'piston_head', 'note', 'rail', 'trapdoor', 'door']);
+const P3 = b => `(${b.x},${b.y},${b.z})`;
+
+/* ---------- Bac à sable ---------- */
+function withSandbox(fn) {
+  const sw = { map: W.map, layers: W.layers, sets: W.sets, count: W.count, version: W.version };
+  const ss = { T: Sim.T, q: Sim.q, moving: Sim.moving, time: Sim.time, dayCycle: Sim.dayCycle, unstableUntil: Sim.unstableUntil, unstableWhy: Sim.unstableWhy,
+    slowUntil: Sim.slowUntil, poweredDust: Sim.poweredDust, pending: Sim.pending, onChange: Sim.onChange, running: Sim.running };
+  const muted = Sfx.muted, cur = Edit.active;
+  const clones = [...W.all()].map(b => { const c = deser(ser(b)); c._wp = b._wp; return c; });
+  try {
+    Edit.active = null; Sim.onChange = null; Sim.running = false; Sfx.muted = true;
+    W.map = new Map(); W.layers = Array.from({ length: MAXY }, () => new Set()); W.sets = {}; for (const t in BT) W.sets[t] = new Set(); W.count = 0;
+    Sim.q = new Map(); Sim.moving = []; Sim.unstableUntil = 0; Sim.T = 0;
+    for (const b of clones) W.add(b);
+    Sim.linksDirty = Sim.powerDirty = true; Sim.settle();
+    return fn();
+  } finally {
+    Object.assign(W, sw); Object.assign(Sim, ss); Sfx.muted = muted; Edit.active = cur;
+    Sim.linksDirty = Sim.powerDirty = true; Iso.order = null; R.dirty = true;
+  }
+}
+const runTicks = n => { for (let i = 0; i < n; i++) Sim.tick(); };
+function outputState(b) {
+  switch (b.t) {
+    case 'piston': case 'sticky': return b.ext ? 'sorti' : 'rentré';
+    case 'lamp': return b.on ? 'allumée' : 'éteinte';
+    case 'door': case 'trapdoor': return b.on ? 'ouverte' : 'fermée';
+    case 'note': return 'note ' + (b.flash ? 'jouée' : 'muette');
+    default: return b.on ? 'active' : 'inactive';
+  }
+}
+const listOutputs = () => [...W.all()].filter(b => OUTPUT_T.has(b.t));
+const listInputs = () => [...W.all()].filter(b => INPUT_T.has(b.t));
+function pressInput(b) {
+  if (b.t === 'plate') { Sim.plateDown(b, true); return 'plaque verrouillée'; }
+  Sim.use(b); return b.t === 'lever' ? (b.on ? 'levier activé' : 'levier désactivé') : 'bouton pressé';
+}
+/* Banc d'essai : état de repos, puis chaque entrée actionnée seule (et relâchée pour un levier) */
+function behaviourReport(maxInputs = 12) {
+  const lines = [], facts = { neverChanged: new Set(), clocks: [] };
+  const key = b => b.x + ',' + b.y + ',' + b.z;
+  const record = (ticks, outs, onTick) => {
+    const first = new Map(), flips = new Map(), prev = new Map(outs.map(o => [key(o), outputState(o)]));
+    for (let t = 1; t <= ticks; t++) {
+      Sim.tick();
+      for (const o of outs) { const s = outputState(o), k = key(o); if (s !== prev.get(k)) { if (!first.has(k)) first.set(k, t); flips.set(k, (flips.get(k) || 0) + 1); prev.set(k, s); } }
+      if (onTick) onTick(t);
+    }
+    return { first, flips };
+  };
+  withSandbox(() => {
+    const outs = listOutputs(), ins = listInputs().slice(0, maxInputs);
+    for (const o of outs) facts.neverChanged.add(key(o));
+    const r0 = record(60, outs);
+    const rest = outs.map(o => `${blockName(o)} ${P3(o)} : ${outputState(o)}` + ((r0.flips.get(key(o)) || 0) > 2 ? ` (change ${r0.flips.get(key(o))} fois en 60 ticks : horloge)` : ''));
+    for (const o of outs) if ((r0.flips.get(key(o)) || 0) > 2) { facts.clocks.push(o); facts.neverChanged.delete(key(o)); }
+    lines.push('Au repos (60 ticks sans rien toucher) : ' + (rest.length ? rest.join(' ; ') : 'aucune sortie (lampe, piston, porte…)'));
+    if (Sim.unstableUntil > Sim.T) lines.push('ATTENTION : la simulation signale un circuit instable (' + (Sim.unstableWhy || 'mises à jour en boucle') + ').');
+    if (!ins.length) lines.push('Aucune entrée (levier, bouton, plaque) à tester.');
+    if (listInputs().length > maxInputs) lines.push(`(seules les ${maxInputs} premières entrées sont testées)`);
+    const base = [...W.all()].map(b => deser(ser(b)));
+    for (const inp of ins) {
+      // repart de l'état de repos pour chaque entrée
+      W.map = new Map(); W.layers = Array.from({ length: MAXY }, () => new Set()); for (const t in BT) W.sets[t] = new Set(); W.count = 0; Sim.q = new Map(); Sim.moving = []; Sim.unstableUntil = 0;
+      for (const b of base) W.add(deser(ser(b)));
+      Sim.linksDirty = Sim.powerDirty = true; Sim.settle(); runTicks(60);
+      const o2 = listOutputs(), i2 = W.get(inp.x, inp.y, inp.z);
+      const what = pressInput(i2), r = record(40, o2);
+      const ch = o2.filter(o => r.first.has(key(o))).map(o => { facts.neverChanged.delete(key(o)); return `${blockName(o)} ${P3(o)} → ${outputState(o)} après ${r.first.get(key(o))} tick${r.first.get(key(o)) > 1 ? 's' : ''}`; });
+      let back = '';
+      if (i2.t === 'lever') {
+        pressInput(i2); const r2 = record(40, o2);
+        const ch2 = o2.filter(o => r2.first.has(key(o))).map(o => `${blockName(o)} ${P3(o)} → ${outputState(o)}`);
+        back = ch2.length ? ` | levier remis : ${ch2.join(', ')}` : (ch.length ? ' | levier remis : rien ne revient (mémoire/verrou ?)' : '');
+      }
+      lines.push(`${blockName(i2)} ${P3(i2)}, ${what} : ` + (ch.length ? ch.join(', ') : 'aucune sortie ne réagit') + back);
+      if (Sim.unstableUntil > Sim.T) lines.push('  ⚠ instabilité détectée pendant cet essai : ' + (Sim.unstableWhy || ''));
+    }
+  });
+  return { text: lines.join('\n'), facts };
+}
+
+/* ---------- Vérifications automatiques ---------- */
+function checkPlan() {
+  const out = [], add = (gravite, titre, explication, blocs, actions) => out.push({ gravite, titre, explication, blocs: blocs.map(b => [b.x, b.y, b.z]), correction: actions ? { description: '', actions } : null, auto: true });
+  const at = (b, d) => W.get(b.x + DIRS[d][0], b.y + DIRS[d][1], b.z + DIRS[d][2]);
+  for (const b of W.all()) {
+    if (b.mv) continue;
+    if (!hasSupport(b) && b.t !== 'piston_head') add('erreur', `${blockName(b)} sans support`, `En jeu, ce bloc casserait aussitôt : il lui faut ${BT[b.t].needs === 'att' ? 'un bloc solide auquel s’accrocher' : 'un bloc solide en dessous'}.`, [b],
+      BT[b.t].needs && b.y > 0 && !W.get(b.x, b.y - 1, b.z) ? [{ op: 'poser', x: b.x, y: b.y - 1, z: b.z, bloc: 'solid' }] : null);
+    if (b.t === 'torch' && b.burnt) add('erreur', 'Torche grillée', 'Elle s’est éteinte trop souvent (8 fois en 3 s) : le circuit forme sans doute une boucle trop rapide.', [b]);
+    if (b.t === 'repeater' || b.t === 'comparator') {
+      const back = at(b, OPP[b.f]), front = at(b, b.f);
+      if (!back) add('attention', `${blockName(b)} sans entrée`, `Rien derrière lui (côté ${DIR_WORD[OPP[b.f]]}) : il ne reçoit aucun signal. Vérifie son orientation : il envoie vers ${DIR_WORD[b.f]}.`, [b]);
+      if (!front) add('attention', `${blockName(b)} qui ne mène nulle part`, `Rien devant lui (côté ${DIR_WORD[b.f]}) : son signal est perdu.`, [b]);
+    }
+    if (b.t === 'dust' && !b.cn && !b.lvl) {
+      const near = [N, E, S, O].some(d => at(b, d)) || W.get(b.x, b.y + 1, b.z);
+      if (!near) add('conseil', 'Poudre isolée', 'Ce point de poudre n’est relié à rien.', [b]);
+    }
+    if (b.t === 'observer' && !at(b, b.f)) add('conseil', 'Observateur qui ne regarde rien', `Sa face observe ${DIR_WORD[b.f]}, où il n’y a aucun bloc : il ne réagira qu’à ce qui y sera posé.`, [b]);
+    if (isPiston(b) && b.jam && Sim.T - b.jam < 40) add('erreur', 'Piston bloqué', 'Il n’a pas pu pousser : plus de 12 blocs, ou un bloc impossible à pousser (obsidienne, coffre…).', [b]);
+    if (b.t === 'lever' && ![N, E, S, O, U, D].some(d => d !== b.f && at(b, d)) ) add('conseil', 'Levier qui n’alimente rien', 'Aucun bloc à côté de lui en dehors de son support.', [b]);
+  }
+  if (Sim.unstableUntil > Sim.T) add('attention', 'Circuit instable', 'La simulation a repéré des mises à jour en boucle : ' + (Sim.unstableWhy || 'horloge trop rapide ou boucle de torches') + '.', []);
+  return out;
+}
+
+/* ---------- Description du plan pour Claude ---------- */
+function describeBlock(b) {
+  const n = blockName(b), d = DIR_WORD[b.f], parts = [`${P3(b)} ${n} [${typeKey(b)}]`];
+  switch (b.t) {
+    case 'dust': parts.push(`puissance ${b.lvl}`); break;
+    case 'repeater': parts.push(`sortie vers ${d}`, `délai ${b.d}`, b.on ? 'allumé' : 'éteint', b.lk ? 'verrouillé' : ''); break;
+    case 'comparator': parts.push(`sortie vers ${d}`, b.m ? 'mode soustraction' : 'mode comparaison', `sortie ${b.lvl}`); break;
+    case 'torch': parts.push(b.f === D ? 'posée au sol' : `accrochée au bloc côté ${d}`, b.burnt ? 'GRILLÉE' : b.on ? 'allumée' : 'éteinte'); break;
+    case 'lever': case 'button_stone': case 'button_wood': parts.push(b.f === D ? 'au sol' : b.f === U ? 'au plafond' : `accroché au bloc côté ${d}`, b.on ? 'activé' : 'désactivé'); break;
+    case 'piston': case 'sticky': parts.push(`pousse vers ${d}`, b.ext ? 'sorti' : 'rentré'); break;
+    case 'piston_head': parts.push(`tête vers ${d}`); break;
+    case 'observer': parts.push(`observe ${d}`, `sortie vers ${DIR_WORD[OPP[b.f]]}`, b.on ? 'impulsion' : ''); break;
+    case 'lamp': parts.push(b.on ? 'allumée' : 'éteinte'); break;
+    case 'door': case 'trapdoor': parts.push(b.on ? 'ouverte' : 'fermée'); break;
+    case 'rail': parts.push(b.f ? 'axe est-ouest' : 'axe nord-sud', b.on ? 'actif' : ''); break;
+    case 'hopper': parts.push(`remplissage ${b.lvl}`, b.on ? 'bloquée' : ''); break;
+    case 'note': parts.push(`note ${b.p}`); break;
+    case 'daylight': parts.push(b.m ? 'inversé' : '', `signal ${b.lvl}`); break;
+    case 'plate': parts.push(b.on ? 'enfoncée' : ''); break;
+  }
+  if (BT[b.t].mc && BT[b.t].mc.cls === 'stairs') parts.push(`monte vers ${d}`);
+  if (BT[b.t].cond && !COMPONENT_T.has(b.t)) parts.push(b.sp ? `alimenté fort (${b.sp})` : b.wp ? `alimenté faible (${b.wp})` : '');
+  return parts.filter(Boolean).join(', ');
+}
+const MAP_CH = { lever: 'L', button_stone: 'b', button_wood: 'b', plate: '_', rblock: 'R', torch: 'i', daylight: 'D', dust: '+', observer: 'V', hopper: 'H', command: 'C',
+  lamp: 'O', piston: 'P', sticky: 'S', piston_head: 'h', note: 'N', rail: '=', trapdoor: 'T', door: 'Ð', door_top: 'Ð', solid: '#', glass: 'g', obsidian: 'X' };
+function mapChar(b) {
+  if (b.t === 'repeater') return '↑→↓←'[b.f] || 'r';
+  if (b.t === 'comparator') return '⇑⇒⇓⇐'[b.f] || 'c';
+  if (MAP_CH[b.t]) return MAP_CH[b.t];
+  const m = BT[b.t].mc; if (!m) return '?';
+  return { cube: '#', cubefix: '#', clear: 'g', clearfix: 'g', plant: '"', flat: '_', slab: 's', stairs: 'e', post: '|' }[m.cls] || 'd';
+}
+function describePlan() {
+  const all = [...W.all()], bb = W.bounds();
+  if (!bb) return { text: 'Le plan est vide.', n: 0 };
+  const L = [];
+  L.push(`Plan Redstone Planner : ${all.filter(b => !BT[b.t].hidden).length} blocs, X ${bb.x0}→${bb.x1}, Y ${bb.y0}→${bb.y1}, Z ${bb.z0}→${bb.z1}.`);
+  L.push('Repère : x augmente vers l’est, z vers le sud, y vers le haut (étages). Y 0 est posé sur le sol du monde.');
+  L.push(`Réglages : quasi-connectivité ${Sim.opts.qc ? 'activée' : 'désactivée'}, torches grillables ${Sim.opts.burnout ? 'oui' : 'non'}, tick ${Sim.T}.`);
+  const counts = {}; for (const b of all) if (!BT[b.t].hidden) { const k = blockName(b); counts[k] = (counts[k] || 0) + 1; }
+  L.push('Inventaire : ' + Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([k, n]) => `${n} ${k}`).join(', ') + '.');
+  // cartes par étage (vue du dessus, nord en haut)
+  const W_ = bb.x1 - bb.x0 + 1, H_ = bb.z1 - bb.z0 + 1;
+  if (W_ <= 64 && H_ <= 64) {
+    L.push('', 'CARTES (vue du dessus, nord en haut, une colonne = x de ' + bb.x0 + ' à ' + bb.x1 + ', une ligne = z de ' + bb.z0 + ' à ' + bb.z1 + ').');
+    L.push('Légende : L levier, b bouton, _ plaque/bloc plat, R bloc de redstone, i torche, + poudre, ↑→↓← répéteur (sens de sortie), ⇑⇒⇓⇐ comparateur, V observateur, O lampe, P piston, S piston collant, h tête de piston, N bloc musical, = rail, T trappe, Ð porte, # bloc plein opaque, g bloc transparent, " plante, s dalle, e escalier, | barrière/muret/vitre, d décor, . vide.');
+    for (let y = bb.y0; y <= bb.y1; y++) {
+      if (!W.layers[y].size) continue;
+      L.push(`Étage Y ${y} :`);
+      for (let z = bb.z0; z <= bb.z1; z++) { let row = ''; for (let x = bb.x0; x <= bb.x1; x++) { const b = W.get(x, y, z); row += b ? mapChar(b) : '.'; } L.push('  ' + row); }
+    }
+  }
+  // composants (tous) et blocs conducteurs voisins ; décor résumé
+  const comps = all.filter(b => COMPONENT_T.has(b.t)).sort((a, b) => a.y - b.y || a.z - b.z || a.x - b.x);
+  L.push('', `COMPOSANTS DE REDSTONE (${comps.length}) : position (x,y,z), nom [type à utiliser dans les actions], état.`);
+  for (const b of comps.slice(0, 1500)) L.push('- ' + describeBlock(b));
+  if (comps.length > 1500) L.push(`… ${comps.length - 1500} composants de plus non listés.`);
+  const near = new Set(); for (const c of comps) for (const d of DIRS) { const n = W.get(c.x + d[0], c.y + d[1], c.z + d[2]); if (n && !COMPONENT_T.has(n.t)) near.add(n); }
+  if (near.size) { L.push('', `BLOCS VOISINS DES COMPOSANTS (${near.size}) :`); for (const b of [...near].slice(0, 800)) L.push('- ' + describeBlock(b)); }
+  return { text: L.join('\n'), n: all.length };
+}
+
+/* ---------- Actions (corrections) : mêmes règles que la pose à la main ---------- */
+function applyAction(a) {
+  const x = Math.round(+a.x), y = Math.round(+a.y), z = Math.round(+a.z);
+  if (![x, y, z].every(Number.isFinite) || !inRange(x, y, z)) throw new Error(`position (${a.x},${a.y},${a.z}) hors du plan`);
+  const op = String(a.op || '').toLowerCase();
+  const cur = W.get(x, y, z);
+  if (op === 'retirer') { if (cur) { checkSupport(destroy(cur.t === 'door_top' ? (W.get(x, y - 1, z) || cur) : cur)); } return `retiré ${x},${y},${z}`; }
+  if (op === 'regler' || op === 'régler' || op === 'tourner') {
+    if (!cur) throw new Error(`aucun bloc en (${x},${y},${z})`);
+    Edit.touch(K(x, y, z));                       // pour Ctrl+Z
+    if (a.dir !== undefined) { const f = dirFromWord(a.dir); if (f < 0) throw new Error('direction inconnue : ' + a.dir); cur.f = f; }
+    if (a.delai !== undefined && cur.t === 'repeater') cur.d = clamp(Math.round(+a.delai), 1, 4);
+    if (a.mode !== undefined && cur.t === 'comparator') cur.m = /sous/.test(String(a.mode)) ? 1 : 0;
+    if (a.note !== undefined && cur.t === 'note') cur.p = clamp(Math.round(+a.note), 0, 24);
+    if (a.actif !== undefined && cur.t === 'lever') cur.on = !!a.actif;
+    Sim.structChanged(); Sim.touch(cur); return `réglé ${x},${y},${z}`;
+  }
+  if (op !== 'poser') throw new Error('opération inconnue : ' + a.op);
+  const t = String(a.bloc || '');
+  if (!BT[t] || BT[t].hidden) throw new Error('type de bloc inconnu : ' + t);
+  if (cur) checkSupport(destroy(cur.t === 'door_top' ? (W.get(x, y - 1, z) || cur) : cur));
+  const save = Ed.orient[t];
+  if (a.dir !== undefined) { const f = dirFromWord(a.dir); if (f < 0) throw new Error('direction inconnue : ' + a.dir); Ed.orient[t] = f; }
+  const ok = Ed.place2(t, x, y, z);
+  Ed.orient[t] = save;
+  if (!ok) throw new Error(`${BT[t].name} ne tient pas en (${x},${y},${z}) : il lui faut un support ou la case du dessus libre`);
+  const b = W.get(x, y, z);
+  if (a.delai !== undefined && b.t === 'repeater') b.d = clamp(Math.round(+a.delai), 1, 4);
+  if (a.mode !== undefined && b.t === 'comparator') b.m = /sous/.test(String(a.mode)) ? 1 : 0;
+  if (a.actif !== undefined && b.t === 'lever') b.on = !!a.actif;
+  return `posé ${BT[t].name} en ${x},${y},${z}`;
+}
+function applyActions(actions) {
+  const done = [], errors = [];
+  for (const a of actions || []) { try { done.push(applyAction(a)); } catch (e) { errors.push(e.message); } }
+  Sim.linksDirty = Sim.powerDirty = true; Sim.settle();
+  return { done, errors };
+}
+
+/* ---------- Claude ---------- */
+let samplePromise = null;
+function getSample() {
+  if (!samplePromise) samplePromise = (window.claude && typeof window.claude.use === 'function') ? Promise.resolve(window.claude.use('sample')).catch(() => null) : Promise.resolve(null);
+  return samplePromise;
+}
+const AI_RULES = `Tu es un expert de la redstone de Minecraft Java Edition (règles exactes du jeu : ticks de 0,1 s, alimentation forte et faible des blocs opaques, poudre qui perd 1 par bloc et s'arrête à 15 blocs, répéteurs 1 à 4 ticks et verrouillage, comparateurs en comparaison/soustraction, torches inverseuses qui grillent après 8 extinctions en 3 s, pistons limités à 12 blocs et qui ne poussent pas obsidienne ni blocs à données, observateurs, quasi-connectivité des pistons).
+On te donne un plan fait dans un planificateur de redstone. Il fonctionne comme le jeu.`;
+const AI_FORMAT = `Réponds avec UNIQUEMENT un objet JSON, sans autre texte :
+{"resume": "ce que fait le circuit, en 1 à 3 phrases simples",
+ "fonctionnement": "comment le signal circule, étape par étape, en quelques phrases",
+ "problemes": [{"gravite": "erreur" | "attention" | "conseil",
+   "titre": "court", "explication": "pourquoi c'est un problème, en langage simple",
+   "blocs": [[x,y,z], ...],
+   "correction": null | {"description": "ce que fait la correction", "actions": [ACTION, ...]}}]}
+ACTION est l'un de :
+ {"op":"poser","x":..,"y":..,"z":..,"bloc":"<type>","dir":"nord|est|sud|ouest|haut|bas","delai":1-4,"mode":"comparaison|soustraction"}
+ {"op":"retirer","x":..,"y":..,"z":..}
+ {"op":"regler","x":..,"y":..,"z":..,"dir":"...","delai":..,"mode":"...","actif":true|false}
+<type> : un type entre crochets du plan, ou l'un de : lever, button_stone, button_wood, plate, rblock, torch, daylight, dust, repeater, comparator, observer, hopper, command, lamp, piston, sticky, note, rail, trapdoor, door, solid, glass, obsidian, ou "mc:<id Minecraft>" (ex. mc:oak_planks).
+Sens de "dir" : répéteur et comparateur = côté où sort le signal ; piston = sens de poussée ; observateur = côté de la face qui observe (il émet à l'opposé) ; torche, levier, bouton = côté du bloc qui les porte ("bas" = posé au sol) ; escalier = côté haut. Un bloc posé doit avoir son support (bloc plein en dessous pour poudre, répéteur, comparateur, rail, porte, plantes ; bloc plein à côté pour une torche murale ou un levier mural).
+N'invente pas de problème : si le circuit est correct, renvoie "problemes": [] ou seulement des conseils utiles. Coordonnées exactes du plan. Écris en français simple.`;
+function aiTools(status) {
+  return [{
+    name: 'tester',
+    description: 'Essaie des actions (corrections) sur une COPIE du plan, puis actionne les entrées données une par une, et renvoie ce que font les sorties (lampes, pistons, portes…) et les erreurs de pose. Le plan réel n’est pas modifié. Utilise-le pour vérifier une correction avant de la proposer.',
+    inputSchema: { type: 'object', properties: {
+      actions: { type: 'array', description: 'Actions au format ACTION (op poser/retirer/regler).', items: { type: 'object' } },
+      entrees: { type: 'array', description: 'Entrées à actionner dans l’ordre, chacune {x,y,z} d’un levier, bouton ou plaque.', items: { type: 'object' } },
+    } },
+    execute(input) {
+      status('Claude essaie une correction dans une copie du plan…');
+      return withSandbox(() => {
+        const res = applyActions(Array.isArray(input.actions) ? input.actions : []);
+        runTicks(40);
+        const outs = listOutputs(), snap = () => outs.map(o => `${blockName(o)} ${P3(o)} ${outputState(o)}`).join(' ; ') || 'aucune sortie';
+        const steps = ['repos : ' + snap()];
+        for (const e of (Array.isArray(input.entrees) ? input.entrees : []).slice(0, 8)) {
+          const b = W.get(Math.round(+e.x), Math.round(+e.y), Math.round(+e.z));
+          if (!b || !INPUT_T.has(b.t)) { steps.push(`(${e.x},${e.y},${e.z}) n'est pas une entrée`); continue; }
+          const what = pressInput(b); runTicks(40); steps.push(`${blockName(b)} ${P3(b)} ${what} → ${snap()}`);
+        }
+        const auto = checkPlan().filter(p => p.gravite !== 'conseil').map(p => `${p.titre} ${p.blocs.map(c => '(' + c.join(',') + ')').join(' ')}`);
+        return { actions_appliquees: res.done, erreurs_de_pose: res.errors, essais: steps, problemes_restants: auto.slice(0, 20), instable: Sim.unstableUntil > Sim.T };
+      });
+    },
+  }];
+}
+async function analyseWithClaude({ goal, onStatus, signal }) {
+  const sample = await getSample();
+  if (!sample) throw { code: 'unavailable' };
+  const plan = describePlan(), tests = behaviourReport(), auto = checkPlan();
+  const autoTxt = auto.length ? auto.map(p => `- [${p.gravite}] ${p.titre} ${p.blocs.map(c => '(' + c.join(',') + ')').join(' ')} : ${p.explication}`).join('\n') : '- rien de signalé';
+  const prompt = `${AI_RULES}
+
+${goal ? 'CE QUE L’UTILISATEUR VEUT QUE LE CIRCUIT FASSE :\n' + goal + '\n\n' : ''}${plan.text}
+
+ESSAIS DANS LA SIMULATION (chaque entrée actionnée seule, depuis l'état de repos) :
+${tests.text}
+
+VÉRIFICATIONS AUTOMATIQUES :
+${autoTxt}
+
+TA MISSION : comprends la structure et le fonctionnement du circuit, repère les erreurs (et ce qui l'empêche de faire ce que veut l'utilisateur), et propose des corrections précises. ${'Tu peux utiliser l’outil « tester » pour vérifier une correction avant de la proposer (quelques essais au plus).'}
+
+${AI_FORMAT}`;
+  const lim = await sample.limits().catch(() => null);
+  const opts = { modelTier: 'complex', signal, onText: () => onStatus && onStatus('Claude écrit son analyse…') };
+  if (lim && lim.tools) opts.tools = aiTools(onStatus || (() => {}));
+  if (prompt.length > 240000) throw { code: 'prompt_too_large' };
+  onStatus && onStatus('Claude lit le plan (' + plan.n + ' blocs)…');
+  const res = await sample.json(prompt, opts);
+  return { res, auto, tests };
+}
+
+/* ---------- Panneau « Analyse » ---------- */
+Object.assign(UI, {
+  aiCtl: null,
+  highlight(cells) {
+    if (!cells || !cells.length) return;
+    const [x, y, z] = cells[0];
+    if (this.view !== '2d') this.setView('2d');
+    this.setLayer(y); R.center(x + .5, z + .5);
+    const i = viewInsets(); R.cam.x -= (i.l - i.r) / 2; R.cam.y -= (i.t - i.b) / 2;
+    this.hl = { cells, until: performance.now() + 4500 }; R.dirty = true;
+  },
+  async analysePanel(open = true) {
+    let p = $('aiPanel');
+    if (!open) { if (p) { p.hidden = true; $('stage').classList.remove('has-drawer'); } return; }
+    if (!$('lessons').hidden) this.toggleLessons();
+    if (!p) {
+      p = el('aside', { id: 'aiPanel', class: 'drawer', 'aria-label': 'Analyse du plan' },
+        el('header', null, el('h2', null, 'Analyse du plan'), el('button', { class: 'btn icon', 'aria-label': 'Fermer l’analyse', onclick: () => this.analysePanel(false) }, svgIcon('close'))),
+        el('div', { class: 'ls-body', id: 'aiBody' }));
+      $('stage').append(p);
+    }
+    p.hidden = false; $('stage').classList.add('has-drawer');
+    this.renderAnalyse();
+  },
+  renderAnalyse(result) {
+    const body = $('aiBody'); body.innerHTML = '';
+    const sampleP = getSample();
+    const goal = el('textarea', { class: 'ai-goal', placeholder: 'Ce que le circuit doit faire (facultatif) : « le levier ouvre la porte 2×2 »…', rows: '2' });
+    goal.value = this.aiGoal || ''; goal.oninput = () => { this.aiGoal = goal.value; };
+    const status = el('p', { class: 'ai-status', hidden: '' });
+    const go = el('button', { class: 'btn primary ai-go' }, svgIcon('spark'), 'Analyser avec Claude');
+    const stop = el('button', { class: 'btn', hidden: '' }, 'Arrêter');
+    const check = el('button', { class: 'btn' }, svgIcon('check'), 'Vérifier seulement');
+    const note = el('p', { class: 'muted ai-note' });
+    body.append(el('div', { class: 'ls-sum' }, el('b', null, 'Claude lit ton plan'), el('small', null, 'Il comprend la structure et la redstone, repère les erreurs et propose des corrections que tu peux appliquer (Ctrl+Z pour revenir).'), goal,
+      el('div', { class: 'ls-actions' }, go, stop, check), status, note));
+    sampleP.then(s => { if (!s) { go.disabled = true; note.textContent = 'L’analyse par Claude fonctionne dans la page publiée sur claude.ai. Ici, seule la vérification automatique est disponible.'; } });
+    const setStatus = t => { status.hidden = !t; status.textContent = t || ''; };
+    check.onclick = () => this.renderAnalyse({ auto: checkPlan(), tests: behaviourReport(), resOnly: false });
+    go.onclick = async () => {
+      if (!W.count) { this.toast('Le plan est vide.'); return; }
+      this.aiCtl = new AbortController(); go.disabled = true; check.disabled = true; stop.hidden = false; setStatus('Préparation du plan…');
+      stop.onclick = () => this.aiCtl && this.aiCtl.abort();
+      try {
+        const r = await analyseWithClaude({ goal: goal.value.trim(), onStatus: setStatus, signal: this.aiCtl.signal });
+        this.renderAnalyse(r);
+      } catch (e) {
+        const msg = { cancelled: '', not_granted: 'Tu n’as pas autorisé cette page à utiliser Claude.', sampling_disabled: 'Claude n’est pas disponible pour ce compte.', rate_limited: 'Trop de demandes pour le moment : réessaie un peu plus tard.',
+          prompt_too_large: 'Le plan est trop grand pour être analysé d’un coup : sélectionne une partie et ouvre-la seule.', invalid_json: 'La réponse de Claude n’a pas pu être lue. Réessaie.', unavailable: 'Claude n’est pas disponible ici.',
+          session_expired: 'Reconnecte-toi à Claude.' }[e && e.code];
+        setStatus(msg === undefined ? 'L’analyse a échoué (' + ((e && e.code) || 'erreur') + '). Réessaie.' : msg);
+        go.disabled = false; check.disabled = false; stop.hidden = true;
+      }
+    };
+    if (!result) return;
+    const { res, auto, tests } = result;
+    if (res) {
+      if (res.resume) body.append(el('div', { class: 'ai-sec' }, el('h3', null, 'Ce que fait le circuit'), el('p', null, String(res.resume))));
+      if (res.fonctionnement) body.append(el('div', { class: 'ai-sec' }, el('h3', null, 'Comment le signal circule'), el('p', null, String(res.fonctionnement))));
+    }
+    const probs = [...(res && Array.isArray(res.problemes) ? res.problemes : []), ...(res ? [] : auto)];
+    const fixable = probs.filter(p => p && p.correction && Array.isArray(p.correction.actions) && p.correction.actions.length);
+    const head = el('div', { class: 'ai-sec' }, el('h3', null, probs.length ? `${probs.length} point${probs.length > 1 ? 's' : ''} relevé${probs.length > 1 ? 's' : ''}` : 'Aucun problème trouvé'));
+    if (fixable.length > 1) head.append(el('button', { class: 'btn primary', style: 'margin-top:6px', onclick: () => {
+      Edit.begin('Corrections de l’analyse'); let n = 0, errs = [];
+      for (const p of fixable) if (!p._done) { const r = applyActions(p.correction.actions); n += r.done.length; errs = errs.concat(r.errors); p._done = true; }
+      Edit.commit(); this.layerInfo(); R.dirty = true; this.toast(`${n} modification${n > 1 ? 's' : ''} appliquée${n > 1 ? 's' : ''}` + (errs.length ? ` (${errs.length} impossible${errs.length > 1 ? 's' : ''})` : '') + '. Ctrl+Z pour revenir.');
+      this.renderAnalyse(result);
+    } }, svgIcon('check'), 'Tout corriger'));
+    body.append(head);
+    const order = { erreur: 0, attention: 1, conseil: 2 };
+    probs.sort((a, b) => (order[a.gravite] ?? 3) - (order[b.gravite] ?? 3));
+    for (const p of probs) {
+      if (!p) continue;
+      const cells = Array.isArray(p.blocs) ? p.blocs.filter(c => Array.isArray(c) && c.length === 3).map(c => c.map(v => Math.round(+v))) : [];
+      const acts = p.correction && Array.isArray(p.correction.actions) ? p.correction.actions : [];
+      const card = el('div', { class: 'ai-card ' + (p.gravite || '') },
+        el('div', { class: 'hd' }, el('span', { class: 'ai-tag' }, { erreur: 'Erreur', attention: 'Attention', conseil: 'Conseil' }[p.gravite] || 'Note'), el('b', null, String(p.titre || ''))),
+        el('p', null, String(p.explication || '')),
+        p.correction && p.correction.description ? el('p', { class: 'muted' }, 'Correction : ' + p.correction.description) : null);
+      const act = el('div', { class: 'ls-actions' });
+      if (cells.length) act.append(el('button', { class: 'btn', onclick: () => this.highlight(cells) }, svgIcon('search'), 'Voir'));
+      if (acts.length) {
+        const b = el('button', { class: 'btn primary' }, svgIcon('check'), p._done ? 'Appliquée' : 'Appliquer');
+        b.disabled = !!p._done;
+        b.onclick = () => {
+          Edit.begin('Correction : ' + (p.titre || '')); const r = applyActions(acts); Edit.commit(); p._done = true;
+          this.layerInfo(); R.dirty = true; b.disabled = true; b.lastChild.textContent = 'Appliquée';
+          this.toast(r.errors.length ? 'Correction en partie impossible : ' + r.errors[0] : 'Correction appliquée. Ctrl+Z pour revenir.');
+          if (cells.length) this.highlight(cells);
+        };
+        act.append(b);
+      }
+      if (act.childElementCount) card.append(act);
+      body.append(card);
+    }
+    if (tests && tests.text) body.append(el('details', { class: 'ai-sec ai-tests' }, el('summary', null, 'Essais dans la simulation'), el('pre', null, tests.text)));
+    if (res && auto.length) body.append(el('details', { class: 'ai-sec ai-tests' }, el('summary', null, 'Vérification automatique'), el('pre', null, auto.map(p => `[${p.gravite}] ${p.titre} ${p.blocs.map(c => '(' + c.join(',') + ')').join(' ')}`).join('\n'))));
+  },
+  /* Après un import : proposer l'analyse */
+  offerAnalysis(label) {
+    const box = $('toasts');
+    const t = el('div', { class: 'toast ai-offer' }, el('span', null, label + ' '), el('button', { class: 'btn primary', onclick: () => { t.remove(); this.analysePanel(true); } }, svgIcon('spark'), 'Analyser le plan'));
+    box.append(t); setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 320); }, 9000);
+  },
+});
+$('btnAnalyse').addEventListener('click', () => { const p = $('aiPanel'); UI.analysePanel(!p || p.hidden); });
 
 /* =====================================================================
    17. BIBLIOTHÈQUE : aperçus, « Ouvrir » et « Insérer »
@@ -7316,6 +7755,7 @@ Object.assign(UI, {
     const d = $('lessons');
     open = open === undefined ? d.hidden : open;
     d.hidden = !open;
+    if (open && $('aiPanel')) $('aiPanel').hidden = true;
     $('stage').classList.toggle('has-drawer', open);
     $('btnLessons').classList.toggle('on', open);
     store.set('redstone-planner:lessons-open', open ? (this.lessonView || 'list') : '');
