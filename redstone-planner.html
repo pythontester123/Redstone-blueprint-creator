@@ -236,6 +236,71 @@ table.bom canvas { width: 24px; height: 24px; vertical-align: middle; image-rend
 .bom-raw b { color: var(--accent-hi); }
 .muted { color: var(--muted); }
 
+/* ---------- Panneau des leçons ---------- */
+.drawer {
+  position: absolute; top: 0; right: 0; bottom: 0; width: min(380px, 100%); z-index: 20;
+  background: var(--panel); border-left: 1px solid var(--line); box-shadow: var(--shadow);
+  display: flex; flex-direction: column; animation: slide .2s ease-out;
+}
+@keyframes slide { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.drawer > header { display: flex; align-items: center; gap: 9px; padding: 12px 12px 12px 16px; border-bottom: 1px solid var(--line); }
+.drawer > header h2 { margin: 0; font-size: 15px; flex: 1; }
+.drawer > header svg { color: var(--accent-hi); }
+.ls-body { overflow-y: auto; padding: 14px 16px 24px; display: flex; flex-direction: column; gap: 14px; scrollbar-width: thin; }
+#stage.has-drawer #layerCtl, #stage.has-drawer #isoCtl { right: 392px; }
+#stage.has-drawer #hotbar, #stage.has-drawer #selBar { left: calc(50% - 190px); }
+.ls-sum { padding: 12px; border-radius: var(--radius); background: var(--panel-2); border: 1px solid var(--line); display: grid; gap: 8px; }
+.ls-sum b { font-size: 14px; }
+.ls-sum small { color: var(--muted); }
+.ls-bar { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; }
+.ls-bar i { height: 6px; border-radius: 3px; background: var(--panel-3); overflow: hidden; position: relative; }
+.ls-bar i span { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 3px; }
+.ls-level h3 { margin: 0 0 6px; display: flex; align-items: baseline; gap: 8px; font-size: 13px; }
+.ls-level h3 small { color: var(--muted); font-weight: 400; margin-left: auto; font-variant-numeric: tabular-nums; }
+.lvl { font: 600 10.5px var(--mono); padding: 2px 6px; border-radius: 5px; background: var(--accent-soft); color: #ffcfc8; letter-spacing: .03em; white-space: nowrap; }
+.ls-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 8px 10px; border-radius: 8px; border: 1px solid transparent; background: transparent; cursor: pointer; }
+.ls-item:hover, .ls-item:focus-visible { background: var(--panel-2); border-color: var(--line); outline: none; }
+.ls-item .num { width: 22px; height: 22px; flex: none; border-radius: 50%; display: grid; place-items: center; font: 600 11px var(--mono); background: var(--panel-3); color: var(--muted); }
+.ls-item.done .num { background: var(--ok); color: #0c1a12; }
+.ls-item span.t { flex: 1; min-width: 0; }
+.ls-item .chip-sm { font-size: 10.5px; color: var(--muted); border: 1px solid var(--line-2); border-radius: 5px; padding: 1px 5px; }
+.ls-back { align-self: flex-start; background: none; border: 0; color: var(--muted); cursor: pointer; padding: 0; font-size: 12px; }
+.ls-back:hover { color: var(--text); }
+.ls-lesson h3 { margin: 6px 0 0; font-size: 17px; text-wrap: balance; }
+.ls-text { line-height: 1.6; color: #d4d7de; }
+.ls-text p { margin: 0 0 9px; }
+.ls-text ul { margin: 0 0 9px; padding-left: 18px; }
+.ls-text li { margin-bottom: 3px; }
+.tipbox { padding: 9px 11px; border-radius: 8px; background: rgba(233, 194, 90, .08); border: 1px solid rgba(233, 194, 90, .3); color: #f1dfae; font-size: 12.5px; }
+.ls-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.ls-chal { padding: 12px; border-radius: var(--radius); border: 1px solid rgba(224, 68, 58, .4); background: rgba(224, 68, 58, .06); display: grid; gap: 9px; }
+.ls-chal h4 { margin: 0; font-size: 13px; color: #ffcfc8; }
+.ls-chal p { margin: 0; }
+.ls-res { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 12px; }
+.ls-res li { display: flex; gap: 7px; align-items: baseline; }
+.ls-res li::before { content: "✓"; color: var(--ok); font-weight: 700; }
+.ls-res li.ko::before { content: "✗"; color: var(--accent-hi); }
+.ls-nav { display: flex; justify-content: space-between; gap: 8px; }
+.ls-master { text-align: center; padding: 14px; border-radius: var(--radius); background: linear-gradient(135deg, rgba(224, 68, 58, .18), rgba(233, 194, 90, .14)); border: 1px solid rgba(233, 194, 90, .35); }
+.ls-master b { display: block; font-size: 15px; color: #ffe2a6; }
+
+/* ---------- Bibliothèque ---------- */
+.dialog.library { width: min(1040px, 100%); }
+.lib-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.lib-tools input { flex: 1; min-width: 160px; height: 32px; padding: 0 10px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line); outline: none; }
+.lib-tools input:focus { border-color: var(--accent); }
+.lib-cat { margin: 4px 0 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.card { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel-2); overflow: hidden; min-width: 0; }
+.card canvas { width: 100%; aspect-ratio: 12 / 7; display: block; background: #0c0e12; image-rendering: pixelated; border-bottom: 1px solid var(--line); }
+.card .in { padding: 9px 10px 10px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
+.card .hd { display: flex; align-items: baseline; gap: 6px; }
+.card .hd b { flex: 1; font-size: 13px; min-width: 0; }
+.card p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; flex: 1; }
+.card .meta { font: 11px var(--mono); color: var(--faint); }
+.card .act { display: flex; gap: 6px; margin-top: 4px; }
+.card .act .btn { height: 28px; padding: 0 9px; font-size: 12px; flex: 1; justify-content: center; }
+
 /* ---------- Écran d'accueil ---------- */
 .welcome { width: min(560px, 100%); }
 .welcome .hero { display: flex; gap: 14px; align-items: center; padding: 18px 18px 6px; }
@@ -253,9 +318,12 @@ table.bom canvas { width: 24px; height: 24px; vertical-align: middle; image-rend
 
 /* ---------- Petits écrans ---------- */
 #btnMenu { display: none; }
-@media (max-width: 1180px) { .lbl-wide { display: none; } }
+@media (max-width: 1560px) { .lbl-wide { display: none; } .brand small { display: none; } }
+@media (max-width: 1100px) { .lbl-mid { display: none; } }
 @media (max-width: 760px) {
   #app { grid-template-columns: 1fr; }
+  #stage.has-drawer #layerCtl, #stage.has-drawer #isoCtl { right: 12px; }
+  #stage.has-drawer #hotbar { left: 50%; }
   #sidebar { position: absolute; z-index: 30; top: 50px; bottom: 30px; left: 0; width: 270px; transform: translateX(-102%); transition: transform .2s; box-shadow: var(--shadow); }
   body.side-open #sidebar { transform: none; }
   #btnMenu { display: inline-flex; }
@@ -285,10 +353,11 @@ table.bom canvas { width: 24px; height: 24px; vertical-align: middle; image-rend
     <button class="btn icon" id="btnRedo" title="Rétablir (Ctrl+Y)" aria-label="Rétablir"><svg class="i" data-i="redo"></svg></button>
     <button class="btn" id="btnClear" title="Tout effacer"><svg class="i" data-i="trash"></svg><span class="lbl-wide">Effacer</span></button>
     <div class="sep"></div>
-    <button class="btn" id="btnExamples"><svg class="i" data-i="book"></svg>Exemples</button>
-    <button class="btn" id="btnExport"><svg class="i" data-i="download"></svg><span class="lbl-wide">Exporter</span></button>
-    <button class="btn" id="btnImport"><svg class="i" data-i="upload"></svg><span class="lbl-wide">Importer</span></button>
-    <button class="btn" id="btnBom"><svg class="i" data-i="list"></svg><span class="lbl-wide">Matériaux</span></button>
+    <button class="btn" id="btnLessons" title="Leçons de redstone"><svg class="i" data-i="cap"></svg><span class="lbl-mid">Leçons</span></button>
+    <button class="btn" id="btnLibrary" title="Bibliothèque de schémas"><svg class="i" data-i="book"></svg><span class="lbl-mid">Bibliothèque</span></button>
+    <button class="btn" id="btnExport" title="Exporter (JSON, PNG)"><svg class="i" data-i="download"></svg><span class="lbl-wide">Exporter</span></button>
+    <button class="btn" id="btnImport" title="Importer un circuit"><svg class="i" data-i="upload"></svg><span class="lbl-wide">Importer</span></button>
+    <button class="btn" id="btnBom" title="Liste de matériaux"><svg class="i" data-i="list"></svg><span class="lbl-wide">Matériaux</span></button>
     <div class="spacer"></div>
     <div class="seg" role="group" aria-label="Vue">
       <button id="view2d" class="on" title="Vue du dessus (V)"><svg class="i" data-i="grid"></svg>2D</button>
@@ -355,6 +424,10 @@ table.bom canvas { width: 24px; height: 24px; vertical-align: middle; image-rend
     </div>
     <div class="float" id="hotbar" role="toolbar" aria-label="Barre rapide"></div>
     <div id="warn" hidden></div>
+    <aside id="lessons" class="drawer" hidden aria-label="Leçons">
+      <header><svg class="i" data-i="cap"></svg><h2>Leçons de redstone</h2><button class="btn icon" id="lsClose" aria-label="Fermer les leçons"><svg class="i" data-i="close"></svg></button></header>
+      <div class="ls-body" id="lsBody"></div>
+    </aside>
   </main>
 
   <!-- =================== BARRE D'ÉTAT =================== -->
@@ -430,8 +503,8 @@ const NOTE_NAMES = ['Fa♯', 'Sol', 'Sol♯', 'La', 'La♯', 'Si', 'Do', 'Do♯'
 /* =====================================================================
    3. MONDE : stockage creux des blocs
    ===================================================================== */
-const SAVE_KEYS = ['f', 'on', 'lvl', 'd', 'm', 'p', 'ext', 'dot', 'lock', 'burnt', 'sticky'];
-const BOOL_KEYS = new Set(['on', 'ext', 'dot', 'lock', 'burnt', 'sticky']);
+const SAVE_KEYS = ['f', 'on', 'lvl', 'd', 'm', 'p', 'ext', 'dot', 'lock', 'burnt', 'sticky', 'tpl'];
+const BOOL_KEYS = new Set(['on', 'ext', 'dot', 'lock', 'burnt', 'sticky', 'tpl']);
 
 function mk(t, x, y, z, props) {
   const b = { t, x, y, z, f: DEFAULT_F[t] ?? 0, on: false, lvl: 0, d: 1, m: 0, p: 0, ext: false, dot: false, lock: false, burnt: false, sticky: false,
@@ -550,7 +623,7 @@ function checkSupport(cells) {
       const p = d < 0 ? [x, y, z] : [x + DIRS[d][0], y + DIRS[d][1], z + DIRS[d][2]];
       const b = W.get(p[0], p[1], p[2]);
       if (!b || b.mv) continue;
-      if (!hasSupport(b)) { removed++; for (const c of destroy(b)) q.push(c); }
+      if (!hasSupport(b)) { removed++; if (Sim.onBreak) Sim.onBreak(b); for (const c of destroy(b)) q.push(c); }
     }
   }
   return removed;
@@ -846,6 +919,11 @@ const Sim = {
         case 'piston': case 'sticky': {
           if ((b.busy | 0) > T) break;
           const p = this.pistonPowered(b);
+          // Comme dans Java, la face avant n'est pas une entrée : on le signale une fois
+          if (!p && !b.ext && !this.hinted && !Sfx.muted && frontWire(b) > 0) {
+            this.hinted = true;
+            this.hint = 'Un piston ne s’active pas par sa face avant (règle de Minecraft Java). Alimente-le par l’arrière, un côté, le dessus ou le dessous.';
+          }
           if (p && !b.ext) moved = this.extend(b) || moved;
           else if (!p && b.ext) moved = this.retract(b) || moved;
           break;
@@ -959,7 +1037,7 @@ const Sim = {
       x += dx; y += dy; z += dz;
     }
     const freed = [];
-    if (broken) freed.push(...destroy(broken));
+    if (broken) { if (this.onBreak) this.onBreak(broken); Sfx.pop(); freed.push(...destroy(broken)); }
     for (let i = list.length - 1; i >= 0; i--) {
       const m = list[i];
       freed.push([m.x, m.y, m.z]);
@@ -1016,6 +1094,14 @@ const Sim = {
   plateUp(b) { if (!b.held) return; b.held = false; if (!b.lock) this.schedule(b, 10, 'release'); },
 };
 
+/* Signal qui arrive par un fil (poudre, répéteur, comparateur) dans la face avant d'un piston */
+function frontWire(b) {
+  const d = DIRS[b.f], n = W.get(b.x + d[0], b.y + d[1], b.z + d[2]);
+  if (!n || n.mv) return 0;
+  if (n.t === 'dust') return (n.pt >> OPP[b.f] & 1) ? n.lvl : 0;
+  if ((n.t === 'repeater' && n.on) || (n.t === 'comparator' && n.lvl)) return n.f === OPP[b.f] ? 1 : 0;
+  return 0;
+}
 function dustConnects(nb, h) {
   if (!nb || nb.mv) return false;
   switch (nb.t) {
@@ -1066,6 +1152,7 @@ const Sfx = {
     o.connect(g).connect(c.destination); o.start(t); o.stop(t + dur + 0.02);
   },
   click(v) { if (this.throttle()) this.tone(1400 * v, 0.04, 'square', 0.025); },
+  pop() { this.tone(520, 0.06, 'square', 0.02, 260); },
   piston(out) { if (this.throttle()) this.tone(out ? 120 : 90, 0.12, 'sawtooth', 0.03, out ? 70 : 60); },
   door() { if (this.throttle()) this.tone(220, 0.1, 'triangle', 0.03, 140); },
   fizz() { this.tone(900, 0.25, 'sawtooth', 0.02, 200); },
@@ -1138,6 +1225,7 @@ const Ed = {
   erase(x, y, z) {
     const b = W.get(x, y, z);
     if (!b) return false;
+    if (b.tpl) { UI.toast('Ce bloc fait partie du défi : il reste en place.'); return false; }
     checkSupport(destroy(b));
     return true;
   },
@@ -1202,6 +1290,7 @@ const Ed = {
     for (const b of this.selBlocks(s, layer)) {
       if (b.t === 'piston_head' || b.t === 'door_top') continue;
       const o = ser(b);
+      if (b.t === 'dust') o._pt = b.pt;
       delete o.ext;                         // les pistons copiés sont rentrés ; la simulation les ressort
       if (b.t === 'button_stone' || b.t === 'button_wood' || b.t === 'plate') delete o.on;
       o.x -= s.x0; o.z -= s.z0;
@@ -1220,14 +1309,15 @@ const Ed = {
     const w = c.w; c.w = c.h; c.h = w;
   },
   pasteClip(c, ax, az, layer, own = true) {
-    if (own) Edit.begin('Coller');
+    if (own) Edit.begin(c.label || 'Coller');
     const cells = [];
+    this.lastPasted = [];
     for (const o of c.items) {
-      const x = ax + o.x, z = az + o.z, y = c.all ? o.y : layer + o.y;
+      const x = ax + o.x, z = az + o.z, y = c.rel ? layer + o.y : c.all ? o.y : layer + o.y;
       if (!inRange(x, y, z)) continue;
       const ex = W.get(x, y, z); if (ex) destroy(ex);
       const b = deser({ ...o, x, y, z }); if (!b) continue;
-      W.add(b);
+      W.add(b); this.lastPasted.push(b);
       if (b.t === 'door' && y + 1 < MAXY) { const t = W.get(x, y + 1, z); if (t) destroy(t); W.add(mk('door_top', x, y + 1, z, { f: b.f, on: b.on })); }
       cells.push([x, y, z]);
     }
@@ -1238,7 +1328,7 @@ const Ed = {
   deleteSel(s, layer) {
     Edit.begin('Supprimer la sélection');
     const freed = [];
-    for (const b of this.selBlocks(s, layer)) if (!b.dead) freed.push(...destroy(b));
+    for (const b of this.selBlocks(s, layer)) if (!b.dead && !b.tpl) freed.push(...destroy(b));
     checkSupport(freed);
     Edit.commit(); Sim.settle();
   },
@@ -1263,59 +1353,210 @@ const Ed = {
 };
 
 /* =====================================================================
-   8. TEXTURES PIXEL 16×16 (générées au chargement, aucun fichier externe)
+   8. TEXTURES PIXEL 16×16 (dessinées au pixel près, aucun fichier externe)
+   Les textures orientées existent en 4 variantes : _T (motif en haut,
+   c'est-à-dire vers le Nord), _R (Est), _B (Sud), _L (Ouest).
    ===================================================================== */
 const TEX = {};
+const QN = 'TRBL';
+const FONT = '"Segoe UI", system-ui, sans-serif', MONO = 'ui-monospace, Menlo, Consolas, monospace';
 const rgb = (r, g, b, a = 1) => `rgba(${clamp(r | 0, 0, 255)},${clamp(g | 0, 0, 255)},${clamp(b | 0, 0, 255)},${a})`;
-function makeTex(name, seed, fn) {
-  const c = document.createElement('canvas'); c.width = c.height = 16;
-  const g = c.getContext('2d'); fn(g, mulberry32(seed)); TEX[name] = c;
+function cnv(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+function genTex(name, seed, paint) {
+  const c = cnv(16, 16), g = c.getContext('2d'), img = g.createImageData(16, 16), d = img.data, rnd = mulberry32(seed);
+  const P = {
+    rnd,
+    set(x, y, c, a) {
+      if (x < 0 || y < 0 || x > 15 || y > 15) return;
+      const i = (y * 16 + x) * 4;
+      d[i] = clamp(c[0] | 0, 0, 255); d[i + 1] = clamp(c[1] | 0, 0, 255); d[i + 2] = clamp(c[2] | 0, 0, 255);
+      d[i + 3] = a !== undefined ? a : c[3] !== undefined ? c[3] : 255;
+    },
+    get(x, y) { const i = (y * 16 + x) * 4; return [d[i], d[i + 1], d[i + 2], d[i + 3]]; },
+    rect(x, y, w, h, c, amp = 0) { for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) { const v = (rnd() - 0.5) * amp; this.set(i, j, [c[0] + v, c[1] + v, c[2] + v], c[3]); } },
+    fill(c, amp = 0) { this.rect(0, 0, 16, 16, c, amp); },
+    frame(c, x = 0, y = 0, w = 16, h = 16) { for (let i = x; i < x + w; i++) { this.set(i, y, c); this.set(i, y + h - 1, c); } for (let j = y; j < y + h; j++) { this.set(x, j, c); this.set(x + w - 1, j, c); } },
+    mul(x, y, k) { if (x < 0 || y < 0 || x > 15 || y > 15) return; const p = this.get(x, y); this.set(x, y, [p[0] * k, p[1] * k, p[2] * k], p[3]); },
+    specks(n, c) { for (let k = 0; k < n; k++) this.set(rnd() * 16 | 0, rnd() * 16 | 0, c); },
+    /* pierres irrégulières (pavé, bloc de redstone) : cellules de Voronoï qui se raccordent sur les bords */
+    cells(n, mortar, colorOf, amp = 10) {
+      const pts = []; for (let k = 0; k < n; k++) pts.push([rnd() * 16, rnd() * 16, rnd()]);
+      for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+        let d1 = 1e9, d2 = 1e9, k1 = 0;
+        for (let k = 0; k < n; k++) for (const ox of [-16, 0, 16]) for (const oy of [-16, 0, 16]) {
+          const dx = x + .5 - pts[k][0] - ox, dy = y + .5 - pts[k][1] - oy, dd = Math.sqrt(dx * dx + dy * dy);
+          if (dd < d1) { d2 = d1; d1 = dd; k1 = k; } else if (dd < d2) d2 = dd;
+        }
+        const v = (rnd() - 0.5) * amp;
+        if (d2 - d1 < 1.1) this.set(x, y, [mortar[0] + v, mortar[1] + v, mortar[2] + v]);
+        else { const c = colorOf(pts[k1][2]), hl = d1 < 1.6 ? 10 : 0; this.set(x, y, [c[0] + v + hl, c[1] + v + hl, c[2] + v + hl]); }
+      }
+    },
+  };
+  paint(P);
+  g.putImageData(img, 0, 0);
+  TEX[name] = c;
+  return c;
 }
-function pix(g, x, y, c) { g.fillStyle = c; g.fillRect(x, y, 1, 1); }
-function noiseFill(g, rnd, base, amp) {
-  for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const v = (rnd() - 0.5) * amp; pix(g, x, y, rgb(base[0] + v, base[1] + v, base[2] + v)); }
+function rotCanvas(src, q) {
+  const c = cnv(src.width, src.height), g = c.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  g.translate(src.width / 2, src.height / 2); g.rotate(q * Math.PI / 2); g.drawImage(src, -src.width / 2, -src.height / 2);
+  return c;
 }
-function texFrame(g, c) { g.fillStyle = c; g.fillRect(0, 0, 16, 1); g.fillRect(0, 15, 16, 1); g.fillRect(0, 0, 1, 16); g.fillRect(15, 0, 1, 16); }
+function variants(name) { for (let q = 0; q < 4; q++) TEX[name + '_' + QN[q]] = q ? rotCanvas(TEX[name], q) : TEX[name]; }
+/* Copies assombries (faces latérales en 3D), mises en cache */
+const SHADED = new Map();
+function shadedTex(c, k) {
+  if (!k) return c;
+  let m = SHADED.get(c); if (!m) { m = {}; SHADED.set(c, m); }
+  if (m[k]) return m[k];
+  const o = cnv(c.width, c.height), g = o.getContext('2d');
+  g.drawImage(c, 0, 0);
+  const img = g.getImageData(0, 0, c.width, c.height), d = img.data, f = 1 - k;
+  for (let i = 0; i < d.length; i += 4) { d[i] *= f; d[i + 1] *= f; d[i + 2] *= f; }
+  g.putImageData(img, 0, 0);
+  return (m[k] = o);
+}
+
+const C = {
+  plank: [160, 128, 78], plankDark: [110, 86, 50], stick: [122, 90, 54], stickDark: [92, 66, 38],
+  litHead: [255, 64, 28], litHot: [255, 196, 130], offHead: [96, 22, 14], gold: [222, 182, 64], goldDark: [160, 126, 40],
+  dustOn: [235, 45, 25], dustOff: [96, 14, 10], iron: [204, 204, 210], ironDark: [150, 150, 156],
+};
 function buildTextures() {
-  makeTex('stone', 11, (g, r) => { noiseFill(g, r, [124, 124, 126], 22); for (let i = 0; i < 9; i++) { const x = r() * 15 | 0, y = r() * 15 | 0; pix(g, x, y, '#5f5f62'); pix(g, x + 1, y, '#6a6a6d'); } });
-  makeTex('cobble', 12, (g, r) => { noiseFill(g, r, [118, 118, 120], 34); g.strokeStyle = '#4e4e52'; g.lineWidth = 1; for (let i = 0; i < 5; i++) { const x = r() * 12 | 0, y = r() * 12 | 0; g.strokeRect(x + .5, y + .5, 3 + (r() * 4 | 0), 2 + (r() * 3 | 0)); } });
-  makeTex('planks', 13, (g, r) => { noiseFill(g, r, [178, 142, 88], 16); for (let y = 3; y < 16; y += 4) { g.fillStyle = '#7d5f35'; g.fillRect(0, y, 16, 1); } for (let i = 0; i < 4; i++) pix(g, r() * 16 | 0, (i * 4) + 1, '#8e6b3c'); });
-  makeTex('obsidian', 14, (g, r) => { noiseFill(g, r, [20, 13, 32], 10); for (let i = 0; i < 18; i++) pix(g, r() * 16 | 0, r() * 16 | 0, r() > .5 ? '#3d2560' : '#5a3a85'); });
-  makeTex('rblock', 15, (g, r) => { for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const v = r(); pix(g, x, y, v < .18 ? '#7a0c05' : v < .7 ? '#b81d10' : v < .93 ? '#de3a22' : '#ff7a55'); } texFrame(g, '#6d0904'); });
-  makeTex('lampOff', 16, (g, r) => { noiseFill(g, r, [96, 64, 38], 18); g.fillStyle = '#4b301b'; g.fillRect(7, 1, 2, 14); g.fillRect(1, 7, 14, 2); g.fillRect(3, 3, 2, 2); g.fillRect(11, 3, 2, 2); g.fillRect(3, 11, 2, 2); g.fillRect(11, 11, 2, 2); texFrame(g, '#3d2614'); });
-  makeTex('lampOn', 17, (g, r) => { noiseFill(g, r, [246, 200, 112], 24); g.fillStyle = '#fff2c2'; g.fillRect(5, 5, 6, 6); g.fillStyle = '#c98a3c'; g.fillRect(7, 1, 2, 3); g.fillRect(7, 12, 2, 3); g.fillRect(1, 7, 3, 2); g.fillRect(12, 7, 3, 2); texFrame(g, '#9a6428'); });
-  makeTex('note', 18, (g, r) => { noiseFill(g, r, [112, 72, 44], 18); for (let y = 2; y < 16; y += 5) { g.fillStyle = '#5c3a22'; g.fillRect(0, y, 16, 1); } texFrame(g, '#4a2e1a'); });
-  makeTex('command', 19, (g, r) => { noiseFill(g, r, [182, 116, 74], 20); texFrame(g, '#7d4a2a'); g.fillStyle = '#5a3520'; g.fillRect(4, 4, 8, 8); g.fillStyle = '#e8c08a'; g.fillRect(6, 6, 4, 4); });
-  makeTex('hopper', 20, (g, r) => { noiseFill(g, r, [66, 66, 72], 14); texFrame(g, '#2e2e33'); g.fillStyle = '#26262a'; g.fillRect(3, 3, 10, 10); g.fillStyle = '#1b1b1e'; g.fillRect(5, 5, 6, 6); });
-  makeTex('glass', 21, (g) => { g.fillStyle = 'rgba(190,225,240,0.10)'; g.fillRect(0, 0, 16, 16); texFrame(g, 'rgba(225,240,248,0.85)'); g.fillStyle = 'rgba(255,255,255,0.7)'; for (const [x, y] of [[3, 4], [4, 3], [5, 2], [10, 12], [11, 11], [12, 10], [12, 4]]) g.fillRect(x, y, 1, 1); });
-  makeTex('daylight', 22, (g, r) => { noiseFill(g, r, [196, 176, 134], 14); g.fillStyle = '#6f8fb8'; for (const [x, y] of [[2, 2], [6, 2], [10, 2], [2, 6], [6, 6], [10, 6], [2, 10], [6, 10], [10, 10]]) g.fillRect(x, y, 4 - (x === 10 ? 0 : 0), 3); g.fillStyle = '#a9c4e4'; for (const [x, y] of [[3, 3], [7, 7], [11, 11]]) g.fillRect(x, y, 1, 1); });
-  makeTex('daylightInv', 23, (g, r) => { noiseFill(g, r, [150, 130, 100], 14); g.fillStyle = '#2f3d63'; for (const [x, y] of [[2, 2], [6, 2], [10, 2], [2, 6], [6, 6], [10, 6], [2, 10], [6, 10], [10, 10]]) g.fillRect(x, y, 4, 3); });
-  makeTex('iron', 24, (g, r) => { noiseFill(g, r, [206, 206, 212], 10); texFrame(g, '#8d8d93'); g.fillStyle = '#9a9aa1'; for (const [x, y] of [[3, 3], [9, 3], [3, 9], [9, 9]]) g.fillRect(x, y, 4, 4); g.fillStyle = '#5e5e66'; for (const [x, y] of [[4, 4], [10, 4], [4, 10], [10, 10]]) g.fillRect(x, y, 2, 2); });
-  makeTex('observer', 25, (g, r) => { noiseFill(g, r, [96, 97, 100], 16); texFrame(g, '#4a4a4e'); });
-  makeTex('slab', 26, (g, r) => { noiseFill(g, r, [166, 166, 168], 12); texFrame(g, '#7c7c80'); });
+  genTex('stone', 1, P => { P.fill([125, 125, 126], 9); for (let k = 0; k < 14; k++) { const x = P.rnd() * 16 | 0, y = P.rnd() * 16 | 0; P.mul(x, y, 0.84); P.mul(x + 1, y, 0.9); } });
+  genTex('cobble', 2, P => P.cells(9, [70, 70, 72], v => [100 + v * 40, 100 + v * 40, 102 + v * 40], 12));
+  genTex('planks', 3, P => {
+    P.fill(C.plank, 9);
+    for (let k = 0; k < 4; k++) { P.rect(0, k * 4 + 3, 16, 1, C.plankDark); P.rect((k * 7 + 2) % 16, k * 4, 1, 3, [118, 92, 54]); }
+    for (let k = 0; k < 12; k++) P.mul(P.rnd() * 16 | 0, P.rnd() * 16 | 0, 0.88);
+  });
+  genTex('smooth', 4, P => { P.fill([168, 168, 170], 5); P.frame([128, 128, 130]); });
+  genTex('obsidian', 5, P => { P.fill([20, 13, 30], 6); P.specks(14, [52, 32, 82]); P.specks(14, [36, 22, 58]); P.specks(4, [86, 60, 120]); });
+  genTex('rblock', 6, P => { P.cells(11, [118, 12, 6], v => [180 + v * 55, 26 + v * 22, 16], 14); P.specks(6, [255, 130, 100]); });
+  const lamp = (P, base, line, hi) => { P.fill(base, 16); for (const k of [0, 5, 10, 15]) { P.rect(k, 0, 1, 16, line); P.rect(0, k, 16, 1, line); } P.specks(10, hi); };
+  genTex('lampOff', 7, P => lamp(P, [104, 68, 38], [60, 37, 20], [140, 96, 56]));
+  genTex('lampOn', 8, P => { lamp(P, [238, 190, 104], [168, 110, 52], [255, 236, 180]); P.rect(6, 6, 4, 4, [255, 244, 205], 10); P.rect(1, 1, 4, 4, [250, 214, 140], 10); P.rect(11, 11, 4, 4, [250, 214, 140], 10); });
+  genTex('note', 9, P => { P.fill([98, 60, 38], 10); P.rect(5, 1, 1, 14, [76, 46, 28]); P.rect(10, 1, 1, 14, [76, 46, 28]); P.frame([60, 36, 22]); });
+  genTex('command', 10, P => { P.fill([178, 112, 70], 12); P.frame([108, 60, 34]); P.rect(3, 3, 10, 10, [148, 88, 54], 6); P.rect(5, 5, 6, 6, [118, 138, 150], 8); P.frame([70, 80, 88], 5, 5, 6, 6); P.set(7, 7, [210, 225, 230]); });
+  genTex('hopperTop', 11, P => { P.fill([72, 72, 78], 8); P.rect(2, 2, 12, 12, [46, 46, 50], 4); P.rect(4, 4, 8, 8, [30, 30, 33], 3); P.frame([50, 50, 54]); });
+  genTex('hopperSide', 12, P => { P.fill([76, 76, 82], 10); P.rect(0, 0, 16, 2, [56, 56, 60]); P.rect(0, 6, 16, 1, [58, 58, 62]); });
+  genTex('glass', 13, P => {
+    P.fill([200, 228, 240, 22]);
+    P.frame([220, 234, 240, 235]);
+    for (const [x, y] of [[3, 4], [4, 3], [5, 2], [10, 12], [11, 11], [12, 10], [12, 4], [13, 3]]) P.set(x, y, [255, 255, 255, 210]);
+  });
+  const day = (P, pane) => { P.fill([176, 146, 98], 8); for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) { P.rect(1 + i * 5, 1 + j * 5, 4, 4, pane, 12); P.set(2 + i * 5, 2 + j * 5, [pane[0] + 60, pane[1] + 60, pane[2] + 50]); } };
+  genTex('dayTop', 14, P => day(P, [96, 128, 178]));
+  genTex('dayTopInv', 15, P => day(P, [40, 52, 96]));
+  genTex('daySide', 16, P => { P.fill([150, 118, 72], 8); P.rect(0, 10, 16, 1, C.plankDark); });
+  genTex('iron', 17, P => { P.fill(C.iron, 7); P.frame(C.ironDark); for (const [x, y] of [[2, 2], [10, 2], [2, 10], [10, 10]]) { P.rect(x, y, 4, 4, C.ironDark); P.rect(x + 1, y + 1, 2, 2, [92, 92, 98]); } });
+  genTex('doorTop', 18, P => { P.fill(C.iron, 6); P.frame(C.ironDark); P.rect(3, 3, 4, 6, [104, 104, 110]); P.rect(9, 3, 4, 6, [104, 104, 110]); P.rect(0, 12, 16, 1, C.ironDark); });
+  genTex('doorBot', 19, P => { P.fill(C.iron, 6); P.frame(C.ironDark); P.frame(C.ironDark, 3, 2, 10, 11); P.rect(12, 1, 2, 2, [90, 90, 96]); });
+  genTex('observerFace', 20, P => { P.fill([96, 96, 98], 8); P.frame([66, 66, 68]); P.rect(3, 5, 4, 2, [24, 24, 26]); P.rect(9, 5, 4, 2, [24, 24, 26]); P.rect(4, 10, 8, 2, [40, 40, 42]); });
+  genTex('observerBack0', 21, P => { P.fill([96, 96, 98], 8); P.frame([66, 66, 68]); P.rect(6, 6, 4, 4, [70, 18, 12]); P.frame([40, 40, 42], 5, 5, 6, 6); });
+  genTex('observerBack1', 22, P => { P.fill([96, 96, 98], 8); P.frame([66, 66, 68]); P.rect(6, 6, 4, 4, [250, 54, 30]); P.set(6, 6, [255, 190, 150]); P.frame([40, 40, 42], 5, 5, 6, 6); });
+  genTex('observerSide', 23, P => { P.fill([108, 108, 110], 8); P.frame([76, 76, 78]); P.rect(1, 4, 14, 1, [84, 84, 86]); P.rect(1, 11, 14, 1, [84, 84, 86]); });
+  genTex('observerTop', 24, P => { P.fill([108, 108, 110], 8); P.frame([76, 76, 78]); P.rect(7, 4, 2, 9, [58, 58, 60]); P.rect(6, 5, 4, 1, [58, 58, 60]); P.rect(5, 6, 6, 1, [58, 58, 60]); P.set(7, 3, [58, 58, 60]); P.set(8, 3, [58, 58, 60]); });
+  genTex('pistonSide', 25, P => {
+    P.rect(0, 0, 16, 4, C.plank, 9); P.rect(0, 3, 16, 1, C.plankDark);
+    P.rect(0, 4, 16, 12, [112, 112, 114], 16); P.rect(0, 4, 16, 1, [72, 72, 74]); P.rect(6, 6, 4, 9, [96, 96, 98], 8); P.frame([84, 84, 86], 0, 4, 16, 12);
+  });
+  genTex('pistonTop', 26, P => { P.fill(C.plank, 9); for (let k = 0; k < 4; k++) P.rect(0, k * 4 + 3, 16, 1, C.plankDark); P.frame([118, 118, 120]); });
+  genTex('pistonTopSticky', 27, P => { P.fill(C.plank, 9); for (let k = 0; k < 4; k++) P.rect(0, k * 4 + 3, 16, 1, C.plankDark); P.frame([118, 118, 120]); P.rect(3, 3, 10, 10, [104, 186, 86], 18); P.specks(0, [0, 0, 0]); P.rect(4, 4, 2, 2, [160, 225, 140]); });
+  genTex('pistonBottom', 28, P => { P.fill([112, 112, 114], 16); P.frame([80, 80, 82]); P.rect(5, 5, 6, 6, [84, 84, 86], 6); });
+  genTex('pistonInner', 29, P => { P.fill([112, 112, 114], 14); P.frame([80, 80, 82]); P.rect(6, 6, 4, 4, [48, 48, 50]); });
+  genTex('rod', 30, P => { P.fill([186, 154, 102], 8); P.rect(0, 0, 16, 1, [140, 110, 66]); P.rect(0, 15, 16, 1, [140, 110, 66]); });
+  const rep = (P, c) => { P.fill([168, 168, 170], 5); P.frame([128, 128, 130]); for (let y = 1; y < 15; y++) P.rect(7, y, 2, 1, c, 30); };
+  genTex('repTop0', 31, P => rep(P, C.dustOff)); genTex('repTop1', 32, P => rep(P, C.dustOn));
+  const cmp = (P, c) => { P.fill([168, 168, 170], 5); P.frame([128, 128, 130]); P.rect(4, 6, 1, 8, c, 30); P.rect(11, 6, 1, 8, c, 30); P.rect(4, 6, 8, 1, c, 30); P.rect(7, 2, 2, 4, c, 30); };
+  genTex('cmpTop0', 33, P => cmp(P, C.dustOff)); genTex('cmpTop1', 34, P => cmp(P, C.dustOn));
+  const rail = (P, c) => {
+    for (const r of [1, 5, 9, 13]) P.rect(1, r, 14, 2, [108, 80, 48], 8);
+    P.rect(2, 0, 2, 16, C.gold, 10); P.rect(12, 0, 2, 16, C.gold, 10); P.rect(3, 0, 1, 16, C.goldDark); P.rect(13, 0, 1, 16, C.goldDark);
+    for (let y = 0; y < 16; y += 2) P.rect(7, y, 2, 1, c);
+  };
+  genTex('railOff', 35, P => rail(P, C.dustOff)); genTex('railOn', 36, P => rail(P, C.dustOn));
+  genTex('plate', 37, P => { P.fill([152, 152, 154], 6); P.frame([118, 118, 120]); });
+  genTex('plateOn', 38, P => { P.fill([126, 126, 128], 6); P.frame([96, 96, 98]); });
+  // objets d'inventaire (sprites plats)
+  genTex('itemDust', 40, P => {
+    const rows = [[6, 7, 8], [7, 5, 10], [8, 4, 11], [9, 3, 12], [10, 3, 12], [11, 4, 11], [12, 5, 10]];
+    const inside = (x, y) => rows.some(r => r[0] === y && x >= r[1] && x <= r[2]);
+    for (const [y, a, b] of rows) for (let x = a; x <= b; x++) { const v = P.rnd(); P.set(x, y, v < .25 ? [150, 0, 0] : v < .75 ? [214, 10, 4] : [255, 60, 30]); }
+    for (const [x, y] of [[6, 7], [7, 8], [5, 9], [8, 6]]) P.set(x, y, [255, 120, 90]);
+    for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) if (!inside(x, y) && (inside(x + 1, y) || inside(x - 1, y) || inside(x, y + 1) || inside(x, y - 1))) P.set(x, y, [70, 4, 4]);
+    for (const [x, y] of [[4, 4], [12, 5], [10, 3], [2, 7]]) P.set(x, y, [200, 20, 10]);
+  });
+  genTex('itemTorch', 41, P => {
+    P.rect(7, 7, 2, 9, C.stick); P.rect(8, 7, 1, 9, C.stickDark);
+    P.rect(7, 4, 2, 3, C.litHead); P.set(7, 4, C.litHot); P.set(8, 3, [255, 140, 90, 200]); P.set(7, 3, [255, 140, 90, 200]);
+    for (const [x, y] of [[6, 5], [9, 5], [6, 4], [9, 6]]) P.set(x, y, [230, 40, 20, 150]);
+  });
+  genTex('itemLever', 42, P => {
+    const cob = TEX.cobble.getContext('2d').getImageData(0, 0, 16, 16).data;
+    for (let y = 11; y < 15; y++) for (let x = 3; x < 13; x++) { const i = (y * 16 + x) * 4; P.set(x, y, [cob[i], cob[i + 1], cob[i + 2]]); }
+    P.frame([52, 52, 54], 3, 11, 10, 4);
+    for (let t = 0; t <= 8; t++) { const x = 6 + Math.round(t * 5 / 8), y = 10 - t; P.set(x, y, C.stick); P.set(x + 1, y, C.stickDark); }
+  });
+  genTex('itemDoor', 43, P => { P.rect(4, 0, 8, 16, C.iron, 6); P.frame(C.ironDark, 4, 0, 8, 16); P.rect(5, 2, 2, 4, [96, 96, 102]); P.rect(9, 2, 2, 4, [96, 96, 102]); P.frame(C.ironDark, 5, 8, 6, 6); P.set(10, 7, [60, 60, 64]); });
+  genTex('itemHopper', 44, P => {
+    P.rect(1, 1, 14, 5, [76, 76, 82], 8); P.rect(3, 2, 10, 3, [34, 34, 38]); P.frame([44, 44, 48], 1, 1, 14, 5);
+    P.rect(4, 6, 8, 4, [70, 70, 76], 8); P.frame([44, 44, 48], 4, 6, 8, 4); P.rect(6, 10, 4, 3, [64, 64, 70], 6); P.frame([44, 44, 48], 6, 10, 4, 3);
+  });
+  for (const n of ['pistonSide', 'observerTop', 'repTop0', 'repTop1', 'cmpTop0', 'cmpTop1', 'railOff', 'railOn', 'iron', 'doorTop', 'doorBot']) variants(n);
+  buildDustAtlas();
 }
+
+/* ---------- Atlas de la poudre : 16 formes × 16 niveaux, tuiles de 16 px ---------- */
+let DUST_ATLAS = null;
+function dustColor(l) {
+  const f = l / 15, r = f * 0.6 + (f > 0 ? 0.4 : 0.3);
+  const g = clamp(f * f * 0.7 - 0.5, 0, 1), b = clamp(f * f * 0.6 - 0.7, 0, 1);
+  return [r * 255, g * 255, b * 255];
+}
+const DUST_RGB = Array.from({ length: 16 }, (_, i) => dustColor(i));
+const DUST_COLORS = DUST_RGB.map(c => rgb(c[0], c[1], c[2]));
+function buildDustAtlas() {
+  const c = cnv(256, 256), g = c.getContext('2d'), img = g.createImageData(256, 256), d = img.data;
+  const rnd = mulberry32(77);
+  for (let pt = 0; pt < 16; pt++) {
+    const m = new Float32Array(256);
+    const put = (x, y, v) => { if (x >= 0 && y >= 0 && x < 16 && y < 16) m[y * 16 + x] = Math.max(m[y * 16 + x], v); };
+    const rad = pt ? 2.9 : 3.6;
+    for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const dx = x - 7.5, dy = y - 7.5; if (dx * dx + dy * dy <= rad * rad) put(x, y, 1); }
+    for (let h = 0; h < 4; h++) {
+      if (!(pt >> h & 1)) continue;
+      for (let t = 0; t < 8; t++) for (let w = 6; w <= 9; w++) {
+        const v = (w === 7 || w === 8) ? 1 : 0.78;
+        if (h === 0) put(w, t, v); else if (h === 2) put(w, 15 - t, v); else if (h === 1) put(15 - t, w, v); else put(t, w, v);
+      }
+    }
+    for (let i = 0; i < 256; i++) if (m[i] > 0) { m[i] *= 0.7 + rnd() * 0.45; if (m[i] < 0.62 && rnd() < 0.3) m[i] = 0; }
+    for (let L = 0; L < 16; L++) {
+      const col = DUST_RGB[L];
+      for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+        const v = m[y * 16 + x]; if (!v) continue;
+        const i = ((L * 16 + y) * 256 + pt * 16 + x) * 4;
+        d[i] = clamp(col[0] * v + (L ? 0 : 10), 0, 255); d[i + 1] = clamp(col[1] * v, 0, 255); d[i + 2] = clamp(col[2] * v, 0, 255); d[i + 3] = 255;
+      }
+    }
+  }
+  g.putImageData(img, 0, 0);
+  DUST_ATLAS = c;
+}
+
+/* ---------- Halos lumineux ---------- */
 const GLOW = {};
 function buildGlows() {
   const mkGlow = (name, r, g, b) => {
-    const c = document.createElement('canvas'); c.width = c.height = 64;
-    const x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+    const c = cnv(64, 64), x = c.getContext('2d'), gr = x.createRadialGradient(32, 32, 0, 32, 32, 32);
     gr.addColorStop(0, `rgba(${r},${g},${b},0.9)`); gr.addColorStop(0.35, `rgba(${r},${g},${b},0.35)`); gr.addColorStop(1, `rgba(${r},${g},${b},0)`);
     x.fillStyle = gr; x.fillRect(0, 0, 64, 64); GLOW[name] = c;
   };
   mkGlow('red', 255, 50, 25); mkGlow('lamp', 255, 200, 110); mkGlow('warn', 255, 160, 40);
 }
-
-/* =====================================================================
-   9. DESSIN 2D D'UN BLOC (vue du dessus)
-   ===================================================================== */
-function dustColor(l) {
-  const f = l / 15, r = f * 0.6 + (f > 0 ? 0.4 : 0.3);
-  const g = clamp(f * f * 0.7 - 0.5, 0, 1), b = clamp(f * f * 0.6 - 0.7, 0, 1);
-  return rgb(r * 255, g * 255, b * 255);
-}
-const DUST_COLORS = Array.from({ length: 16 }, (_, i) => dustColor(i));
-function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
-function tex(g, name, x, y, s) { g.drawImage(TEX[name], x, y, s, s); }
 /* Les halos sont mis en file puis dessinés en une seule passe additive (rapide) */
 const GLOWQ = { on: false, list: [], ctx: null };
 function glow(g, name, cx, cy, size, a) {
@@ -1325,55 +1566,207 @@ function glow(g, name, cx, cy, size, a) {
 }
 function flushGlows(g) {
   const L = GLOWQ.list; if (!L.length) return;
-  const t = GLOWQ.ctx || g;                     // calque basse résolution si disponible
+  const t = GLOWQ.ctx || g;
   t.save(); t.globalCompositeOperation = 'lighter';
   for (let i = 0; i < L.length; i += 5) { t.globalAlpha = Math.min(1, L[i + 4]); const s = L[i + 3]; t.drawImage(GLOW[L[i]], L[i + 1] - s / 2, L[i + 2] - s / 2, s, s); }
   t.restore(); L.length = 0;
 }
-/* Poudre dessinée en lot : regroupée par niveau, bras en rectangles pleins (rapide même à 10 000 blocs) */
+
+/* =====================================================================
+   9. DESSIN 2D (vue du dessus), au pixel de texture près
+   Repère local d'un objet orienté : 16×16 texels, « haut » = direction f.
+   ===================================================================== */
+/* rectangle local (i, j, w, h) tourné de q quarts de tour horaires */
+function rq(q, i, j, w, h) {
+  switch (q & 3) { case 0: return [i, j, w, h]; case 1: return [16 - j - h, i, h, w]; case 2: return [16 - i - w, 16 - j - h, w, h]; default: return [j, 16 - i - w, h, w]; }
+}
+function pr(g, x, y, s, q, i, j, w, h, c) { const r = rq(q, i, j, w, h), k = s / 16; g.fillStyle = c; g.fillRect(x + r[0] * k, y + r[1] * k, r[2] * k, r[3] * k); }
+function prTex(g, name, x, y, s, q, i = 0, j = 0, w = 16, h = 16) {
+  const t = TEX[name + '_' + QN[q & 3]] || TEX[name], r = rq(q, i, j, w, h), k = s / 16;
+  g.drawImage(t, r[0], r[1], r[2], r[3], x + r[0] * k, y + r[1] * k, r[2] * k, r[3] * k);
+}
+function tex(g, name, x, y, s) { g.drawImage(TEX[name], x, y, s, s); }
+function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+const HEX = c => rgb(c[0], c[1], c[2]);
+/* tête de torche vue de dessus : 2×2 texels entourés du bout du bâton */
+function torchPix(g, x, y, s, q, i, j, lit, burnt, fx) {
+  pr(g, x, y, s, q, i - 1, j - 1, 4, 4, 'rgba(46,30,16,0.75)');
+  pr(g, x, y, s, q, i, j, 2, 2, burnt ? '#57524d' : lit ? HEX(C.litHead) : HEX(C.offHead));
+  if (lit) pr(g, x, y, s, q, i, j, 1, 1, HEX(C.litHot));
+  if (lit && fx) { const r = rq(q, i, j, 2, 2), k = s / 16; glow(g, 'red', x + (r[0] + 1) * k, y + (r[1] + 1) * k, s * 0.75, 0.6); }
+}
+/* Repère un bloc opaque alimenté : rouge plein = fort, contour = faible */
+function poweredMark(g, b, x, y, s) {
+  if (!b.pw) return;
+  g.fillStyle = `rgba(255,50,30,${0.08 + 0.14 * b.pw / 15})`; g.fillRect(x, y, s, s);
+  const m = Math.max(3, s * 0.16);
+  if (b.sp) { g.fillStyle = '#ff4a2e'; g.fillRect(x + s * 0.08, y + s * 0.08, m, m); }
+  else { g.strokeStyle = '#ff6a50'; g.lineWidth = Math.max(1, s * 0.04); g.strokeRect(x + s * 0.08, y + s * 0.08, m, m); }
+}
+function flash(g, b, x, y, s, now, col) {
+  if (b.flash && now - b.flash < 400) { g.fillStyle = `rgba(${col},${0.5 * (1 - (now - b.flash) / 400)})`; g.fillRect(x, y, s, s); }
+}
+/* Dessine le bloc b dans la case (x, y) de taille s. fx = effets (halos). */
+function drawBlock(g, b, x, y, s, now, fx) {
+  const cx = x + s / 2, cy = y + s / 2;
+  switch (b.t) {
+    case 'solid': tex(g, 'stone', x, y, s); poweredMark(g, b, x, y, s); break;
+    case 'obsidian': tex(g, 'obsidian', x, y, s); poweredMark(g, b, x, y, s); break;
+    case 'glass': tex(g, 'glass', x, y, s); break;
+    case 'rblock': tex(g, 'rblock', x, y, s); if (fx) glow(g, 'red', cx, cy, s * 1.6, 0.25); break;
+    case 'lamp': tex(g, b.on ? 'lampOn' : 'lampOff', x, y, s); if (b.on && fx) glow(g, 'lamp', cx, cy, s * 2.6, 0.55); poweredMark(g, { pw: 0 }, x, y, s); break;
+    case 'note': tex(g, 'note', x, y, s); poweredMark(g, b, x, y, s); flash(g, b, x, y, s, now, '140,255,170'); break;
+    case 'command': tex(g, 'command', x, y, s); poweredMark(g, b, x, y, s); flash(g, b, x, y, s, now, '255,230,160'); break;
+    case 'hopper': {
+      tex(g, 'hopperTop', x, y, s);
+      if (b.lvl) { const k = s / 16, h = Math.max(1, Math.round(b.lvl * 8 / 15)); g.fillStyle = HEX(C.gold); g.fillRect(x + 4 * k, y + (12 - h) * k, 8 * k, h * k); }
+      if (b.on) pr(g, x, y, s, 0, 1, 1, 2, 2, '#ff3b1f');
+      break;
+    }
+    case 'daylight': tex(g, b.m ? 'dayTopInv' : 'dayTop', x, y, s); if (b.lvl && fx) glow(g, 'lamp', cx, cy, s * 1.4, 0.15 * b.lvl / 15); break;
+    case 'dust':
+      g.drawImage(DUST_ATLAS, b.pt * 16, b.lvl * 16, 16, 16, x, y, s, s);
+      if (b.lvl && fx) glow(g, 'red', cx, cy, s * 1.6, 0.12 + 0.3 * b.lvl / 15);
+      break;
+    case 'repeater': {
+      prTex(g, b.on ? 'repTop1' : 'repTop0', x, y, s, b.f);
+      torchPix(g, x, y, s, b.f, 7, 2, b.on, false, fx);                     // torche fixe, côté sortie
+      if (b.lk) { pr(g, x, y, s, b.f, 2, 4, 12, 2, '#3a3a3d'); pr(g, x, y, s, b.f, 2, 4, 12, 1, '#5d5d62'); }
+      torchPix(g, x, y, s, b.f, 7, 4 + 2 * b.d, b.on, false, fx);           // torche mobile : recule avec le délai
+      break;
+    }
+    case 'comparator': {
+      prTex(g, b.lvl ? 'cmpTop1' : 'cmpTop0', x, y, s, b.f);
+      torchPix(g, x, y, s, b.f, 7, 2, b.m === 1, false, fx);
+      torchPix(g, x, y, s, b.f, 4, 11, b.lvl > 0, false, fx);
+      torchPix(g, x, y, s, b.f, 10, 11, b.lvl > 0, false, fx);
+      break;
+    }
+    case 'torch': {
+      if (b.f === D || b.f === U) torchPix(g, x, y, s, 0, 7, 7, b.on, b.burnt, fx);
+      else {
+        pr(g, x, y, s, b.f, 7, 0, 2, 6, HEX(C.stick)); pr(g, x, y, s, b.f, 8, 0, 1, 6, HEX(C.stickDark));
+        torchPix(g, x, y, s, b.f, 7, 6, b.on, b.burnt, fx);
+      }
+      if (b.burnt) { g.fillStyle = 'rgba(200,200,200,0.5)'; g.beginPath(); g.arc(cx + s * 0.16, cy - s * 0.2, s * 0.07, 0, 7); g.arc(cx + s * 0.24, cy - s * 0.3, s * 0.05, 0, 7); g.fill(); }
+      break;
+    }
+    case 'lever': {
+      const tip = b.on ? HEX(C.litHead) : '#4a3622';
+      if (b.f === D || b.f === U) {
+        prTex(g, 'cobble', x, y, s, 0, 5, 3, 6, 10);
+        g.strokeStyle = 'rgba(30,30,32,0.8)'; g.lineWidth = Math.max(1, s / 32); const k = s / 16; g.strokeRect(x + 5 * k, y + 3 * k, 6 * k, 10 * k);
+        if (b.on) { pr(g, x, y, s, 0, 7, 8, 2, 5, HEX(C.stick)); pr(g, x, y, s, 0, 8, 8, 1, 5, HEX(C.stickDark)); pr(g, x, y, s, 0, 7, 12, 2, 2, tip); }
+        else { pr(g, x, y, s, 0, 7, 3, 2, 5, HEX(C.stick)); pr(g, x, y, s, 0, 8, 3, 1, 5, HEX(C.stickDark)); pr(g, x, y, s, 0, 7, 2, 2, 2, tip); }
+        if (b.f === U) { g.setLineDash([3, 3]); g.strokeStyle = '#9aa'; g.strokeRect(x + 2, y + 2, s - 4, s - 4); g.setLineDash([]); }
+      } else {
+        const q = b.f;
+        prTex(g, 'cobble', x, y, s, q, 4, 0, 8, 4);
+        pr(g, x, y, s, q, 7, 4, 2, 3, HEX(C.stick));
+        const dx = b.on ? 1 : -1;
+        pr(g, x, y, s, q, 7 + dx, 7, 2, 2, HEX(C.stick)); pr(g, x, y, s, q, 7 + 2 * dx, 9, 2, 2, tip);
+      }
+      if (b.on && fx) glow(g, 'red', cx, cy, s * 0.8, 0.25);
+      break;
+    }
+    case 'button_stone': case 'button_wood': {
+      const t = b.t === 'button_wood' ? 'planks' : 'stone';
+      if (b.f === D || b.f === U) { if (b.on) prTex(g, t, x, y, s, 0, 5, 7, 6, 2); else prTex(g, t, x, y, s, 0, 5, 6, 6, 4); }
+      else { if (b.on) prTex(g, t, x, y, s, b.f, 5, 0, 6, 1); else prTex(g, t, x, y, s, b.f, 5, 0, 6, 2); }
+      const r = b.f < 4 ? rq(b.f, 5, 0, 6, b.on ? 1 : 2) : rq(0, 5, b.on ? 7 : 6, 6, b.on ? 2 : 4), k = s / 16;
+      g.strokeStyle = b.on ? '#ff4a2e' : 'rgba(25,25,27,0.85)'; g.lineWidth = Math.max(1, s / 28); g.strokeRect(x + r[0] * k, y + r[1] * k, r[2] * k, r[3] * k);
+      if (b.f === U) { g.setLineDash([3, 3]); g.strokeStyle = '#9aa'; g.lineWidth = 1; g.strokeRect(x + 2, y + 2, s - 4, s - 4); g.setLineDash([]); }
+      break;
+    }
+    case 'plate': {
+      prTex(g, b.on ? 'plateOn' : 'plate', x, y, s, 0, 1, 1, 14, 14);
+      if (b.on) { const k = s / 16; g.strokeStyle = '#ff4a2e'; g.lineWidth = Math.max(1, s / 24); g.strokeRect(x + 1.5 * k, y + 1.5 * k, 13 * k, 13 * k); }
+      if (b.lock) pr(g, x, y, s, 0, 7, 7, 2, 2, HEX(C.gold));
+      break;
+    }
+    case 'rail': prTex(g, b.on ? 'railOn' : 'railOff', x, y, s, b.f ? 1 : 0); if (b.on && fx) glow(g, 'red', cx, cy, s, 0.2); break;
+    case 'trapdoor':
+      if (!b.on) tex(g, 'iron', x, y, s);
+      else { prTex(g, 'iron', x, y, s, b.f, 0, 0, 16, 3); g.strokeStyle = 'rgba(200,200,210,0.22)'; g.lineWidth = 1; g.strokeRect(x + 1.5, y + 1.5, s - 3, s - 3); }
+      break;
+    case 'door': case 'door_top': prTex(g, b.t === 'door' ? 'doorBot' : 'doorTop', x, y, s, b.on ? (b.f + 1) % 4 : b.f, 0, 0, 16, 3); break;
+    case 'piston': case 'sticky': {
+      const f = b.f, st = b.t === 'sticky';
+      if (f < 4) {
+        if (!b.ext) prTex(g, 'pistonSide', x, y, s, f);
+        else { prTex(g, 'pistonSide', x, y, s, f, 0, 4, 16, 12); pr(g, x, y, s, f, 0, 0, 16, 4, '#3b3b3e'); pr(g, x, y, s, f, 6, 0, 4, 4, '#c3a06a'); }
+      } else if (f === U) tex(g, b.ext ? 'pistonInner' : st ? 'pistonTopSticky' : 'pistonTop', x, y, s);
+      else tex(g, 'pistonBottom', x, y, s);
+      if (f >= 4 && s >= 18) { g.fillStyle = 'rgba(255,245,225,0.9)'; g.font = `700 ${Math.round(s * 0.28)}px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(f === U ? '▲' : '▼', x + s * 0.8, y + s * 0.2); }
+      if (b.jam && Sim.T - b.jam < 5) { g.strokeStyle = '#f0a33a'; g.lineWidth = 2; g.strokeRect(x + 1, y + 1, s - 2, s - 2); }
+      break;
+    }
+    case 'piston_head': {
+      const f = b.f;
+      if (f < 4) { pr(g, x, y, s, f, 6, 4, 4, 12, '#c3a06a'); pr(g, x, y, s, f, 9, 4, 1, 12, '#9c7c4c'); prTex(g, 'pistonSide', x, y, s, f, 0, 0, 16, 4); }
+      else if (f === U) tex(g, b.sticky ? 'pistonTopSticky' : 'pistonTop', x, y, s);
+      else { tex(g, 'pistonInner', x, y, s); pr(g, x, y, s, 0, 6, 6, 4, 4, '#c3a06a'); }
+      break;
+    }
+    case 'observer': {
+      const f = b.f;
+      if (f < 4) {
+        prTex(g, 'observerTop', x, y, s, OPP[f]);                           // flèche vers la sortie
+        pr(g, x, y, s, f, 0, 0, 16, 2, '#2c2c2e'); pr(g, x, y, s, f, 3, 0, 4, 1, '#0e0e10'); pr(g, x, y, s, f, 9, 0, 4, 1, '#0e0e10');
+        pr(g, x, y, s, OPP[f], 6, 0, 4, 2, b.on ? '#ff3b1f' : '#5a1610');
+      } else tex(g, f === U ? 'observerFace' : (b.on ? 'observerBack1' : 'observerBack0'), x, y, s);
+      if (b.on && fx) glow(g, 'red', cx, cy, s * 1.1, 0.3);
+      break;
+    }
+  }
+}
+/* Atlas de poudre déjà agrandi à la taille d'une case : chaque tuile devient une simple copie */
+const DUST_SCALED = { s: 0, c: null };
+function dustAtlasAt(s) {
+  if (DUST_SCALED.s === s) return DUST_SCALED.c;
+  const c = cnv(16 * s, 16 * s), g = c.getContext('2d');
+  g.imageSmoothingEnabled = false; g.drawImage(DUST_ATLAS, 0, 0, 16 * s, 16 * s);
+  DUST_SCALED.s = s; DUST_SCALED.c = c;
+  return c;
+}
+/* Poudre dessinée en lot : tuiles de l'atlas (zoom normal) ou rectangles groupés (très dézoomé) */
 const DUST_BUCK = Array.from({ length: 16 }, () => []);
-function dustRects(g, arr, sx, sz, cs, hw, ext) {
+function dustRects(g, arr, sx, sz, cs, hw) {
   const half = cs / 2;
   g.beginPath();
   for (const b of arr) {
     const cx = sx(b.x) + half, cy = sz(b.z) + half, p = b.pt;
-    if (p & 1) g.rect(cx - hw, cy - half - ext, hw * 2, half + ext);
-    if (p & 2) g.rect(cx, cy - hw, half + ext, hw * 2);
-    if (p & 4) g.rect(cx - hw, cy, hw * 2, half + ext);
-    if (p & 8) g.rect(cx - half - ext, cy - hw, half + ext, hw * 2);
+    if (p & 1) g.rect(cx - hw, cy - half, hw * 2, half);
+    if (p & 2) g.rect(cx, cy - hw, half, hw * 2);
+    if (p & 4) g.rect(cx - hw, cy, hw * 2, half);
+    if (p & 8) g.rect(cx - half, cy - hw, half, hw * 2);
+    g.rect(cx - hw * 1.4, cy - hw * 1.4, hw * 2.8, hw * 2.8);
   }
-  g.fill('nonzero');
+  g.fill();
 }
 function drawDustBatch(g, list, sx, sz, cs, now, fx) {
   if (!list.length) return;
-  const w = Math.max(1.5, cs * 0.2), hw = w / 2, r = Math.max(1, w * 0.8);
-  const big = cs >= 20 && list.length < 4000;
+  const w = Math.max(1.5, cs * 0.2);
   for (let L = 0; L < 16; L++) DUST_BUCK[L].length = 0;
   for (const b of list) DUST_BUCK[b.lvl].push(b);
   const gl = GLOWQ.ctx;
   if (fx && gl) for (let L = 1; L < 16; L++) {
     const arr = DUST_BUCK[L]; if (!arr.length) continue;
     gl.fillStyle = `rgba(255,50,22,${0.12 + 0.36 * L / 15})`;
-    dustRects(gl, arr, sx, sz, cs, w * 1.5, 0);
+    dustRects(gl, arr, sx, sz, cs, w * 1.5);
   }
-  for (let L = 0; L < 16; L++) {
-    const arr = DUST_BUCK[L]; if (!arr.length) continue;
-    g.fillStyle = DUST_COLORS[L];
-    dustRects(g, arr, sx, sz, cs, hw, 0);
-    if (big) {
-      g.beginPath();
-      for (const b of arr) { const cx = sx(b.x) + cs / 2, cy = sz(b.z) + cs / 2, q = b.pt ? r : r * 1.4; g.moveTo(cx + q, cy); g.arc(cx, cy, q, 0, 6.2832); }
-      g.fill();
-    } else { g.beginPath(); for (const b of arr) { const cx = sx(b.x) + cs / 2, cy = sz(b.z) + cs / 2, q = b.pt ? r : r * 1.4; g.rect(cx - q, cy - q, q * 2, q * 2); } g.fill(); }
-  }
-  if (fx && big && !UI.reduceMotion) {
+  if (cs >= 10 && list.length <= 700) {
+    const t = Math.round(cs), at = dustAtlasAt(t);
+    for (const b of list) g.drawImage(at, b.pt * t, b.lvl * t, t, t, sx(b.x), sz(b.z), t, t);
+  } else for (let L = 0; L < 16; L++) { const arr = DUST_BUCK[L]; if (!arr.length) continue; g.fillStyle = DUST_COLORS[L]; dustRects(g, arr, sx, sz, cs, w / 2); }
+  if (fx && cs >= 20 && list.length < 800 && !UI.reduceMotion) {
     const sh = new Path2D();
     for (let L = 1; L < 16; L++) for (const b of DUST_BUCK[L]) {
       const cx = sx(b.x) + cs / 2, cy = sz(b.z) + cs / 2;
       for (let h = 0; h < 4; h++) if (b.pt >> h & 1) { sh.moveTo(cx, cy); sh.lineTo(cx + DIRS[h][0] * cs * 0.5, cy + DIRS[h][2] * cs * 0.5); }
     }
-    g.strokeStyle = 'rgba(255,205,165,0.28)'; g.lineWidth = Math.max(1, w * 0.3); g.lineCap = 'butt';
-    g.setLineDash([cs * 0.3, cs * 0.45]); g.lineDashOffset = -now * 0.012 * (cs / 32);
+    g.strokeStyle = 'rgba(255,215,180,0.22)'; g.lineWidth = Math.max(1, cs / 16); g.lineCap = 'butt';
+    g.setLineDash([cs * 0.25, cs * 0.5]); g.lineDashOffset = -now * 0.012 * (cs / 32);
     g.stroke(sh); g.setLineDash([]);
   }
   if (cs >= 14) {
@@ -1399,238 +1792,11 @@ function lodColor(b) {
   if (b.t === 'comparator' && b.lvl) return '#ff4a26';
   return LOD_COL[b.t] || '#777';
 }
-/* Une petite torche vue de dessus */
-function torchHead(g, cx, cy, r, lit, burnt, fx) {
-  g.fillStyle = '#3b2a1a'; g.beginPath(); g.arc(cx, cy, r * 1.25, 0, 7); g.fill();
-  g.fillStyle = burnt ? '#55524f' : lit ? '#ff4a26' : '#5a1b12';
-  g.beginPath(); g.arc(cx, cy, r, 0, 7); g.fill();
-  if (lit && fx) glow(g, 'red', cx, cy, r * 7, 0.55);
-  if (lit) { g.fillStyle = '#ffd0a0'; g.beginPath(); g.arc(cx - r * .3, cy - r * .3, r * .35, 0, 7); g.fill(); }
-}
-function arrow(g, s, color) {
-  g.fillStyle = color; g.beginPath(); g.moveTo(0, -s * 0.44); g.lineTo(s * 0.13, -s * 0.3); g.lineTo(-s * 0.13, -s * 0.3); g.closePath(); g.fill();
-}
-/* Repère un bloc opaque alimenté : rouge plein = fort, contour = faible */
-function poweredMark(g, b, x, y, s) {
-  if (!b.pw) return;
-  g.fillStyle = `rgba(255,50,30,${0.08 + 0.14 * b.pw / 15})`; g.fillRect(x, y, s, s);
-  const m = Math.max(3, s * 0.16);
-  if (b.sp) { g.fillStyle = '#ff4a2e'; g.fillRect(x + s * 0.08, y + s * 0.08, m, m); }
-  else { g.strokeStyle = '#ff6a50'; g.lineWidth = Math.max(1, s * 0.04); g.strokeRect(x + s * 0.08, y + s * 0.08, m, m); }
-}
-/* Dessine le bloc b dans la case (x, y) de taille s. fx = effets (halo, animation). */
-function drawBlock(g, b, x, y, s, now, fx) {
-  const cx = x + s / 2, cy = y + s / 2;
-  switch (b.t) {
-    case 'solid': tex(g, 'stone', x, y, s); poweredMark(g, b, x, y, s); break;
-    case 'obsidian': tex(g, 'obsidian', x, y, s); poweredMark(g, b, x, y, s); break;
-    case 'glass': tex(g, 'glass', x, y, s); break;
-    case 'rblock': tex(g, 'rblock', x, y, s); if (fx) glow(g, 'red', cx, cy, s * 1.6, 0.25); break;
-    case 'lamp':
-      tex(g, b.on ? 'lampOn' : 'lampOff', x, y, s);
-      if (b.on && fx) glow(g, 'lamp', cx, cy, s * 2.6, 0.55);
-      break;
-    case 'note': {
-      tex(g, 'note', x, y, s); poweredMark(g, b, x, y, s);
-      g.fillStyle = '#f3d9a6'; g.font = `700 ${Math.round(s * 0.5)}px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle';
-      g.fillText('♪', cx, cy + s * 0.02);
-      if (b.flash && now - b.flash < 400) { g.fillStyle = `rgba(140,255,170,${0.5 * (1 - (now - b.flash) / 400)})`; g.fillRect(x, y, s, s); }
-      break;
-    }
-    case 'command': {
-      tex(g, 'command', x, y, s); poweredMark(g, b, x, y, s);
-      if (b.flash && now - b.flash < 400) { g.fillStyle = `rgba(255,230,160,${0.5 * (1 - (now - b.flash) / 400)})`; g.fillRect(x, y, s, s); }
-      break;
-    }
-    case 'hopper': {
-      tex(g, 'hopper', x, y, s);
-      if (b.lvl) { const h = (s * 0.7) * b.lvl / 15; g.fillStyle = '#e9c25a'; g.fillRect(x + s * 0.86, y + s * 0.85 - h, s * 0.08, h); }
-      if (b.on) { g.fillStyle = '#ff4a2e'; g.beginPath(); g.arc(x + s * 0.18, y + s * 0.18, s * 0.07, 0, 7); g.fill(); }
-      break;
-    }
-    case 'daylight': {
-      tex(g, b.m ? 'daylightInv' : 'daylight', x, y, s);
-      if (b.lvl && fx) glow(g, 'lamp', cx, cy, s * 1.4, 0.15 * b.lvl / 15);
-      break;
-    }
-    case 'dust': drawDust(g, b, x, y, s, now, fx); break;
-    case 'repeater': case 'comparator': drawDiode(g, b, x, y, s, fx); break;
-    case 'torch': {
-      const r = s * 0.13;
-      if (b.f === D) torchHead(g, cx, cy, r, b.on, b.burnt, fx);
-      else {
-        const d = DIRS[b.f], ex = cx + d[0] * s * 0.5, ey = cy + d[2] * s * 0.5;
-        const hx = cx - d[0] * s * 0.06, hy = cy - d[2] * s * 0.06;
-        g.strokeStyle = '#7a5a36'; g.lineWidth = s * 0.12; g.lineCap = 'round';
-        g.beginPath(); g.moveTo(ex, ey); g.lineTo(hx, hy); g.stroke();
-        torchHead(g, hx, hy, r, b.on, b.burnt, fx);
-      }
-      if (b.burnt) { g.fillStyle = 'rgba(200,200,200,0.5)'; g.beginPath(); g.arc(cx + s * 0.16, cy - s * 0.2, s * 0.08, 0, 7); g.arc(cx + s * 0.24, cy - s * 0.3, s * 0.06, 0, 7); g.fill(); }
-      break;
-    }
-    case 'lever': {
-      const f = b.f, wall = f < 4;
-      g.save(); g.translate(cx, cy); if (wall) g.rotate(f * Math.PI / 2);
-      const by = wall ? -s * 0.36 : 0;
-      g.fillStyle = '#7d7d80'; rr(g, -s * 0.2, by - s * 0.12, s * 0.4, s * 0.24, s * 0.04); g.fill();
-      g.strokeStyle = '#2c2c2e'; g.lineWidth = 1; g.stroke();
-      const ang = (b.on ? 1 : -1) * 0.65;
-      const tx = Math.sin(ang) * s * 0.34, ty = by + (wall ? Math.cos(ang) * s * 0.34 : -Math.cos(ang) * s * 0.34);
-      g.strokeStyle = '#8a6a40'; g.lineWidth = s * 0.08; g.lineCap = 'round';
-      g.beginPath(); g.moveTo(0, by); g.lineTo(tx, ty); g.stroke();
-      g.fillStyle = b.on ? '#ff4a26' : '#5a1b12'; g.beginPath(); g.arc(tx, ty, s * 0.08, 0, 7); g.fill();
-      if (f === U) { g.setLineDash([3, 3]); g.strokeStyle = '#9aa'; g.strokeRect(-s * 0.3, -s * 0.3, s * 0.6, s * 0.6); g.setLineDash([]); }
-      g.restore();
-      if (b.on && fx) glow(g, 'red', cx, cy, s * 0.9, 0.3);
-      break;
-    }
-    case 'button_stone': case 'button_wood': {
-      const f = b.f, wall = f < 4, col = b.t === 'button_wood' ? '#a07c4a' : '#8c8c90';
-      g.save(); g.translate(cx, cy); if (wall) g.rotate(f * Math.PI / 2);
-      const th = b.on ? 0.1 : 0.18;
-      if (wall) { g.fillStyle = col; g.fillRect(-s * 0.2, -s * 0.5, s * 0.4, s * th); }
-      else { g.fillStyle = col; rr(g, -s * 0.2, -s * 0.14, s * 0.4, s * 0.28, s * 0.05); g.fill(); }
-      if (b.on) { g.strokeStyle = '#ff4a2e'; g.lineWidth = Math.max(1.5, s * 0.05); if (wall) g.strokeRect(-s * 0.2, -s * 0.5, s * 0.4, s * th); else { rr(g, -s * 0.2, -s * 0.14, s * 0.4, s * 0.28, s * 0.05); g.stroke(); } }
-      if (f === U) { g.setLineDash([3, 3]); g.strokeStyle = '#9aa'; g.lineWidth = 1; g.strokeRect(-s * 0.3, -s * 0.3, s * 0.6, s * 0.6); g.setLineDash([]); }
-      g.restore();
-      break;
-    }
-    case 'plate': {
-      const i = s * 0.1;
-      g.fillStyle = b.on ? '#6f6f73' : '#909094'; rr(g, x + i, y + i, s - 2 * i, s - 2 * i, s * 0.06); g.fill();
-      g.strokeStyle = b.on ? '#ff4a2e' : '#5d5d61'; g.lineWidth = Math.max(1, s * 0.04); g.stroke();
-      if (b.lock) { g.fillStyle = '#e9c25a'; g.fillRect(cx - s * 0.06, cy - s * 0.06, s * 0.12, s * 0.12); }
-      break;
-    }
-    case 'rail': {
-      g.save(); g.translate(cx, cy); if (b.f === 1) g.rotate(Math.PI / 2);
-      g.fillStyle = '#5b4126'; for (let k = -1.5; k <= 1.5; k++) g.fillRect(-s * 0.36, k * s * 0.25 - s * 0.05, s * 0.72, s * 0.1);
-      g.fillStyle = '#d9b34c'; g.fillRect(-s * 0.3, -s * 0.5, s * 0.08, s); g.fillRect(s * 0.22, -s * 0.5, s * 0.08, s);
-      g.fillStyle = b.on ? '#ff3b20' : '#5a1b12'; g.fillRect(-s * 0.04, -s * 0.5, s * 0.08, s);
-      g.restore();
-      if (b.on && fx) glow(g, 'red', cx, cy, s * 1.2, 0.25);
-      break;
-    }
-    case 'trapdoor': {
-      if (!b.on) { tex(g, 'iron', x + s * 0.04, y + s * 0.04, s * 0.92); }
-      else { g.save(); g.translate(cx, cy); g.rotate(b.f * Math.PI / 2); g.drawImage(TEX.iron, -s / 2, -s / 2, s, s * 0.2); g.restore(); g.strokeStyle = 'rgba(200,200,210,0.25)'; g.strokeRect(x + 1.5, y + 1.5, s - 3, s - 3); }
-      break;
-    }
-    case 'door': case 'door_top': {
-      const f = b.on ? (b.f + 1) % 4 : b.f;
-      g.save(); g.translate(cx, cy); g.rotate(f * Math.PI / 2);
-      g.drawImage(TEX.iron, -s / 2, -s / 2, s, s * 0.2);
-      if (b.t === 'door') { g.fillStyle = '#4a4a50'; g.fillRect(s * 0.25, -s * 0.36, s * 0.1, s * 0.08); }
-      g.restore();
-      if (b.t === 'door_top') { g.fillStyle = 'rgba(210,210,220,0.35)'; g.font = `600 ${Math.round(s * 0.26)}px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('haut', cx, cy + s * 0.12); }
-      break;
-    }
-    case 'piston': case 'sticky': drawPiston(g, b, x, y, s, now); break;
-    case 'piston_head': drawHead(g, b, x, y, s); break;
-    case 'observer': drawObserver(g, b, x, y, s, fx); break;
-  }
-}
-function drawDust(g, b, x, y, s, now, fx) {
-  const cx = x + s / 2, cy = y + s / 2, w = Math.max(2, s * 0.2), L = b.lvl;
-  if (L > 0 && fx) glow(g, 'red', cx, cy, s * 1.7, 0.14 + 0.3 * L / 15);
-  g.strokeStyle = DUST_COLORS[L]; g.fillStyle = DUST_COLORS[L];
-  g.lineWidth = w; g.lineCap = 'round';
-  g.beginPath();
-  for (let h = 0; h < 4; h++) if (b.pt >> h & 1) { g.moveTo(cx, cy); g.lineTo(cx + DIRS[h][0] * s * 0.5, cy + DIRS[h][2] * s * 0.5); }
-  g.stroke();
-  g.beginPath(); g.arc(cx, cy, b.pt ? w * 0.8 : w * 1.1, 0, 7); g.fill();
-  if (L > 0 && fx && !UI.reduceMotion) {
-    g.strokeStyle = `rgba(255,200,160,${0.1 + 0.22 * L / 15})`; g.lineWidth = Math.max(1, w * 0.3);
-    g.setLineDash([s * 0.3, s * 0.45]); g.lineDashOffset = -now * 0.012 * (s / 32);
-    g.beginPath();
-    for (let h = 0; h < 4; h++) if (b.pt >> h & 1) { g.moveTo(cx, cy); g.lineTo(cx + DIRS[h][0] * s * 0.5, cy + DIRS[h][2] * s * 0.5); }
-    g.stroke(); g.setLineDash([]);
-  }
-  // marches : ▲ la poudre monte d'un bloc, ▼ elle descend
-  if ((b.upm | b.dnm) && s >= 14) {
-    g.fillStyle = '#ffd8c8';
-    for (let h = 0; h < 4; h++) {
-      const up = b.upm >> h & 1, dn = b.dnm >> h & 1; if (!up && !dn) continue;
-      const px = cx + DIRS[h][0] * s * 0.36, py = cy + DIRS[h][2] * s * 0.36, a = s * 0.09, k = up ? -1 : 1;
-      g.beginPath(); g.moveTo(px, py + k * a); g.lineTo(px - a, py - k * a * 0.6); g.lineTo(px + a, py - k * a * 0.6); g.closePath(); g.fill();
-    }
-  }
-}
-function drawDiode(g, b, x, y, s, fx) {
-  const cx = x + s / 2, cy = y + s / 2, comp = b.t === 'comparator';
-  g.drawImage(TEX.slab, x + s * 0.04, y + s * 0.04, s * 0.92, s * 0.92);
-  g.save(); g.translate(cx, cy); g.rotate(b.f * Math.PI / 2);
-  arrow(g, s, comp ? (b.lvl ? '#ff7a5c' : '#6e6e72') : (b.on ? '#ff7a5c' : '#6e6e72'));
-  const r = s * 0.085;
-  if (!comp) {
-    torchHead(g, 0, -s * 0.16, r, b.on, false, fx);
-    torchHead(g, 0, s * 0.3 - (b.d - 1) * s * 0.1, r, b.on, false, fx);
-    if (b.lk) { g.fillStyle = '#1e1e20'; g.fillRect(-s * 0.4, s * 0.02, s * 0.8, s * 0.1); g.fillStyle = '#5c5c62'; g.fillRect(-s * 0.4, s * 0.02, s * 0.8, s * 0.025); }
-  } else {
-    torchHead(g, 0, -s * 0.2, r, b.m === 1, false, fx);
-    torchHead(g, -s * 0.22, s * 0.24, r, b.lvl > 0, false, fx);
-    torchHead(g, s * 0.22, s * 0.24, r, b.lvl > 0, false, fx);
-    g.fillStyle = '#d8d8dc'; g.fillRect(-s * 0.08, s * 0.08, s * 0.16, s * 0.12);
-  }
-  g.restore();
-}
-function drawPiston(g, b, x, y, s, now) {
-  const f = b.f, sticky = b.t === 'sticky';
-  tex(g, 'cobble', x, y, s);
-  if (f < 4) {
-    g.save(); g.translate(x + s / 2, y + s / 2); g.rotate(f * Math.PI / 2);
-    if (!b.ext) {
-      g.drawImage(TEX.planks, -s / 2, -s / 2, s, s * 0.25);
-      if (sticky) { g.fillStyle = '#6fbf5a'; g.fillRect(-s * 0.25, -s * 0.5, s * 0.5, s * 0.25); }
-    } else { g.fillStyle = '#c9a66b'; g.fillRect(-s * 0.08, -s * 0.5, s * 0.16, s * 0.5); g.fillStyle = '#3a3a3e'; g.fillRect(-s * 0.5, -s * 0.5, s, s * 0.06); }
-    g.restore();
-  } else {
-    if (f === U && !b.ext) { tex(g, 'planks', x, y, s); if (sticky) { g.fillStyle = '#6fbf5a'; g.fillRect(x + s * 0.25, y + s * 0.25, s * 0.5, s * 0.5); } }
-    else if (f === U) { g.fillStyle = '#c9a66b'; g.fillRect(x + s * 0.4, y + s * 0.4, s * 0.2, s * 0.2); }
-    g.fillStyle = '#f0e6d2'; g.font = `700 ${Math.round(s * 0.32)}px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillText(f === U ? '▲' : '▼', x + s * 0.78, y + s * 0.22);
-  }
-  if (b.jam && Sim.T - b.jam < 5) { g.strokeStyle = '#f0a33a'; g.lineWidth = 2; g.strokeRect(x + 1, y + 1, s - 2, s - 2); }
-}
-function drawHead(g, b, x, y, s) {
-  const f = b.f;
-  if (f < 4) {
-    g.save(); g.translate(x + s / 2, y + s / 2); g.rotate(f * Math.PI / 2);
-    g.fillStyle = '#c9a66b'; g.fillRect(-s * 0.08, -s * 0.25, s * 0.16, s * 0.75);
-    g.drawImage(TEX.planks, -s / 2, -s / 2, s, s * 0.25);
-    if (b.sticky) { g.fillStyle = '#6fbf5a'; g.fillRect(-s * 0.25, -s * 0.5, s * 0.5, s * 0.25); }
-    g.restore();
-  } else {
-    tex(g, 'planks', x, y, s);
-    if (b.sticky) { g.fillStyle = '#6fbf5a'; g.fillRect(x + s * 0.25, y + s * 0.25, s * 0.5, s * 0.5); }
-    if (f === D) { g.fillStyle = 'rgba(0,0,0,.35)'; g.fillRect(x, y, s, s); g.fillStyle = '#c9a66b'; g.fillRect(x + s * 0.4, y + s * 0.4, s * 0.2, s * 0.2); }
-  }
-}
-function drawObserver(g, b, x, y, s, fx) {
-  const f = b.f;
-  tex(g, 'observer', x, y, s);
-  const eyes = () => { g.fillStyle = '#2b2b2e'; g.fillRect(-s * 0.3, -s * 0.5, s * 0.6, s * 0.22); g.fillStyle = '#0d0d0f'; g.fillRect(-s * 0.22, -s * 0.44, s * 0.12, s * 0.1); g.fillRect(s * 0.1, -s * 0.44, s * 0.12, s * 0.1); };
-  if (f < 4) {
-    g.save(); g.translate(x + s / 2, y + s / 2); g.rotate(f * Math.PI / 2);
-    eyes();
-    g.fillStyle = b.on ? '#ff3b20' : '#5a1b12'; g.beginPath(); g.arc(0, s * 0.36, s * 0.08, 0, 7); g.fill();
-    g.fillStyle = '#c8c8cc'; g.beginPath(); g.moveTo(0, s * 0.22); g.lineTo(-s * 0.1, s * 0.04); g.lineTo(s * 0.1, s * 0.04); g.closePath(); g.fill();
-    g.restore();
-  } else if (f === U) {
-    g.save(); g.translate(x + s / 2, y + s / 2); g.translate(0, s * 0.36); eyes(); g.restore();
-  } else {
-    g.fillStyle = b.on ? '#ff3b20' : '#5a1b12'; g.beginPath(); g.arc(x + s / 2, y + s / 2, s * 0.12, 0, 7); g.fill();
-  }
-  if (b.on && fx) glow(g, 'red', x + s / 2, y + s / 2, s * 1.2, 0.3);
-}
 /* Niveau affiché sur un bloc (mode « niveaux de puissance ») */
 function blockLevel(b) {
   switch (b.t) {
-    case 'dust': return b.lvl;
-    case 'comparator': case 'daylight': return b.lvl;
-    case 'hopper': return b.lvl;
-    case 'repeater': case 'lever': case 'button_stone': case 'button_wood': case 'plate': case 'observer': return b.on ? 15 : 0;
-    case 'torch': return b.on ? 15 : 0;
+    case 'dust': case 'comparator': case 'daylight': case 'hopper': return b.lvl;
+    case 'repeater': case 'lever': case 'button_stone': case 'button_wood': case 'plate': case 'observer': case 'torch': return b.on ? 15 : 0;
     case 'rblock': return 15;
   }
   if (BT[b.t].cond) return b.pw;
@@ -1646,10 +1812,11 @@ function levelText(g, v, cx, cy, s) {
 /* =====================================================================
    10. RENDU DE LA GRILLE 2D
    ===================================================================== */
-const FONT = '"Segoe UI", system-ui, sans-serif', MONO = 'ui-monospace, Menlo, Consolas, monospace';
+const PARTICLE_COL = { dust: ['#d6140a', '#ff3b1f', '#8a0a05'], torch: ['#ff4a26', '#7a5a36'], lever: ['#8a6a40', '#7d7d80'], repeater: ['#a8a8aa', '#ff3b1f'],
+  comparator: ['#a8a8aa', '#ff3b1f'], button_stone: ['#8c8c90'], button_wood: ['#a07c4a'], plate: ['#909094'], rail: ['#d9b34c', '#5b4126'], door: ['#cfcfd5'], door_top: ['#cfcfd5'] };
 const R = {
   cv: null, g: null, dpr: 1, w: 0, h: 0,
-  cam: { x: 0, y: 0, z: 1 }, dirty: true, lastTick: 0, tickMs: 100,
+  cam: { x: 0, y: 0, z: 1 }, dirty: true, lastTick: 0, tickMs: 100, particles: [],
   cs() { return 32 * this.cam.z; },
   resize() {
     const r = this.cv.getBoundingClientRect();
@@ -1673,6 +1840,27 @@ const R = {
     this.cam.z = clamp(Math.min((this.w - 120) / (wc * 32), (this.h - 140) / (hc * 32)), 0.25, 2);
     this.center((bb.x0 + bb.x1 + 1) / 2, (bb.z0 + bb.z1 + 1) / 2);
   },
+  /* Éclats quand un bloc casse (piston, perte de support) */
+  burst(b) {
+    const cols = PARTICLE_COL[b.t] || ['#9a9a9e'], now = performance.now(), rnd = Math.random;
+    for (let i = 0; i < 12; i++) {
+      const a = rnd() * Math.PI * 2, v = 0.6 + rnd() * 1.4;
+      this.particles.push({ x: b.x + 0.5, y: b.y, z: b.z + 0.5, vx: Math.cos(a) * v, vz: Math.sin(a) * v, c: cols[i % cols.length], t0: now, life: 380 + rnd() * 260, s: 0.08 + rnd() * 0.08 });
+    }
+    UI.flashUntil = Math.max(UI.flashUntil || 0, now + 700);
+  },
+  drawParticles(g, Y, sx, sz, cs, now) {
+    if (!this.particles.length) return;
+    this.particles = this.particles.filter(p => now - p.t0 < p.life);
+    for (const p of this.particles) {
+      if (p.y !== Y) continue;
+      const t = (now - p.t0) / p.life, e = 1 - (1 - t) * (1 - t);
+      g.globalAlpha = 1 - t; g.fillStyle = p.c;
+      const s = p.s * cs, px = sx(0) + (p.x + p.vx * e * 0.6) * cs, pz = sz(0) + (p.z + p.vz * e * 0.6) * cs;
+      g.fillRect(px - s / 2, pz - s / 2, s, s);
+    }
+    g.globalAlpha = 1;
+  },
 
   draw(now) {
     const g = this.g, cs = this.cs(), W_ = this.w, H_ = this.h;
@@ -1684,16 +1872,15 @@ const R = {
     const view = { x0, x1, z0, z1 };
     this.grid(g, cs, view);
     const Y = UI.layer, anim = Sim.running || this.hasMoving();
-    // calque des halos : quart de résolution, agrandi avec lissage (flou doux et peu coûteux)
+    // calque des halos : quart de résolution, flouté puis agrandi (doux et peu coûteux)
     const gw = Math.ceil(W_ / 4), gh = Math.ceil(H_ / 4);
-    if (!this.glowCv) { this.glowCv = document.createElement('canvas'); this.glowG = this.glowCv.getContext('2d'); }
+    if (!this.glowCv) { this.glowCv = cnv(gw, gh); this.glowG = this.glowCv.getContext('2d'); }
     if (this.glowCv.width !== gw || this.glowCv.height !== gh) { this.glowCv.width = gw; this.glowCv.height = gh; }
     const gg = this.glowG; gg.setTransform(1, 0, 0, 1, 0, 0); gg.clearRect(0, 0, gw, gh); gg.setTransform(0.25, 0, 0, 0.25, 0, 0);
     GLOWQ.ctx = gg;
     const sx = x => Math.round(x * cs - this.cam.x), sz = z => Math.round(z * cs - this.cam.y);
     // couche du dessous en transparence (montre les supports)
     if (Y > 0) { g.globalAlpha = 0.3; this.layer(g, Y - 1, view, sx, sz, now, false); g.globalAlpha = 1; }
-    // couche courante
     this.layer(g, Y, view, sx, sz, now, true);
     // couche du dessus, très légère, là où la couche courante est vide
     if (Y + 1 < MAXY && W.layers[Y + 1].size) {
@@ -1705,13 +1892,13 @@ const R = {
       g.globalAlpha = 1;
     }
     GLOWQ.ctx = null;
-    if (!this.blurCv) { this.blurCv = document.createElement('canvas'); this.blurG = this.blurCv.getContext('2d'); }
+    if (!this.blurCv) { this.blurCv = cnv(gw, gh); this.blurG = this.blurCv.getContext('2d'); }
     if (this.blurCv.width !== gw || this.blurCv.height !== gh) { this.blurCv.width = gw; this.blurCv.height = gh; }
     const bg = this.blurG; bg.clearRect(0, 0, gw, gh);
     bg.filter = 'blur(' + Math.max(1, Math.min(3, cs / 14)).toFixed(1) + 'px)'; bg.drawImage(this.glowCv, 0, 0); bg.filter = 'none';
     g.save(); g.globalCompositeOperation = 'lighter'; g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'medium';
     g.drawImage(this.blurCv, 0, 0, gw * 4, gh * 4); g.restore();
-    // niveaux de puissance
+    this.drawParticles(g, Y, sx, sz, cs, now);
     if (UI.showLevels && cs >= 16) {
       for (const b of W.layers[Y]) {
         if (b.x < x0 || b.x > x1 || b.z < z0 || b.z > z1 || b.mv) continue;
@@ -1720,7 +1907,6 @@ const R = {
         levelText(g, v, px + s / 2, pz + s / 2, s);
       }
     }
-    // composants instables
     if (Sim.unstableUntil > Sim.T) {
       const a = 0.5 + 0.5 * Math.sin(now / 150);
       g.strokeStyle = `rgba(240,163,58,${0.4 + 0.5 * a})`; g.lineWidth = 2;
@@ -1743,7 +1929,6 @@ const R = {
     for (let x = Math.ceil(v.x0 / 16) * 16; x <= v.x1; x += 16) { const p = Math.round(x * cs - this.cam.x) + 0.5; g.moveTo(p, 0); g.lineTo(p, this.h); }
     for (let z = Math.ceil(v.z0 / 16) * 16; z <= v.z1; z += 16) { const p = Math.round(z * cs - this.cam.y) + 0.5; g.moveTo(0, p); g.lineTo(this.w, p); }
     g.stroke();
-    // origine
     const ox = Math.round(-this.cam.x), oz = Math.round(-this.cam.y);
     g.fillStyle = '#4a2a28'; g.fillRect(ox - 1, oz - 6, 2, 12); g.fillRect(ox - 6, oz - 1, 12, 2);
   },
@@ -1760,12 +1945,11 @@ const R = {
       drawBlock(g, b, px, pz, sx(b.x + 1) - px, now, fx);
     }
     drawDustBatch(g, dusts, sx, sz, cs, now, fx);
-    // blocs poussés par un piston : glissement interpolé
     for (const b of moving) {
       const d = DIRS[b.mv.dir], k = 1 - clamp((now - b.mv.t0) / Math.min(this.tickMs, 150), 0, 1);
-      const px = sx(b.x) - d[0] * k * this.cs(), pz = sz(b.z) - d[2] * k * this.cs();
+      const px = sx(b.x) - d[0] * k * cs, pz = sz(b.z) - d[2] * k * cs;
       const a = g.globalAlpha; if (d[1]) g.globalAlpha = a * (1 - k * 0.7);
-      drawBlock(g, b, px, pz, this.cs(), now, fx);
+      drawBlock(g, b, px, pz, cs, now, fx);
       g.globalAlpha = a;
     }
     flushGlows(g); GLOWQ.on = false;
@@ -1774,8 +1958,7 @@ const R = {
   layerImage(Y) {
     const bb = W.bounds(Y) || { x0: 0, x1: 4, z0: 0, z1: 4 };
     const cs = clamp(Math.floor(4000 / Math.max(bb.x1 - bb.x0 + 3, bb.z1 - bb.z0 + 3)), 8, 32);
-    const c = document.createElement('canvas');
-    c.width = (bb.x1 - bb.x0 + 3) * cs; c.height = (bb.z1 - bb.z0 + 3) * cs;
+    const c = cnv((bb.x1 - bb.x0 + 3) * cs, (bb.z1 - bb.z0 + 3) * cs);
     const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
     g.fillStyle = '#0f1115'; g.fillRect(0, 0, c.width, c.height);
     g.strokeStyle = '#1c2028'; g.beginPath();
@@ -1793,24 +1976,25 @@ const R = {
 };
 
 /* =====================================================================
-   11. VUE ISOMÉTRIQUE 3D (lecture seule, canvas)
+   11. VUE ISOMÉTRIQUE 3D TEXTURÉE (lecture seule)
+   Chaque face visible reçoit sa texture par transformation affine,
+   comme les modèles de blocs de Minecraft (coordonnées en 1/16 de bloc).
    ===================================================================== */
-const COL = {
-  solid: [126, 126, 128], obsidian: [28, 18, 42], glass: [190, 225, 240], rblock: [190, 30, 18], lampOff: [104, 70, 40], lampOn: [250, 208, 120],
-  note: [116, 74, 46], command: [184, 118, 76], hopper: [64, 64, 70], observer: [98, 99, 102], cobble: [116, 116, 118], planks: [178, 142, 88],
-  slab: [168, 168, 170], iron: [205, 205, 212], daylight: [196, 176, 134], wood: [160, 124, 74], stick: [122, 90, 54],
-};
+const OPAQUE = new Set(['solid', 'obsidian', 'rblock', 'lamp', 'note', 'command', 'observer', 'piston', 'sticky']);
+const FACE_OF = { N, E, S, W: O };
+const U_AXIS = [O, N, E, S];          // direction de l'axe u (vers la droite) pour les faces N, E, S, O
 const Iso = {
-  rot: 0, zoom: 1, ox: 0, oy: 0, cut: false, fitted: false, order: null, orderKey: '',
+  rot: 0, zoom: 1, ox: 0, oy: 0, cut: false, fitted: false, order: null, orderKey: '', D: 1, noCull: false, dustGlow: true,
   a() { return 16 * this.zoom; },
   rotP(x, z) { switch (this.rot) { case 0: return [x, z]; case 1: return [-z, x]; case 2: return [-x, -z]; default: return [z, -x]; } },
   P(X, Y, Z, a) { return [this.ox + (X - Z) * a, this.oy + (X + Z) * a * 0.5 - Y * a * 1.15]; },
-  shadeCache: new Map(),
-  shade(c, k) {
-    const key = c[0] * 65536 + c[1] * 256 + c[2] + k;
-    let v = this.shadeCache.get(key);
-    if (!v) { v = `rgb(${c[0] * k | 0},${c[1] * k | 0},${c[2] * k | 0})`; this.shadeCache.set(key, v); }
-    return v;
+  pt(x, y, z, a) { const [X, Z] = this.rotP(x, z); return this.P(X, y, Z, a); },
+  /* faces latérales visibles pour la rotation courante, avec leur ombrage */
+  sides() {
+    if (this._sidesRot === this.rot) return this._sides;
+    const out = [];
+    for (const d of [N, E, S, O]) { const [X, Z] = this.rotP(DIRS[d][0], DIRS[d][2]); if (X > 0) out.push([d, 0.4]); else if (Z > 0) out.push([d, 0.2]); }
+    this._sidesRot = this.rot; this._sides = out; return out;
   },
   sorted() {
     const key = W.version + ':' + Sim.structVer + ':' + this.rot + ':' + (this.cut ? UI.layer : -1);
@@ -1825,24 +2009,35 @@ const Iso = {
     this.order = arr; this.orderKey = key;
     return arr;
   },
-  /* Boîte en coordonnées monde (fractions de bloc) */
-  box(g, x0, y0, z0, x1, y1, z1, col, a, alpha = 1, stroke = false) {
-    const [ax, az] = this.rotP(x0, z0), [bx, bz] = this.rotP(x1, z1);
-    const X0 = Math.min(ax, bx), X1 = Math.max(ax, bx), Z0 = Math.min(az, bz), Z1 = Math.max(az, bz);
-    const p = (X, Y, Z) => this.P(X, Y, Z, a);
-    const quad = (pts, c) => { g.fillStyle = c; g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < 4; i++) g.lineTo(pts[i][0], pts[i][1]); g.closePath(); g.fill(); if (stroke) { g.strokeStyle = 'rgba(255,255,255,0.55)'; g.lineWidth = 1; g.stroke(); } };
-    g.globalAlpha = alpha;
-    quad([p(X0, y1, Z1), p(X1, y1, Z1), p(X1, y0, Z1), p(X0, y0, Z1)], this.shade(col, 0.78));
-    quad([p(X1, y1, Z0), p(X1, y1, Z1), p(X1, y0, Z1), p(X1, y0, Z0)], this.shade(col, 0.6));
-    quad([p(X0, y1, Z0), p(X1, y1, Z0), p(X1, y1, Z1), p(X0, y1, Z1)], this.shade(col, 1));
-    g.globalAlpha = 1;
+  /* Une face : texture (ou couleur [r,g,b]) recadrée (sx,sy,sw,sh) posée sur le parallélogramme O+U, O+V */
+  face(g, t, sx, sy, sw, sh, O, U, V, a, shade) {
+    const o = this.pt(O[0], O[1], O[2], a), u = this.pt(O[0] + U[0], O[1] + U[1], O[2] + U[2], a), v = this.pt(O[0] + V[0], O[1] + V[1], O[2] + V[2], a), D = this.D;
+    g.setTransform(D * (u[0] - o[0]) / 16, D * (u[1] - o[1]) / 16, D * (v[0] - o[0]) / 16, D * (v[1] - o[1]) / 16, D * o[0], D * o[1]);
+    if (Array.isArray(t)) { const k = 1 - (shade || 0); g.fillStyle = rgb(t[0] * k, t[1] * k, t[2] * k); g.fillRect(-0.1, -0.1, 16.2, 16.2); }
+    else g.drawImage(shadedTex(t, shade), sx, sy, Math.max(0.01, sw), Math.max(0.01, sh), -0.12, -0.12, 16.24, 16.24);
   },
-  line(g, x0, y0, z0, x1, y1, z1, color, w, a) {
-    const [ax, az] = this.rotP(x0, z0), [bx, bz] = this.rotP(x1, z1);
-    const p0 = this.P(ax, y0, az, a), p1 = this.P(bx, y1, bz, a);
-    g.strokeStyle = color; g.lineWidth = w; g.lineCap = 'round'; g.beginPath(); g.moveTo(p0[0], p0[1]); g.lineTo(p1[0], p1[1]); g.stroke();
+  /* Boîte en 1/16 de bloc. tf(face) renvoie une texture, une couleur [r,g,b] ou null (face masquée). */
+  box(g, bx, by, bz, x0, y0, z0, x1, y1, z1, tf, a, cull) {
+    const X0 = bx + x0 / 16, X1 = bx + x1 / 16, Y0 = by + y0 / 16, Y1 = by + y1 / 16, Z0 = bz + z0 / 16, Z1 = bz + z1 / 16;
+    for (const [d, sh] of this.sides()) {
+      if (cull && cull(d)) continue;
+      const t = tf('NESW'[d]); if (!t) continue;
+      const hgt = y1 - y0, vy = 16 - y1;
+      if (d === N) this.face(g, t, 16 - x1, vy, x1 - x0, hgt, [X1, Y1, Z0], [X0 - X1, 0, 0], [0, Y0 - Y1, 0], a, sh);
+      else if (d === S) this.face(g, t, x0, vy, x1 - x0, hgt, [X0, Y1, Z1], [X1 - X0, 0, 0], [0, Y0 - Y1, 0], a, sh);
+      else if (d === E) this.face(g, t, 16 - z1, vy, z1 - z0, hgt, [X1, Y1, Z1], [0, 0, Z0 - Z1], [0, Y0 - Y1, 0], a, sh);
+      else this.face(g, t, z0, vy, z1 - z0, hgt, [X0, Y1, Z0], [0, 0, Z1 - Z0], [0, Y0 - Y1, 0], a, sh);
+    }
+    if (!(cull && cull(U))) { const t = tf('U'); if (t) this.face(g, t, x0, z0, x1 - x0, z1 - z0, [X0, Y1, Z0], [X1 - X0, 0, 0], [0, 0, Z1 - Z0], a, 0); }
   },
-  pt(x, y, z, a) { const [X, Z] = this.rotP(x, z); return this.P(X, y, Z, a); },
+  /* variante d'une texture orientée pour qu'un motif « vers f » soit du bon côté sur la face */
+  bandQ(face, f) {
+    if (face === 'U') return f === N ? 0 : f === E ? 1 : f === S ? 2 : 3;
+    if (f === U) return 0; if (f === D) return 2;
+    const u = U_AXIS[FACE_OF[face]];
+    return f === u ? 1 : 3;
+  },
+  opaqueAt(x, y, z) { const n = W.get(x, y, z); return !!(n && !n.mv && OPAQUE.has(n.t) && !n.ext); },
   fit(w, h) {
     const bb = W.bounds();
     if (!bb) { this.zoom = 1.5; this.ox = w / 2; this.oy = h / 2; return; }
@@ -1857,141 +2052,160 @@ const Iso = {
     this.ox = w / 2 - (mnx + mxx) / 2 * k; this.oy = h / 2 - (mny + mxy) / 2 * k;
   },
   draw(g, w, h, now, bg = true) {
-    const a = this.a();
+    const a = this.a(), D = this.D;
+    g.setTransform(D, 0, 0, D, 0, 0);
     if (bg) { g.fillStyle = '#0f1115'; g.fillRect(0, 0, w, h); }
     const bb = W.bounds();
-    // sol quadrillé
     if (bb) {
-      g.strokeStyle = '#1d222b'; g.lineWidth = 1;
-      for (let x = bb.x0 - 2; x <= bb.x1 + 3; x++) this.line(g, x, 0, bb.z0 - 2, x, 0, bb.z1 + 3, '#1d222b', 1, a);
-      for (let z = bb.z0 - 2; z <= bb.z1 + 3; z++) this.line(g, bb.x0 - 2, 0, z, bb.x1 + 3, 0, z, '#1d222b', 1, a);
+      g.strokeStyle = '#1d222b'; g.lineWidth = 1; g.beginPath();
+      for (let x = bb.x0 - 2; x <= bb.x1 + 3; x++) { const p = this.pt(x, 0, bb.z0 - 2, a), q = this.pt(x, 0, bb.z1 + 3, a); g.moveTo(p[0], p[1]); g.lineTo(q[0], q[1]); }
+      for (let z = bb.z0 - 2; z <= bb.z1 + 3; z++) { const p = this.pt(bb.x0 - 2, 0, z, a), q = this.pt(bb.x1 + 3, 0, z, a); g.moveTo(p[0], p[1]); g.lineTo(q[0], q[1]); }
+      g.stroke();
     }
-    const glows = [];
-    const list = this.sorted(), m = a * 3;
+    g.imageSmoothingEnabled = false;
+    const glows = [], list = this.sorted(), m = a * 3;
     this.dustGlow = Sim.poweredDust < 1500;
     for (const it of list) {
-      const b = it.b, [X, Z] = this.rotP(b.x + 0.5, b.z + 0.5), [px, py] = this.P(X, b.y + 0.5, Z, a);
+      const b = it.b, [px, py] = this.pt(b.x + 0.5, b.y + 0.5, b.z + 0.5, a);
       if (px < -m || px > w + m || py < -m || py > h + m) continue;
       this.block(g, b, a, now, glows);
     }
+    g.setTransform(D, 0, 0, D, 0, 0);
     g.save(); g.globalCompositeOperation = 'lighter';
     for (const [x, y, z, name, s, al] of glows) { const [px, py] = this.pt(x, y, z, a); g.globalAlpha = al; g.drawImage(GLOW[name], px - s * a / 2, py - s * a / 2, s * a, s * a); }
     g.restore();
   },
+  /* Modèle 3D d'un bloc */
   block(g, b, a, now, glows) {
     if (b.dead) return;
     let x = b.x, y = b.y, z = b.z;
     if (b.mv) { const d = DIRS[b.mv.dir], k = 1 - clamp((now - b.mv.t0) / Math.min(R.tickMs, 150), 0, 1); x -= d[0] * k; y -= d[1] * k; z -= d[2] * k; }
-    const box = (x0, y0, z0, x1, y1, z1, c, al, st) => this.box(g, x + x0, y + y0, z + z0, x + x1, y + y1, z + z1, c, a, al, st);
-    const ln = (x0, y0, z0, x1, y1, z1, c, w) => this.line(g, x + x0, y + y0, z + z0, x + x1, y + y1, z + z1, c, w, a);
-    const torch = (bx, by, bz, tx, ty, tz, lit, burnt) => {
-      ln(bx, by, bz, tx, ty, tz, '#7a5a36', Math.max(2, a * 0.14));
-      const [px, py] = this.pt(x + tx, y + ty, z + tz, a);
-      g.fillStyle = burnt ? '#5a5652' : lit ? '#ff4a26' : '#5a1b12'; g.beginPath(); g.arc(px, py, Math.max(2, a * 0.12), 0, 7); g.fill();
-      if (lit) glows.push([x + tx, y + ty, z + tz, 'red', 1.6, 0.45]);
+    const box = (x0, y0, z0, x1, y1, z1, tf, cull) => this.box(g, x, y, z, x0, y0, z0, x1, y1, z1, tf, a, cull);
+    // boîte définie dans le repère « tourné vers f » (vue du dessus, u = travers, j = longueur, 0 = côté f)
+    const boxQ = (q, i, j, w, h, y0, y1, tf) => { const r = rq(q, i, j, w, h); box(r[0], y0, r[1], r[0] + r[2], y1, r[1] + r[3], tf); };
+    const cullFull = this.noCull ? null : (d) => {
+      const dd = DIRS[d]; return this.opaqueAt(b.x + dd[0], b.y + dd[1], b.z + dd[2]);
     };
-    // pièce orientée : coordonnées locales (u le long de la direction f, v en travers)
-    const along = (f, u0, u1, v0, v1, y0, y1, c) => {
-      const d = DIRS[f];
-      let x0, x1, z0, z1;
-      if (d[0]) { const s = d[0] > 0; x0 = s ? u0 : 1 - u1; x1 = s ? u1 : 1 - u0; z0 = v0; z1 = v1; }
-      else { const s = d[2] > 0; z0 = s ? u0 : 1 - u1; z1 = s ? u1 : 1 - u0; x0 = v0; x1 = v1; }
-      box(x0, y0, z0, x1, y1, z1, c);
+    const all = t => () => t;
+    const T = TEX;
+    const torchBox = (q, i, j, y0, lit, burnt, h = 5) => {
+      const head = burnt ? [87, 82, 77] : lit ? C.litHead : C.offHead;
+      boxQ(q, i, j, 2, 2, y0, y0 + h - 2, all(C.stick)); boxQ(q, i, j, 2, 2, y0 + h - 2, y0 + h, all(head));
+      if (lit) { const r = rq(q, i, j, 2, 2); glows.push([x + (r[0] + 1) / 16, y + (y0 + h) / 16, z + (r[1] + 1) / 16, 'red', 1.3, 0.5]); }
     };
     switch (b.t) {
-      case 'solid': box(0, 0, 0, 1, 1, 1, b.pw ? [150, 112, 110] : COL.solid); break;
-      case 'obsidian': box(0, 0, 0, 1, 1, 1, COL.obsidian); break;
-      case 'command': box(0, 0, 0, 1, 1, 1, COL.command); break;
-      case 'note': box(0, 0, 0, 1, 1, 1, COL.note); if (b.flash && now - b.flash < 400) glows.push([x + .5, y + 1, z + .5, 'lamp', 2, 0.6]); break;
-      case 'rblock': box(0, 0, 0, 1, 1, 1, COL.rblock); glows.push([x + .5, y + .5, z + .5, 'red', 2.2, 0.25]); break;
-      case 'lamp': box(0, 0, 0, 1, 1, 1, b.on ? COL.lampOn : COL.lampOff); if (b.on) glows.push([x + .5, y + .5, z + .5, 'lamp', 4, 0.5]); break;
-      case 'glass': box(0, 0, 0, 1, 1, 1, COL.glass, 0.18, true); break;
-      case 'hopper': box(0, 0.62, 0, 1, 1, 1, COL.hopper); box(0.25, 0, 0.25, 0.75, 0.62, 0.75, COL.hopper); break;
-      case 'daylight': box(0, 0, 0, 1, 0.375, 1, b.m ? [90, 100, 140] : COL.daylight); break;
+      case 'solid': box(0, 0, 0, 16, 16, 16, all(T.stone), cullFull); break;
+      case 'obsidian': box(0, 0, 0, 16, 16, 16, all(T.obsidian), cullFull); break;
+      case 'command': box(0, 0, 0, 16, 16, 16, all(T.command), cullFull); break;
+      case 'note': box(0, 0, 0, 16, 16, 16, all(T.note), cullFull); if (b.flash && now - b.flash < 400) glows.push([x + .5, y + 1, z + .5, 'lamp', 2, 0.6]); break;
+      case 'rblock': box(0, 0, 0, 16, 16, 16, all(T.rblock), cullFull); glows.push([x + .5, y + .5, z + .5, 'red', 2.2, 0.22]); break;
+      case 'lamp': box(0, 0, 0, 16, 16, 16, all(b.on ? T.lampOn : T.lampOff), cullFull); if (b.on) glows.push([x + .5, y + .5, z + .5, 'lamp', 4, 0.5]); break;
+      case 'glass': box(0, 0, 0, 16, 16, 16, all(T.glass), this.noCull ? null : d => { const dd = DIRS[d], n = W.get(b.x + dd[0], b.y + dd[1], b.z + dd[2]); return !!(n && !n.mv && (n.t === 'glass' || OPAQUE.has(n.t))); }); break;
+      case 'hopper':
+        box(0, 10, 0, 16, 16, 16, f => f === 'U' ? T.hopperTop : T.hopperSide);
+        box(4, 4, 4, 12, 10, 12, all(T.hopperSide)); box(6, 0, 6, 10, 4, 10, all(T.hopperSide));
+        break;
+      case 'daylight': box(0, 0, 0, 16, 6, 16, f => f === 'U' ? (b.m ? T.dayTopInv : T.dayTop) : T.daySide); break;
       case 'observer': {
-        box(0, 0, 0, 1, 1, 1, COL.observer);
-        const d = DIRS[b.f], c = [x + .5 + d[0] * .51, y + .5 + d[1] * .51, z + .5 + d[2] * .51];
-        const [px, py] = this.pt(c[0], c[1], c[2], a); g.fillStyle = '#1e1e21'; g.fillRect(px - a * .25, py - a * .12, a * .5, a * .24);
-        if (b.on) glows.push([x + .5 - d[0] * .5, y + .5 - d[1] * .5, z + .5 - d[2] * .5, 'red', 1.6, 0.6]);
+        const f = b.f, out = OPP[f];
+        box(0, 0, 0, 16, 16, 16, face => {
+          const d = face === 'U' ? U : FACE_OF[face];
+          if (d === f) return T.observerFace;
+          if (d === out) return b.on ? T.observerBack1 : T.observerBack0;
+          if (face === 'U' && f < 4) return T['observerTop_' + QN[this.bandQ('U', out)]];
+          return T.observerSide;
+        }, cullFull);
+        if (b.on) glows.push([x + .5 + DIRS[out][0] * .5, y + .5 + DIRS[out][1] * .5, z + .5 + DIRS[out][2] * .5, 'red', 1.6, 0.6]);
         break;
       }
       case 'piston': case 'sticky': case 'piston_head': {
-        const f = b.f, d = DIRS[f], head = b.t === 'piston_head', st = head ? b.sticky : b.t === 'sticky';
-        const faceCol = st ? [111, 191, 90] : COL.planks;
-        const seg = (u0, u1, c, thin) => {
-          let lo = [0, 0, 0], hi = [1, 1, 1];
-          for (let k = 0; k < 3; k++) {
-            if (d[k]) { lo[k] = d[k] > 0 ? u0 : 1 - u1; hi[k] = d[k] > 0 ? u1 : 1 - u0; }
-            else if (thin) { lo[k] = 0.38; hi[k] = 0.62; }
-          }
-          box(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2], c);
+        const f = b.f, head = b.t === 'piston_head', st = head ? b.sticky : b.t === 'sticky', fd = DIRS[f];
+        const faceTex = st ? T.pistonTopSticky : T.pistonTop;
+        const span = (u0, u1, p0 = 0, p1 = 16) => {        // [u0,u1] le long de f (0 = arrière), [p0,p1] en travers
+          const lo = [p0, p0, p0], hi = [p1, p1, p1];
+          for (let k = 0; k < 3; k++) if (fd[k]) { lo[k] = fd[k] > 0 ? u0 : 16 - u1; hi[k] = fd[k] > 0 ? u1 : 16 - u0; }
+          return [lo, hi];
         };
-        const parts = head ? [[-0.25, 0.75, COL.wood, true], [0.75, 1, faceCol, false]] : (b.ext ? [[0, 0.75, COL.cobble, false]] : [[0, 0.75, COL.cobble, false], [0.75, 1, faceCol, false]]);
-        // dessiner la partie la plus éloignée de la caméra d'abord
-        const [rx, rz] = this.rotP(d[0], d[2]); const toward = rx + rz + d[1] > 0;
-        (toward ? parts : parts.slice().reverse()).forEach(p => seg(p[0], p[1], p[2], p[3]));
+        const tf = (front, back) => face => {
+          const d = face === 'U' ? U : FACE_OF[face];
+          if (d === f) return front; if (d === OPP[f]) return back;
+          return T['pistonSide_' + QN[this.bandQ(face, f)]];
+        };
+        const parts = [];
+        if (head) { parts.push([span(-4, 12, 6, 10), all(T.rod)]); parts.push([span(12, 16), tf(faceTex, T.pistonInner)]); }
+        else if (b.ext) parts.push([span(0, 12), tf(T.pistonInner, T.pistonBottom)]);
+        else parts.push([span(0, 16), tf(faceTex, T.pistonBottom), true]);
+        const [rx, rz] = this.rotP(fd[0], fd[2]), toward = rx + rz + fd[1] > 0;
+        if (!toward) parts.reverse();
+        for (const [[lo, hi], t, full] of parts) box(lo[0], lo[1], lo[2], hi[0], hi[1], hi[2], t, full ? cullFull : null);
         break;
       }
       case 'dust': {
-        const yy = 0.03, w = Math.max(2, a * 0.2), c0 = this.pt(x + .5, y + yy, z + .5, a);
-        g.strokeStyle = DUST_COLORS[b.lvl]; g.lineWidth = w; g.lineCap = 'round'; g.beginPath();
-        for (let h = 0; h < 4; h++) if (b.pt >> h & 1) { const e = this.pt(x + .5 + DIRS[h][0] * .5, y + yy, z + .5 + DIRS[h][2] * .5, a); g.moveTo(c0[0], c0[1]); g.lineTo(e[0], e[1]); }
-        if (!b.pt) { g.moveTo(c0[0] - w * .4, c0[1]); g.lineTo(c0[0] + w * .4, c0[1]); }
-        for (let h = 0; h < 4; h++) if (b.upm >> h & 1) { const e0 = this.pt(x + .5 + DIRS[h][0] * .5, y + yy, z + .5 + DIRS[h][2] * .5, a), e1 = this.pt(x + .5 + DIRS[h][0] * .5, y + 1.03, z + .5 + DIRS[h][2] * .5, a); g.moveTo(e0[0], e0[1]); g.lineTo(e1[0], e1[1]); }
-        g.stroke();
+        this.face(g, DUST_ATLAS, b.pt * 16, b.lvl * 16, 16, 16, [x, y + 0.02, z], [1, 0, 0], [0, 0, 1], a, 0);
+        for (let h = 0; h < 4; h++) if (b.upm >> h & 1) {
+          const dh = DIRS[h], wx = x + 0.5 + dh[0] * 0.49, wz = z + 0.5 + dh[2] * 0.49, col = DUST_RGB[b.lvl];
+          const [rx, rz] = this.rotP(-dh[0], -dh[2]); if (rx <= 0 && rz <= 0) continue;
+          const half = 0.09;
+          this.face(g, col, 0, 0, 16, 16, [wx - Math.abs(dh[2]) * half, y + 1.02, wz - Math.abs(dh[0]) * half], [Math.abs(dh[2]) * half * 2, 0, Math.abs(dh[0]) * half * 2], [0, -1, 0], a, 0);
+        }
         if (b.lvl && this.dustGlow) glows.push([x + .5, y + .05, z + .5, 'red', 1.8, 0.12 + 0.25 * b.lvl / 15]);
         break;
       }
       case 'repeater': case 'comparator': {
-        box(0, 0, 0, 1, 0.125, 1, COL.slab);
-        const f = b.f, d = DIRS[f], comp = b.t === 'comparator';
-        const at = (u, v) => [0.5 + d[0] * (u - 0.5) - d[2] * v, 0.5 + d[2] * (u - 0.5) + d[0] * v];
-        const tor = (u, v, lit) => { const [px, pz] = at(u, v); torch(px, .125, pz, px, .42, pz, lit, false); };
-        if (!comp) { tor(0.72, 0, b.on); tor(0.2 + (b.d - 1) * 0.1, 0, b.on); if (b.lk) { const [p0x, p0z] = at(0.45, -0.4), [p1x, p1z] = at(0.45, 0.4); ln(p0x, .17, p0z, p1x, .17, p1z, '#222', Math.max(2, a * 0.12)); } }
-        else { tor(0.78, 0, b.m === 1); tor(0.25, -0.22, b.lvl > 0); tor(0.25, 0.22, b.lvl > 0); }
-        const [ax0, az0] = at(0.5, 0), [ax1, az1] = at(0.95, 0); ln(ax0, .13, az0, ax1, .13, az1, (comp ? b.lvl : b.on) ? '#ff7a5c' : '#55555a', Math.max(1, a * 0.06));
+        const f = b.f, comp = b.t === 'comparator';
+        box(0, 0, 0, 16, 2, 16, face => face === 'U' ? T[(comp ? (b.lvl ? 'cmpTop1' : 'cmpTop0') : (b.on ? 'repTop1' : 'repTop0')) + '_' + QN[f]] : T.smooth);
+        if (!comp) {
+          torchBox(f, 7, 2, 2, b.on, false);
+          if (b.lk) boxQ(f, 2, 4, 12, 2, 2, 4, all([70, 70, 74]));
+          torchBox(f, 7, 4 + 2 * b.d, 2, b.on, false);
+        } else { torchBox(f, 7, 2, 2, b.m === 1, false); torchBox(f, 4, 11, 2, b.lvl > 0, false); torchBox(f, 10, 11, 2, b.lvl > 0, false); }
         break;
       }
       case 'torch': {
-        if (b.f === D) torch(.5, 0, .5, .5, .62, .5, b.on, b.burnt);
-        else { const d = DIRS[b.f]; torch(.5 + d[0] * .45, .25, .5 + d[2] * .45, .5 - d[0] * .05, .78, .5 - d[2] * .05, b.on, b.burnt); }
+        if (b.f === D || b.f === U) torchBox(0, 7, 7, 0, b.on, b.burnt, 10);
+        else { torchBox(b.f, 7, 1, 3, b.on, b.burnt, 5); torchBox(b.f, 7, 3, 8, b.on, b.burnt, 5); }
         break;
       }
-      case 'lever': case 'button_stone': case 'button_wood': {
-        const f = b.f, lever = b.t === 'lever', c = lever ? COL.cobble : b.t === 'button_wood' ? COL.wood : COL.slab;
-        const th = lever ? 0.1 : (b.on ? 0.06 : 0.12);
-        let bs;
-        if (f === D) bs = [0.32, 0, 0.32, 0.68, th, 0.68];
-        else if (f === U) bs = [0.32, 1 - th, 0.32, 0.68, 1, 0.68];
-        else { const d = DIRS[f]; const cx = 0.5 + d[0] * (0.5 - th / 2), cz = 0.5 + d[2] * (0.5 - th / 2); const hx = d[0] ? th / 2 : 0.2, hz = d[2] ? th / 2 : 0.2; bs = [cx - hx, 0.35, cz - hz, cx + hx, 0.65, cz + hz]; }
-        box(bs[0], bs[1], bs[2], bs[3], bs[4], bs[5], c);
-        if (lever) {
-          const cx = (bs[0] + bs[3]) / 2, cy = (bs[1] + bs[4]) / 2, cz = (bs[2] + bs[5]) / 2, s = b.on ? 1 : -1;
-          let tx = cx, ty = cy, tz = cz;
-          if (f === D) { ty += 0.4; tx += 0.18 * s; } else if (f === U) { ty -= 0.4; tx += 0.18 * s; } else { const d = DIRS[f]; tx -= d[0] * 0.35; tz -= d[2] * 0.35; ty += 0.2 * s; }
-          ln(cx, cy, cz, tx, ty, tz, '#8a6a40', Math.max(2, a * 0.1));
-          const [px, py] = this.pt(x + tx, y + ty, z + tz, a); g.fillStyle = b.on ? '#ff4a26' : '#5a1b12'; g.beginPath(); g.arc(px, py, Math.max(2, a * .09), 0, 7); g.fill();
+      case 'lever': {
+        const f = b.f;
+        let hb, ht;                                       // base du manche, bout du manche (coordonnées 1/16)
+        if (f === D || f === U) {
+          const y0 = f === D ? 0 : 13, y1 = y0 + 3;
+          box(5, y0, 4, 11, y1, 12, all(T.cobble));
+          hb = [8, f === D ? y1 : y0, 8]; ht = [8, f === D ? y1 + 7 : y0 - 7, b.on ? 12 : 4];
+        } else {
+          boxQ(f, 5, 0, 6, 3, 4, 12, all(T.cobble));
+          const r = rq(f, 7, 3, 2, 1); hb = [r[0] + 1, 8, r[1] + .5]; const rt = rq(f, 7, 9, 2, 1); ht = [rt[0] + 1, b.on ? 4 : 12, rt[1] + .5];
         }
+        g.setTransform(this.D, 0, 0, this.D, 0, 0);
+        const p0 = this.pt(x + hb[0] / 16, y + hb[1] / 16, z + hb[2] / 16, a), p1 = this.pt(x + ht[0] / 16, y + ht[1] / 16, z + ht[2] / 16, a);
+        g.strokeStyle = HEX(C.stickDark); g.lineWidth = Math.max(2, a * 0.16); g.lineCap = 'butt'; g.beginPath(); g.moveTo(p0[0], p0[1]); g.lineTo(p1[0], p1[1]); g.stroke();
+        g.strokeStyle = HEX(C.stick); g.lineWidth = Math.max(1, a * 0.09); g.stroke();
+        if (b.on) { g.fillStyle = HEX(C.litHead); g.fillRect(p1[0] - a * .07, p1[1] - a * .07, a * .14, a * .14); glows.push([x + ht[0] / 16, y + ht[1] / 16, z + ht[2] / 16, 'red', 0.9, 0.4]); }
         break;
       }
-      case 'plate': box(0.06, 0, 0.06, 0.94, b.on ? 0.03 : 0.06, 0.94, b.on ? [110, 110, 115] : [146, 146, 150]); break;
-      case 'rail': {
-        const ax = b.f === 1;
-        for (const v of [0.2, 0.8]) ax ? ln(0, .03, v, 1, .03, v, '#d9b34c', Math.max(1.5, a * .08)) : ln(v, .03, 0, v, .03, 1, '#d9b34c', Math.max(1.5, a * .08));
-        ax ? ln(0, .03, .5, 1, .03, .5, b.on ? '#ff3b20' : '#5a1b12', Math.max(1.5, a * .08)) : ln(.5, .03, 0, .5, .03, 1, b.on ? '#ff3b20' : '#5a1b12', Math.max(1.5, a * .08));
-        if (b.on) glows.push([x + .5, y + .05, z + .5, 'red', 1.5, .25]);
+      case 'button_stone': case 'button_wood': {
+        const t = all(b.t === 'button_wood' ? T.planks : T.stone), th = b.on ? 1 : 2, f = b.f;
+        if (f === D) box(5, 0, 6, 11, th, 10, t);
+        else if (f === U) box(5, 16 - th, 6, 11, 16, 10, t);
+        else boxQ(f, 5, 0, 6, th, 6, 10, t);
         break;
       }
-      case 'trapdoor': if (!b.on) box(0, 0, 0, 1, 0.19, 1, COL.iron); else along(b.f, 0, 0.19, 0, 1, 0, 1, COL.iron); break;
-      case 'door': case 'door_top': along(b.on ? (b.f + 1) % 4 : b.f, 0, 0.19, 0, 1, 0, 1, COL.iron); break;
+      case 'plate': box(1, 0, 1, 15, b.on ? 0.5 : 1, 15, all(b.on ? T.plateOn : T.plate)); break;
+      case 'rail': box(0, 0, 0, 16, 0.4, 16, face => face === 'U' ? T[(b.on ? 'railOn' : 'railOff') + '_' + QN[b.f ? 1 : 0]] : null); if (b.on) glows.push([x + .5, y + .05, z + .5, 'red', 1.5, .25]); break;
+      case 'trapdoor':
+        if (!b.on) box(0, 0, 0, 16, 3, 16, all(T.iron));
+        else boxQ(b.f, 0, 0, 16, 3, 0, 16, all(T.iron));
+        break;
+      case 'door': case 'door_top': boxQ(b.on ? (b.f + 1) % 4 : b.f, 0, 0, 16, 3, 0, 16, all(b.t === 'door' ? T.doorBot : T.doorTop)); break;
     }
   },
   image() {
-    const bb = W.bounds(); const c = document.createElement('canvas');
-    const save = { zoom: this.zoom, ox: this.ox, oy: this.oy };
-    if (!bb) { c.width = 400; c.height = 300; }
-    else { const span = (bb.x1 - bb.x0) + (bb.z1 - bb.z0) + 4; c.width = clamp(span * 34, 400, 4000); c.height = clamp(span * 20 + (bb.y1 + 2) * 36, 300, 4000); }
-    this.fit(c.width, c.height);
+    const bb = W.bounds(), save = { zoom: this.zoom, ox: this.ox, oy: this.oy, D: this.D };
+    let c;
+    if (!bb) c = cnv(400, 300);
+    else { const span = (bb.x1 - bb.x0) + (bb.z1 - bb.z0) + 4; c = cnv(clamp(span * 40, 400, 4000), clamp(span * 24 + (bb.y1 + 2) * 42, 300, 4000)); }
+    this.D = 1; this.fit(c.width, c.height);
     const g = c.getContext('2d'); this.draw(g, c.width, c.height, performance.now());
     Object.assign(this, save);
     return c;
@@ -1999,35 +2213,130 @@ const Iso = {
 };
 
 /* =====================================================================
-   12. CIRCUITS D'EXEMPLE (tous vérifiés par simulation)
+   12. ICÔNES FAÇON INVENTAIRE MINECRAFT
+   Blocs : petit cube 3D texturé. Objets plats : sprite pixel.
+   ===================================================================== */
+const ITEM_SPRITE = { dust: 'itemDust', torch: 'itemTorch', lever: 'itemLever', door: 'itemDoor', hopper: 'itemHopper', rail: 'railOn' };
+const ICON_CACHE = new Map();
+function itemIcon(t, size = 64) {
+  const key = t + ':' + size;
+  if (ICON_CACHE.has(key)) return ICON_CACHE.get(key);
+  const c = cnv(size, size), g = c.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  if (ITEM_SPRITE[t]) {
+    const m = Math.round(size * 0.08);
+    g.drawImage(TEX[ITEM_SPRITE[t]], m, m, size - 2 * m, size - 2 * m);
+  } else {
+    const b = mk(t, 0, 0, 0, { f: DEFAULT_F[t] ?? 0 });
+    switch (t) {
+      case 'piston': case 'sticky': b.f = U; break;
+      case 'observer': b.f = S; break;
+      case 'repeater': b.f = N; break;
+      case 'comparator': b.f = N; break;
+      case 'button_stone': case 'button_wood': b.f = D; break;
+      case 'trapdoor': b.on = false; break;
+    }
+    const save = { rot: Iso.rot, zoom: Iso.zoom, ox: Iso.ox, oy: Iso.oy, D: Iso.D, noCull: Iso.noCull };
+    const a = size * 0.38;
+    Iso.rot = 0; Iso.zoom = a / 16; Iso.D = 1; Iso.noCull = true;
+    // hauteur visible du modèle (fraction de bloc) pour le centrer verticalement
+    const hf = { plate: 0.06, button_stone: 0.12, button_wood: 0.12, trapdoor: 0.19, repeater: 0.45, comparator: 0.45, daylight: 0.375 }[t] || 1;
+    Iso.ox = size / 2; Iso.oy = size / 2 - (a - 1.15 * a * hf) / 2;
+    Iso.block(g, b, a, 0, []);
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    Object.assign(Iso, save);
+  }
+  ICON_CACHE.set(key, c);
+  return c;
+}
+
+/* =====================================================================
+   12 bis. BIBLIOTHÈQUE DE SCHÉMAS (presets) — tous vérifiés par simulation
    P(x, y, z, type, propriétés) ; f = orientation (N 0, E 1, S 2, O 3, haut 4, bas 5)
    ===================================================================== */
-const EXAMPLES = [
-  { id: 'lamp', name: 'Levier → lampe', desc: 'Le circuit de base : clique sur le levier.', settle: 5,
+const PRESET_CATS = [['base', 'Bases'], ['logic', 'Portes logiques'], ['clock', 'Horloges'], ['memory', 'Mémoires'], ['piston', 'Pistons et portes'], ['sensor', 'Capteurs'], ['math', 'Calcul']];
+
+/* Une bascule T (mémoire maître-esclave à deux répéteurs verrouillables).
+   high = l'entrée est déjà haute au chargement : on fixe un état initial cohérent (Q = 0). */
+function buildTff(P, ox, oz, opts = {}) {
+  const p = (x, z, t, pr) => P(ox + x, 0, oz + z, t, pr);
+  const hi = !!opts.high;
+  if (opts.button) p(0, 1, 'button_stone', { f: D }); else p(0, 1, 'dust');
+  for (const [x, z] of [[1, 1], [2, 1], [3, 1], [3, 2], [4, 1]]) p(x, z, 'dust');
+  p(5, 1, 'solid'); p(6, 1, 'torch', { f: O, on: !hi }); p(6, 2, 'dust');
+  p(6, 3, 'repeater', { f: S, on: false });
+  p(3, 3, 'repeater', { f: S, on: hi });
+  p(3, 4, 'repeater', { f: E, d: 2, on: false }); p(4, 4, 'dust'); p(5, 4, 'dust'); p(6, 4, 'repeater', { f: E });
+  p(7, 4, 'dust'); p(8, 4, 'dust'); p(9, 4, 'lamp');
+  p(7, 5, 'dust'); p(7, 6, 'dust'); p(7, 7, 'solid'); p(6, 7, 'torch', { f: E });
+  for (const [x, z] of [[5, 7], [4, 7], [3, 7], [2, 7], [2, 6], [2, 5], [2, 4]]) p(x, z, 'dust');
+}
+/* Demi-additionneur : S = A XOR B (deux comparateurs en soustraction), C = A − (A − B) */
+function buildHalfAdder(P, ox, opts = {}) {
+  const p = (x, z, t, pr) => P(ox + x, 0, z, t, pr);
+  if (opts.aFromWest) { p(0, 3, 'dust'); p(1, 3, 'repeater', { f: E }); }
+  else { p(0, 3, 'lever', { f: D }); p(1, 3, 'dust'); }
+  p(2, 3, 'dust'); p(3, 3, 'dust');
+  p(3, 4, 'comparator', { f: S, m: 1 }); p(4, 3, 'comparator', { f: N, m: 1 });
+  p(4, 4, 'dust'); p(5, 4, 'dust');
+  if (opts.bLever6) p(6, 4, 'lever', { f: D }); else { p(6, 4, 'dust'); p(7, 4, 'lever', { f: D }); }
+  for (const [x, z] of [[3, 5], [3, 6], [4, 6], [5, 6], [6, 6], [7, 6], [8, 6], [9, 6]]) p(x, z, 'dust');
+  p(4, 2, 'repeater', { f: N });
+  for (let x = 4; x <= 9; x++) p(x, 1, 'dust');
+  for (let z = 2; z <= 5; z++) p(9, z, 'dust');
+  if (opts.sumOut) p(10, 4, 'repeater', { f: E }); else { p(10, 4, 'dust'); p(11, 4, 'lamp'); }
+  // retenue
+  p(0, 4, 'repeater', { f: S, d: opts.aFromWest ? 3 : 2 }); p(0, 5, 'comparator', { f: S, m: 1 });
+  p(1, 5, 'repeater', { f: O }); p(2, 5, 'dust');
+  p(0, 6, 'dust'); p(0, 7, 'dust');
+  if (opts.carryDown) { p(0, 8, 'dust'); p(0, 9, 'dust'); p(0, 10, 'dust'); } else p(0, 8, 'lamp');
+}
+
+const PRESETS = [
+  // ---------- Bases ----------
+  { id: 'lamp', cat: 'base', level: 1, name: 'Levier → lampe', desc: 'Le circuit de base, plus un bouton qui passe par un répéteur.', settle: 5,
     build(P) { P(0, 0, 0, 'lever', { f: D }); for (let x = 1; x <= 3; x++) P(x, 0, 0, 'dust'); P(4, 0, 0, 'lamp');
       P(0, 0, 2, 'button_stone', { f: D }); P(1, 0, 2, 'dust'); P(2, 0, 2, 'repeater', { f: E, d: 2 }); P(3, 0, 2, 'dust'); P(4, 0, 2, 'lamp'); } },
-  { id: 'clock', name: 'Horloge à répéteurs', desc: 'Torche + 2 répéteurs : une période de 1 s. Active le levier pour l’arrêter.',
+  { id: 'longline', cat: 'base', level: 1, name: 'Ligne longue', desc: 'Un répéteur tous les 15 blocs garde le signal à pleine puissance sur 34 blocs.', settle: 5,
+    build(P) { P(0, 0, 0, 'lever', { f: D }); for (let x = 1; x <= 33; x++) P(x, 0, 0, x === 15 || x === 30 ? 'repeater' : 'dust', { f: E }); P(34, 0, 0, 'lamp'); } },
+  { id: 'stairs', cat: 'base', level: 2, name: 'Escalier de redstone', desc: 'La poudre monte d’un bloc à chaque marche tant qu’aucun bloc opaque ne la coupe par le dessus.', settle: 5,
     build(P) {
-      P(1, 0, 1, 'solid'); P(1, 0, 0, 'lever', { f: S }); P(2, 0, 1, 'torch', { f: O }); P(3, 0, 1, 'dust');
-      P(4, 0, 1, 'repeater', { f: E, d: 2 }); P(5, 0, 1, 'lamp'); P(5, 0, 2, 'dust'); P(5, 0, 3, 'dust');
-      P(4, 0, 3, 'repeater', { f: O, d: 2 }); P(3, 0, 3, 'dust'); P(2, 0, 3, 'dust'); P(1, 0, 3, 'dust'); P(1, 0, 2, 'dust');
+      P(0, 0, 0, 'lever', { f: D }); P(1, 0, 0, 'dust');
+      P(2, 0, 0, 'solid'); P(2, 1, 0, 'dust');
+      P(3, 0, 0, 'solid'); P(3, 1, 0, 'solid'); P(3, 2, 0, 'dust');
+      P(4, 0, 0, 'solid'); P(4, 1, 0, 'solid'); P(4, 2, 0, 'solid'); P(4, 3, 0, 'dust'); P(5, 3, 0, 'lamp');
     } },
-  { id: 'and', name: 'Porte ET', desc: 'La lampe s’allume si les deux leviers sont activés. Les torches sont à l’étage Y 1 (touche E).', settle: 10,
+  { id: 'tower', cat: 'base', level: 2, name: 'Tour de torches', desc: 'Le signal monte en alternant blocs et torches. Deux inversions : la lampe du sommet suit le levier.', settle: 8,
+    build(P) { P(0, 0, 0, 'solid'); P(-1, 0, 0, 'lever', { f: E }); P(0, 1, 0, 'torch', { f: D }); P(0, 2, 0, 'solid'); P(0, 3, 0, 'torch', { f: D }); P(0, 4, 0, 'lamp'); } },
+  // ---------- Portes logiques ----------
+  { id: 'not', cat: 'logic', level: 2, name: 'Porte NON', desc: 'Une torche sur un bloc inverse le signal : levier activé, lampe éteinte.', settle: 5,
+    build(P) { P(0, 0, 0, 'lever', { f: D }); P(1, 0, 0, 'dust'); P(2, 0, 0, 'dust'); P(3, 0, 0, 'solid'); P(4, 0, 0, 'torch', { f: O }); P(5, 0, 0, 'dust'); P(6, 0, 0, 'lamp'); } },
+  { id: 'or', cat: 'logic', level: 2, name: 'Porte OU', desc: 'Deux lignes qui se rejoignent : la lampe s’allume si au moins un levier est activé.', settle: 5,
+    build(P) {
+      P(0, 0, 0, 'lever', { f: D }); P(1, 0, 0, 'dust'); P(2, 0, 0, 'dust'); P(2, 0, 1, 'dust');
+      P(0, 0, 2, 'lever', { f: D }); P(1, 0, 2, 'dust'); P(2, 0, 2, 'dust');
+      P(3, 0, 1, 'dust'); P(4, 0, 1, 'dust'); P(5, 0, 1, 'lamp');
+    } },
+  { id: 'and', cat: 'logic', level: 2, name: 'Porte ET', desc: 'Lampe allumée si les deux leviers sont activés. Les deux torches d’entrée sont à l’étage Y 1.', settle: 10,
     build(P) {
       P(1, 0, 1, 'solid'); P(2, 0, 1, 'solid'); P(3, 0, 1, 'solid');
       P(1, 0, 0, 'lever', { f: S }); P(3, 0, 0, 'lever', { f: S });
       P(1, 1, 1, 'torch', { f: D }); P(3, 1, 1, 'torch', { f: D }); P(2, 1, 1, 'dust');
       P(2, 0, 2, 'torch', { f: N }); P(2, 0, 3, 'dust'); P(2, 0, 4, 'lamp');
     } },
-  { id: 'or', name: 'Porte OU', desc: 'La lampe s’allume si au moins un levier est activé.', settle: 5,
+  { id: 'nand', cat: 'logic', level: 2, name: 'Porte NON-ET', desc: 'Deux inverseurs dont les sorties se rejoignent : la lampe s’éteint seulement si les deux leviers sont activés.', settle: 5,
+    build(P) {
+      P(0, 0, 0, 'lever', { f: D }); P(1, 0, 0, 'dust'); P(2, 0, 0, 'solid'); P(3, 0, 0, 'torch', { f: O }); P(4, 0, 0, 'dust'); P(4, 0, 1, 'dust');
+      P(0, 0, 4, 'lever', { f: D }); P(1, 0, 4, 'dust'); P(2, 0, 4, 'solid'); P(3, 0, 4, 'torch', { f: O }); P(4, 0, 4, 'dust'); P(4, 0, 3, 'dust');
+      P(4, 0, 2, 'dust'); P(5, 0, 2, 'dust'); P(6, 0, 2, 'lamp');
+    } },
+  { id: 'nor', cat: 'logic', level: 2, name: 'Porte NON-OU', desc: 'Une porte OU suivie d’une torche : la lampe est allumée seulement si aucun levier n’est activé.', settle: 5,
     build(P) {
       P(0, 0, 0, 'lever', { f: D }); P(1, 0, 0, 'dust'); P(2, 0, 0, 'dust'); P(2, 0, 1, 'dust');
       P(0, 0, 2, 'lever', { f: D }); P(1, 0, 2, 'dust'); P(2, 0, 2, 'dust');
-      P(3, 0, 1, 'dust'); P(4, 0, 1, 'dust'); P(5, 0, 1, 'lamp');
+      P(3, 0, 1, 'dust'); P(4, 0, 1, 'dust'); P(5, 0, 1, 'solid'); P(6, 0, 1, 'torch', { f: O }); P(7, 0, 1, 'dust'); P(8, 0, 1, 'lamp');
     } },
-  { id: 'not', name: 'Porte NON', desc: 'Une torche sur un bloc inverse le signal : levier activé, lampe éteinte.', settle: 5,
-    build(P) { P(0, 0, 0, 'lever', { f: D }); P(1, 0, 0, 'dust'); P(2, 0, 0, 'dust'); P(3, 0, 0, 'solid'); P(4, 0, 0, 'torch', { f: O }); P(5, 0, 0, 'dust'); P(6, 0, 0, 'lamp'); } },
-  { id: 'xor', name: 'Porte XOR', desc: 'Deux comparateurs en soustraction : la lampe s’allume si un seul levier est activé.', settle: 5,
+  { id: 'xor', cat: 'logic', level: 5, name: 'Porte XOR', desc: 'Deux comparateurs en soustraction : la lampe s’allume si un seul levier est activé.', settle: 5,
     build(P) {
       P(0, 0, 3, 'lever', { f: D }); P(1, 0, 3, 'dust'); P(2, 0, 3, 'dust'); P(3, 0, 3, 'dust');
       P(3, 0, 4, 'comparator', { f: S, m: 1 }); P(4, 0, 3, 'comparator', { f: N, m: 1 });
@@ -2038,44 +2347,290 @@ const EXAMPLES = [
       for (let z = 2; z <= 5; z++) P(9, 0, z, 'dust');
       P(10, 0, 4, 'dust'); P(11, 0, 4, 'lamp');
     } },
-  { id: 'tff', name: 'Bascule T (bouton)', desc: 'Chaque appui sur le bouton inverse la lampe. Deux répéteurs verrouillés forment la mémoire.', settle: 30,
+  { id: 'xnor', cat: 'logic', level: 5, name: 'Porte XNOR', desc: 'Une porte XOR suivie d’un inverseur : la lampe s’allume quand les deux leviers sont dans le même état.', settle: 6,
     build(P) {
-      P(0, 0, 1, 'button_stone', { f: D });
-      for (const [x, z] of [[1, 1], [2, 1], [3, 1], [3, 2], [4, 1]]) P(x, 0, z, 'dust');
-      P(5, 0, 1, 'solid'); P(6, 0, 1, 'torch', { f: O }); P(6, 0, 2, 'dust');
-      P(6, 0, 3, 'repeater', { f: S }); P(3, 0, 3, 'repeater', { f: S });
-      P(3, 0, 4, 'repeater', { f: E, d: 2 }); P(4, 0, 4, 'dust'); P(5, 0, 4, 'dust'); P(6, 0, 4, 'repeater', { f: E });
-      P(7, 0, 4, 'dust'); P(8, 0, 4, 'dust'); P(9, 0, 4, 'lamp');
-      P(7, 0, 5, 'dust'); P(7, 0, 6, 'dust'); P(7, 0, 7, 'solid'); P(6, 0, 7, 'torch', { f: E });
-      for (const [x, z] of [[5, 7], [4, 7], [3, 7], [2, 7], [2, 6], [2, 5], [2, 4]]) P(x, 0, z, 'dust');
+      P(0, 0, 3, 'lever', { f: D }); P(1, 0, 3, 'dust'); P(2, 0, 3, 'dust'); P(3, 0, 3, 'dust');
+      P(3, 0, 4, 'comparator', { f: S, m: 1 }); P(4, 0, 3, 'comparator', { f: N, m: 1 });
+      P(4, 0, 4, 'dust'); P(5, 0, 4, 'dust'); P(6, 0, 4, 'dust'); P(7, 0, 4, 'lever', { f: D });
+      for (const [x, z] of [[3, 5], [3, 6], [4, 6], [5, 6], [6, 6], [7, 6], [8, 6], [9, 6]]) P(x, 0, z, 'dust');
+      P(4, 0, 2, 'repeater', { f: N });
+      for (let x = 4; x <= 9; x++) P(x, 0, 1, 'dust');
+      for (let z = 2; z <= 5; z++) P(9, 0, z, 'dust');
+      P(10, 0, 4, 'dust'); P(11, 0, 4, 'solid'); P(12, 0, 4, 'torch', { f: O }); P(13, 0, 4, 'dust'); P(14, 0, 4, 'lamp');
     } },
-  { id: 'door', name: 'Porte secrète 2×2', desc: 'Active le levier : les pistons collants rentrent et ouvrent le passage. Essaie la vue 3D.', settle: 6, layer: 1,
+  // ---------- Horloges ----------
+  { id: 'clock', cat: 'clock', level: 3, name: 'Horloge à répéteurs', desc: 'Torche + 2 répéteurs : une période de 1 s. Active le levier pour l’arrêter.',
+    build(P) {
+      P(1, 0, 1, 'solid'); P(1, 0, 0, 'lever', { f: S }); P(2, 0, 1, 'torch', { f: O }); P(3, 0, 1, 'dust');
+      P(4, 0, 1, 'repeater', { f: E, d: 2 }); P(5, 0, 1, 'lamp'); P(5, 0, 2, 'dust'); P(5, 0, 3, 'dust');
+      P(4, 0, 3, 'repeater', { f: O, d: 2 }); P(3, 0, 3, 'dust'); P(2, 0, 3, 'dust'); P(1, 0, 3, 'dust'); P(1, 0, 2, 'dust');
+    } },
+  { id: 'obsclock', cat: 'clock', level: 4, name: 'Horloge à observateurs', desc: 'Deux observateurs face à face se déclenchent l’un l’autre : une impulsion tous les 2 ticks (horloge la plus rapide).', kick: true,
+    build(P) { P(0, 0, 0, 'observer', { f: E }); P(1, 0, 0, 'observer', { f: O }); for (let x = 2; x <= 5; x++) P(x, 0, 0, 'dust'); P(6, 0, 0, 'rail', { f: 1 }); P(7, 0, 0, 'rail', { f: 1 }); } },
+  { id: 'burn', cat: 'clock', level: 3, name: 'Horloge trop rapide', desc: 'Une torche qui s’alimente elle-même grille après 8 extinctions, puis se rallume 8 s plus tard.',
+    build(P) {
+      P(2, 0, 2, 'solid'); P(3, 0, 2, 'torch', { f: O }); P(3, 0, 1, 'lamp');
+      for (const [x, z] of [[4, 2], [4, 3], [4, 4], [3, 4], [2, 4], [2, 3]]) P(x, 0, z, 'dust');
+    } },
+  // ---------- Mémoires ----------
+  { id: 'rslatch', cat: 'memory', level: 5, name: 'Bascule RS', desc: 'Deux torches qui s’alimentent l’une l’autre gardent un état. Bouton de droite : allume. Bouton de gauche : éteint.', settle: 6,
+    build(P) {
+      P(1, 0, 3, 'solid'); P(0, 0, 3, 'button_stone', { f: E }); P(2, 0, 3, 'torch', { f: O }); P(3, 0, 3, 'dust'); P(4, 0, 3, 'dust');
+      P(5, 0, 3, 'solid'); P(6, 0, 3, 'button_stone', { f: O }); P(5, 0, 4, 'torch', { f: N, on: false });
+      for (const [x, z] of [[5, 5], [4, 5], [3, 5], [2, 5], [1, 5], [1, 4]]) P(x, 0, z, 'dust');
+      P(3, 0, 2, 'dust'); P(3, 0, 1, 'lamp');
+    } },
+  { id: 'replatch', cat: 'memory', level: 3, name: 'Verrou à répéteur', desc: 'Levier du haut : la donnée. Levier du bas : verrouille le répéteur, qui garde alors son état.', settle: 5,
+    build(P) {
+      P(0, 0, 1, 'lever', { f: D }); P(1, 0, 1, 'dust'); P(2, 0, 1, 'repeater', { f: E }); P(3, 0, 1, 'dust'); P(4, 0, 1, 'lamp');
+      P(2, 0, 2, 'repeater', { f: N }); P(2, 0, 3, 'lever', { f: D });
+    } },
+  { id: 'tff', cat: 'memory', level: 5, name: 'Bascule T (bouton)', desc: 'Chaque appui sur le bouton inverse la lampe. Deux répéteurs verrouillés forment une mémoire maître-esclave.', settle: 30,
+    build(P) { buildTff(P, 0, 0, { button: true }); } },
+  // ---------- Pistons et portes ----------
+  { id: 'pistonbreak', cat: 'piston', level: 4, name: 'Piston qui casse la poudre', desc: 'En haut : levier derrière le piston, la poudre devant est cassée. En bas : le signal arrive par la face avant, le piston ne bouge pas (règle Java).', settle: 3,
+    build(P) {
+      P(0, 0, 0, 'lever', { f: D }); P(1, 0, 0, 'piston', { f: E }); P(2, 0, 0, 'dust'); P(3, 0, 0, 'dust');
+      P(1, 0, 3, 'piston', { f: E }); P(2, 0, 3, 'dust'); P(3, 0, 3, 'lever', { f: D });
+    } },
+  { id: 'stickyblock', cat: 'piston', level: 4, name: 'Interrupteur à bloc de redstone', desc: 'Le piston collant pousse le bloc de redstone contre la lampe, puis le ramène.', settle: 3,
+    build(P) { P(0, 0, 0, 'lever', { f: D }); P(1, 0, 0, 'sticky', { f: E }); P(2, 0, 0, 'rblock'); P(4, 0, 0, 'lamp'); } },
+  { id: 'irondoor', cat: 'piston', level: 2, name: 'Porte en fer à boutons', desc: 'Un bouton de chaque côté alimente le bloc voisin de la porte, qui s’ouvre pendant 1 s.', settle: 3,
+    build(P) {
+      for (const y of [0, 1]) { P(0, y, 1, 'solid'); P(2, y, 1, 'solid'); }
+      P(0, 2, 1, 'solid'); P(1, 2, 1, 'solid'); P(2, 2, 1, 'solid');
+      P(1, 0, 1, 'door', { f: N }); P(1, 1, 1, 'door_top', { f: N });
+      P(0, 0, 0, 'button_stone', { f: S }); P(2, 0, 2, 'button_stone', { f: N });
+    } },
+  { id: 'door', cat: 'piston', level: 4, name: 'Porte secrète 2×2', desc: 'Active le levier : les pistons collants rentrent et ouvrent le passage. Essaie la vue 3D.', settle: 6, layer: 1,
     build(P) {
       for (let x = 0; x <= 9; x++) P(x, 3, 2, 'solid');
       for (let y = 1; y <= 2; y++) { P(0, y, 2, 'solid'); P(9, y, 2, 'solid'); }
       for (let x = 2; x <= 7; x++) P(x, 0, 2, 'solid');
       P(1, 0, 2, 'solid'); P(1, 1, 2, 'torch', { f: D }); P(1, 2, 2, 'solid');
       P(8, 0, 2, 'solid'); P(8, 1, 2, 'torch', { f: D }); P(8, 2, 2, 'solid');
-      for (let y = 1; y <= 2; y++) {
-        P(2, y, 2, 'sticky', { f: E }); P(3, y, 2, 'solid');
-        P(7, y, 2, 'sticky', { f: O }); P(6, y, 2, 'solid');
-      }
+      for (let y = 1; y <= 2; y++) { P(2, y, 2, 'sticky', { f: E }); P(3, y, 2, 'solid'); P(7, y, 2, 'sticky', { f: O }); P(6, y, 2, 'solid'); }
       for (let x = 1; x <= 8; x++) P(x, 0, 4, 'dust');
       P(1, 0, 3, 'dust'); P(8, 0, 3, 'dust');
       P(4, 0, 5, 'lever', { f: D });
     } },
-  { id: 'daylight', name: 'Détecteur de lumière du jour', desc: 'Les lampes s’allument la nuit. Le cycle jour/nuit accéléré est activé (panneau de gauche).', settle: 5,
-    setup() { Sim.dayCycle = true; Sim.time = 11200; UI.syncDay(); },
+  // ---------- Capteurs ----------
+  { id: 'daylight', cat: 'sensor', level: 3, name: 'Lampadaire automatique', desc: 'Capteur de lumière + inverseur : les lampes s’allument la nuit. Active le cycle jour/nuit accéléré à gauche.', settle: 5,
+    setup() { Sim.dayCycle = true; Sim.time = 11200; },
     build(P) {
       P(0, 0, 1, 'daylight'); P(1, 0, 1, 'dust'); P(2, 0, 1, 'dust'); P(3, 0, 1, 'solid'); P(4, 0, 1, 'torch', { f: O });
       P(4, 0, 0, 'lamp'); P(4, 0, 2, 'lamp'); P(5, 0, 1, 'dust'); P(6, 0, 1, 'dust'); P(7, 0, 1, 'lamp');
     } },
-  { id: 'burn', name: 'Horloge trop rapide', desc: 'Cette torche s’alimente elle-même à chaque tick : elle grille après 8 extinctions, puis se rallume.',
+  { id: 'change', cat: 'sensor', level: 4, name: 'Détecteur de changement', desc: 'L’observateur regarde la lampe : chaque fois qu’elle change, il envoie une impulsion et le bloc musical joue.', settle: 5,
+    build(P) { P(0, 0, 0, 'lever', { f: D }); P(1, 0, 0, 'dust'); P(2, 0, 0, 'lamp'); P(3, 0, 0, 'observer', { f: O }); P(4, 0, 0, 'dust'); P(5, 0, 0, 'note', { p: 12 }); } },
+  { id: 'hopper', cat: 'sensor', level: 3, name: 'Seuil de remplissage', desc: 'Le comparateur lit la trémie (clic droit pour la remplir). La lampe s’allume à partir de 7/15.', settle: 5,
+    build(P) { P(0, 0, 0, 'hopper', { lvl: 8 }); P(1, 0, 0, 'comparator', { f: E }); for (let x = 2; x <= 8; x++) P(x, 0, 0, 'dust'); P(9, 0, 0, 'lamp'); } },
+  // ---------- Calcul ----------
+  { id: 'halfadder', cat: 'math', level: 6, name: 'Demi-additionneur', desc: 'Additionne deux bits. Lampe de droite : somme (A XOR B). Lampe du bas : retenue (A ET B).', settle: 8,
+    build(P) { buildHalfAdder(P, 0); } },
+  { id: 'fulladder', cat: 'math', level: 6, name: 'Additionneur complet 1 bit', desc: 'A + B + retenue d’entrée. Deux demi-additionneurs et un OU sur les retenues. Lampe de droite : somme ; lampe du bas : retenue de sortie.', settle: 12,
     build(P) {
-      P(2, 0, 2, 'solid'); P(3, 0, 2, 'torch', { f: O }); P(3, 0, 1, 'lamp');
-      for (const [x, z] of [[4, 2], [4, 3], [4, 4], [3, 4], [2, 4], [2, 3]]) P(x, 0, z, 'dust');
+      buildHalfAdder(P, 0, { sumOut: true, carryDown: true });
+      P(11, 0, 4, 'dust'); P(11, 0, 3, 'dust');
+      buildHalfAdder(P, 12, { aFromWest: true, bLever6: true, carryDown: true });
+      for (let x = 1; x <= 11; x++) P(x, 0, 10, x === 6 ? 'repeater' : 'dust', { f: E });
+      P(13, 0, 10, 'dust'); P(14, 0, 10, 'lamp');
+    } },
+  { id: 'counter', cat: 'math', level: 6, name: 'Compteur binaire 3 bits', desc: 'Chaque appui sur le bouton ajoute 1. Les lampes donnent le nombre en binaire, bit de poids faible à gauche (0 à 7).', settle: 30,
+    build(P) {
+      for (let k = 0; k < 3; k++) {
+        const ox = k * 12;
+        buildTff(P, ox, 0, { button: k === 0, high: k > 0 });
+        if (k < 2) {
+          for (let x = 6; x <= 11; x++) P(ox + x, 0, 8, 'dust');
+          for (let z = 8; z >= 2; z--) P(ox + 12, 0, z, z === 5 ? 'repeater' : 'dust', { f: N });
+        }
+      }
     } },
 ];
+const EXAMPLES = PRESETS;
+/* Deux observateurs face à face : dans le jeu, poser le second déclenche le premier. */
+function kickObservers(list) {
+  for (const b of list) {
+    if (b.t !== 'observer' || b.dead) continue;
+    const d = DIRS[b.f], n = W.get(b.x + d[0], b.y + d[1], b.z + d[2]);
+    if (n && n.t === 'observer') b.sig = '';
+  }
+}
+
+/* =====================================================================
+   12 ter. LEÇONS (6 niveaux, du débutant au niveau maximal)
+   Chaque défi reprend les entrées et sorties d'un schéma de la
+   bibliothèque : ce schéma est donc une solution vérifiée.
+   ===================================================================== */
+const LEVELS = [
+  { n: 1, name: 'Débutant', theme: 'Le signal' },
+  { n: 2, name: 'Apprenti', theme: 'La logique' },
+  { n: 3, name: 'Intermédiaire', theme: 'Le temps' },
+  { n: 4, name: 'Avancé', theme: 'Le mouvement' },
+  { n: 5, name: 'Expert', theme: 'La mémoire' },
+  { n: 6, name: 'Maître', theme: 'Le calcul' },
+];
+const LESSONS = [
+  { id: 'l1', level: 1, title: 'Levier, poudre et lampe', preset: 'lamp',
+    html: `<p>Un <b>levier</b> est une source : tant qu’il est activé, il émet une puissance de <b>15</b>.</p>
+      <p>La <b>poudre de redstone</b> transporte ce signal et perd <b>1 niveau par bloc</b>. Après 15 blocs, il ne reste plus rien.</p>
+      <p>Une <b>lampe</b> s’allume dès qu’elle reçoit au moins 1. Elle s’allume tout de suite et s’éteint 2 ticks après la coupure.</p>
+      <div class="tipbox">Active <b>Niveaux de puissance</b> (touche <kbd>L</kbd>) pour voir le nombre sur chaque poudre.</div>`,
+    challenge: { from: 'lamp', goal: 'Relie le levier à la lampe avec de la poudre.', keep: [[0, 0, 0], [4, 0, 0]],
+      truth: { inputs: [[0, 0, 0]], outputs: [[4, 0, 0]], rows: [[0, 0], [1, 1]] } } },
+  { id: 'l2', level: 1, title: 'Le répéteur', preset: 'longline',
+    html: `<p>Le <b>répéteur</b> remet le signal à <b>15</b>, quelle que soit sa force d’entrée. Avec un répéteur tous les 15 blocs, un signal va aussi loin que tu veux.</p>
+      <p>C’est une <b>diode</b> : le signal ne passe que de l’arrière vers l’avant (la flèche).</p>
+      <p>Il ajoute un <b>délai de 1 à 4 ticks</b> (1 tick = 0,1 s). Clic droit pour le régler : la torche mobile recule quand le délai augmente.</p>`,
+    challenge: { from: 'longline', goal: 'Allume la lampe située à 34 blocs du levier. Pense aux répéteurs.', keep: [[0, 0, 0], [34, 0, 0]],
+      truth: { inputs: [[0, 0, 0]], outputs: [[34, 0, 0]], rows: [[0, 0], [1, 1]] } } },
+  { id: 'l3', level: 1, title: 'Les sources de signal', preset: 'lamp',
+    html: `<ul>
+      <li><b>Levier</b> : 15 tant qu’il est activé.</li>
+      <li><b>Bouton en pierre</b> : impulsion de 10 ticks (1 s). <b>En bois</b> : 15 ticks.</li>
+      <li><b>Plaque de pression</b> : active tant qu’on appuie dessus.</li>
+      <li><b>Bloc de redstone</b> : 15 en permanence, peut être poussé par un piston, mais n’alimente pas les blocs opaques.</li>
+      <li><b>Torche de redstone</b> : allumée par défaut, s’éteint si son bloc support est alimenté.</li>
+      <li><b>Capteur de lumière</b> : signal selon l’heure du jour (inversable).</li></ul>
+      <p>L’exemple contient un levier et un bouton : compare la durée de leurs signaux.</p>` },
+  { id: 'l4', level: 2, title: 'Blocs opaques : alimentation forte et faible', preset: 'stairs',
+    html: `<p>Un bloc opaque (pierre, lampe…) peut être <b>alimenté</b> et transmettre le signal autour de lui.</p>
+      <p><b>Alimentation forte</b> : levier ou bouton fixé dessus, torche juste en dessous, répéteur ou comparateur qui pointe dedans. Le bloc alimente alors <b>tout</b> autour de lui, poudre comprise.</p>
+      <p><b>Alimentation faible</b> : poudre qui pointe dedans ou posée dessus. Le bloc n’alimente alors que les composants (répéteur, lampe, piston, torche), <b>pas la poudre</b>.</p>
+      <p>Le verre, le bloc de redstone, l’observateur et le piston ne conduisent pas.</p>
+      <div class="tipbox">Escaliers : un bloc opaque <b>au-dessus</b> d’une marche coupe la poudre. Sur du verre, le signal monte mais ne redescend pas.</div>` },
+  { id: 'l5', level: 2, title: 'La torche : porte NON', preset: 'not',
+    html: `<p>Une torche posée sur un bloc (ou contre lui) <b>s’éteint 1 tick après</b> que ce bloc est alimenté, et se rallume quand il ne l’est plus.</p>
+      <p>Elle <b>inverse</b> donc le signal : c’est la porte NON, base de toute la logique redstone.</p>
+      <p>Une torche alimente aussi <b>fortement</b> le bloc juste au-dessus d’elle : c’est ainsi qu’on fait monter un signal (tour de torches).</p>`,
+    challenge: { from: 'not', goal: 'La lampe doit être allumée quand le levier est désactivé, et inversement.', keep: [[0, 0, 0], [6, 0, 0]],
+      truth: { inputs: [[0, 0, 0]], outputs: [[6, 0, 0]], rows: [[0, 1], [1, 0]] } } },
+  { id: 'l6', level: 2, title: 'Portes OU et ET', preset: 'and',
+    html: `<p><b>OU</b> : il suffit que deux lignes de poudre se rejoignent.</p>
+      <p><b>ET</b> se construit avec des NON (loi de De Morgan : A ET B = NON(NON A OU NON B)) : une torche sur chaque bloc d’entrée, un fil qui relie les torches, puis une torche de sortie.</p>
+      <p>Variantes : <b>NON-ET</b> (deux inverseurs qui se rejoignent) et <b>NON-OU</b> (OU suivi d’une torche) dans la bibliothèque.</p>`,
+    challenge: { from: 'and', goal: 'Construis une porte ET : la lampe ne s’allume que si les deux leviers sont activés.', keep: [[1, 0, 0], [3, 0, 0], [1, 0, 1], [3, 0, 1], [2, 0, 4]],
+      truth: { inputs: [[1, 0, 0], [3, 0, 0]], outputs: [[2, 0, 4]], rows: [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 1]] } } },
+  { id: 'l7', level: 3, title: 'Ticks, délais et verrous', preset: 'replatch',
+    html: `<p>1 tick de redstone = <b>0,1 s</b> (2 ticks de jeu). Délais à connaître :</p>
+      <ul><li>torche : 1 tick</li><li>répéteur : 1 à 4 ticks</li><li>comparateur : 1 tick</li><li>extinction d’une lampe : 2 ticks</li><li>piston : le bloc arrive en 1 tick</li><li>observateur : 1 tick, puis impulsion de 1 tick</li></ul>
+      <p>Un répéteur <b>allonge</b> une impulsion plus courte que son délai.</p>
+      <p><b>Verrou</b> : un répéteur ou un comparateur allumé qui pointe dans le <b>flanc</b> d’un répéteur le fige dans son état actuel (barre grise).</p>` },
+  { id: 'l8', level: 3, title: 'Les horloges', preset: 'clock',
+    html: `<p>Une boucle qui contient un nombre <b>impair d’inversions</b> oscille sans fin : c’est une horloge.</p>
+      <p>La période vaut <b>2 × la somme des délais</b> de la boucle. Torche (1) + deux répéteurs (2 + 2) donnent 10 ticks, soit 1 s.</p>
+      <p>Trop rapide, une torche <b>grille</b> : 8 extinctions en 3 s. Elle reste éteinte puis se rallume.</p>
+      <p>L’horloge la plus rapide utilise deux <b>observateurs</b> face à face (bibliothèque).</p>`,
+    challenge: { from: 'clock', goal: 'Fais clignoter la lampe toute seule, sans toucher à rien.', keep: [[5, 0, 1]],
+      clock: { output: [5, 0, 1], ticks: 80, minEdges: 3 } } },
+  { id: 'l9', level: 3, title: 'Le comparateur', preset: 'hopper',
+    html: `<p>Le comparateur lit son <b>entrée arrière</b> et ses <b>deux côtés</b>.</p>
+      <ul><li><b>Comparaison</b> (torche avant éteinte) : sortie = arrière si arrière ≥ côté, sinon 0.</li>
+      <li><b>Soustraction</b> (torche avant allumée, clic droit) : sortie = arrière − côté.</li></ul>
+      <p>Les côtés n’acceptent que la poudre, le bloc de redstone, les répéteurs, comparateurs et observateurs.</p>
+      <p>Il lit aussi le <b>remplissage d’un conteneur</b> comme une trémie, directement ou à travers un bloc opaque.</p>` },
+  { id: 'l10', level: 4, title: 'Pistons et pistons collants', preset: 'pistonbreak',
+    html: `<p>Un piston pousse jusqu’à <b>12 blocs</b>. L’obsidienne, la trémie et le bloc de commande ne bougent pas.</p>
+      <p>La poudre, les torches, répéteurs, leviers, boutons et rails devant lui sont <b>cassés</b>.</p>
+      <p>Sa <b>face avant n’est pas une entrée</b> : alimente-le par l’arrière, un côté, le dessus ou le dessous.</p>
+      <p>Le <b>piston collant</b> ramène le bloc en rentrant. Un bloc poussé met 1 tick à arriver.</p>`,
+    challenge: { from: 'stickyblock', goal: 'Ajoute ce qu’il faut pour que le levier pousse le bloc de redstone contre la lampe, puis le ramène.', keep: [[0, 0, 0], [2, 0, 0], [4, 0, 0]],
+      truth: { inputs: [[0, 0, 0]], outputs: [[4, 0, 0]], rows: [[0, 0], [1, 1], [0, 0]] } } },
+  { id: 'l11', level: 4, title: 'Observateurs et impulsions', preset: 'change',
+    html: `<p>L’observateur regarde le bloc devant sa face. Quand l’<b>état</b> de ce bloc change (lampe qui s’allume, poudre qui change de puissance, piston qui sort, bloc posé…), il émet une <b>impulsion de 1 tick</b> par l’arrière.</p>
+      <p>Il ne voit pas la puissance d’un bloc opaque : seulement les changements d’état visibles.</p>
+      <p>Il alimente fortement le bloc derrière lui. Deux observateurs face à face font une horloge de 2 ticks.</p>` },
+  { id: 'l12', level: 4, title: 'Quasi-connectivité et portes à pistons', preset: 'door',
+    html: `<p>En Java, un piston s’active aussi si <b>l’espace juste au-dessus</b> de lui est alimenté : c’est la <b>quasi-connectivité</b>.</p>
+      <p>Dans le jeu, il ne réagit qu’à la prochaine mise à jour de bloc (effet « BUD »). Ce simulateur la vérifie à chaque tick ; tu peux la désactiver dans le panneau de gauche.</p>
+      <p>La porte 2×2 utilise deux pistons collants empilés de chaque côté, alimentés par des torches : le levier coupe les torches et ouvre la porte.</p>` },
+  { id: 'l13', level: 5, title: 'La bascule RS', preset: 'rslatch',
+    html: `<p>Deux torches qui alimentent chacune le bloc de l’autre ont <b>deux états stables</b> : c’est une mémoire de 1 bit.</p>
+      <p>Une impulsion sur un bloc force l’état : <b>S</b> (set) allume, <b>R</b> (reset) éteint. L’état reste ensuite sans signal.</p>
+      <div class="tipbox">Au moment où on la construit, les deux torches peuvent s’allumer en même temps et osciller : comme dans le jeu, laisse une torche éteinte au départ.</div>`,
+    challenge: { from: 'rslatch', goal: 'Bouton de droite : la lampe s’allume et reste allumée. Bouton de gauche : elle s’éteint et reste éteinte.',
+      keep: [[1, 0, 3], [0, 0, 3], [5, 0, 3], [6, 0, 3], [3, 0, 1]], seq: 'rs' } },
+  { id: 'l14', level: 5, title: 'La bascule T', preset: 'tff',
+    html: `<p>Une bascule T <b>inverse</b> sa sortie à chaque impulsion : un bouton devient un interrupteur.</p>
+      <p>Version maître-esclave : un premier répéteur mémorise ¬Q quand l’entrée monte, un second le recopie vers Q quand l’entrée est haute. Les verrous se font avec des répéteurs pointés dans les flancs.</p>
+      <p>Le délai de 2 ticks du premier répéteur évite une course entre les deux verrous.</p>`,
+    challenge: { from: 'tff', goal: 'Chaque appui sur le bouton doit inverser la lampe.', keep: [[0, 0, 1], [9, 0, 4]], seq: 'tff' } },
+  { id: 'l15', level: 5, title: 'La porte XOR', preset: 'xor',
+    html: `<p>XOR (OU exclusif) : vrai si <b>une seule</b> entrée est vraie.</p>
+      <p>Avec des comparateurs en soustraction : A − B est positif seulement si A est seul, B − A seulement si B est seul. On réunit les deux sorties.</p>
+      <p>Les deux entrées doivent arriver avec la <b>même puissance</b>, sinon la soustraction laisse un reste quand les deux sont actives.</p>`,
+    challenge: { from: 'xor', goal: 'La lampe doit s’allumer si un seul des deux leviers est activé.', keep: [[0, 0, 3], [7, 0, 4], [11, 0, 4]],
+      truth: { inputs: [[0, 0, 3], [7, 0, 4]], outputs: [[11, 0, 4]], rows: [[0, 0, 0], [1, 0, 1], [0, 1, 1], [1, 1, 0]] } } },
+  { id: 'l16', level: 6, title: 'Le demi-additionneur', preset: 'halfadder',
+    html: `<p>Additionner deux bits donne une <b>somme</b> et une <b>retenue</b> : 1 + 1 = 10 en binaire.</p>
+      <p>Somme = A XOR B ; retenue = A ET B.</p>
+      <p>Astuce de ce schéma : la retenue vaut A − (A − B). Elle réutilise la sortie A − B du XOR, ce qui évite de croiser les fils.</p>`,
+    challenge: { from: 'halfadder', goal: 'Lampe de droite : A XOR B. Lampe du bas : A ET B.', keep: [[0, 0, 3], [7, 0, 4], [11, 0, 4], [0, 0, 8]],
+      truth: { inputs: [[0, 0, 3], [7, 0, 4]], outputs: [[11, 0, 4], [0, 0, 8]], rows: [[0, 0, 0, 0], [1, 0, 1, 0], [0, 1, 1, 0], [1, 1, 0, 1]] } } },
+  { id: 'l17', level: 6, title: 'L’additionneur complet', preset: 'fulladder',
+    html: `<p>Pour additionner des nombres de plusieurs bits, chaque étage reçoit aussi la <b>retenue</b> de l’étage précédent.</p>
+      <p>Additionneur complet = deux demi-additionneurs en série (A + B, puis + retenue) et un <b>OU</b> sur leurs deux retenues.</p>
+      <p>En chaînant n additionneurs complets, la retenue se propage d’un étage à l’autre : c’est le cœur d’une unité de calcul.</p>`,
+    challenge: { from: 'fulladder', goal: 'Lampe de droite : somme de A + B + retenue. Lampe du bas : retenue de sortie.', keep: [[0, 0, 3], [7, 0, 4], [18, 0, 4], [23, 0, 4], [14, 0, 10]],
+      truth: { inputs: [[0, 0, 3], [7, 0, 4], [18, 0, 4]], outputs: [[23, 0, 4], [14, 0, 10]],
+        rows: [[0, 0, 0, 0, 0], [1, 0, 0, 1, 0], [0, 1, 0, 1, 0], [1, 1, 0, 0, 1], [0, 0, 1, 1, 0], [1, 0, 1, 0, 1], [0, 1, 1, 0, 1], [1, 1, 1, 1, 1]], wait: 40 } } },
+  { id: 'l18', level: 6, title: 'Le compteur binaire', preset: 'counter',
+    html: `<p>Une chaîne de bascules T compte en binaire. Chaque étage change d’état quand le précédent <b>retombe</b> de 1 à 0.</p>
+      <p>Ici chaque étage est commandé par la sortie inverse (¬Q) du précédent : le front montant de ¬Q est le front descendant de Q.</p>
+      <p>Avec 3 étages, on compte de 0 à 7 puis on recommence. Tu as atteint le <b>niveau maximal</b> : tous les ordinateurs construits dans Minecraft reposent sur ces briques.</p>`,
+    challenge: { from: 'counter', goal: 'Chaque appui sur le bouton ajoute 1 au nombre binaire affiché par les trois lampes.', keep: [[0, 0, 1], [9, 0, 4], [21, 0, 4], [33, 0, 4]], seq: 'counter' } },
+];
+
+/* ---------- Vérification des défis (utilisée par l'interface et les tests) ---------- */
+function runChallengeChecks(ch) {
+  const res = [];
+  const get = p => W.get(p[0], p[1], p[2]);
+  const tick = n => { for (let i = 0; i < n; i++) Sim.tick(); };
+  const isOn = p => { const b = get(p); return !!(b && b.on); };
+  const name = p => `(${p[0]}, ${p[1]}, ${p[2]})`;
+  const need = (p, types, label) => { const b = get(p); if (!b || !types.includes(b.t)) { res.push({ ok: false, label: label + ' manquant en ' + name(p) }); return false; } return true; };
+  const press = p => { const b = get(p); if (b) Sim.use(b); };
+  if (ch.truth) {
+    const t = ch.truth;
+    if (!t.inputs.every(p => need(p, ['lever'], 'Levier')) || !t.outputs.every(p => need(p, ['lamp'], 'Lampe'))) return res;
+    for (const row of t.rows) {
+      t.inputs.forEach((p, i) => { const b = get(p); if (b.on !== !!row[i]) Sim.use(b); });
+      tick(t.wait || 30);
+      const got = t.outputs.map(isOn), want = row.slice(t.inputs.length).map(v => !!v);
+      const label = 'Entrées ' + row.slice(0, t.inputs.length).join(' ') + ' → ' + (t.outputs.length > 1 ? 'lampes ' : 'lampe ') + want.map(v => v ? 'allumée' : 'éteinte').join(', ');
+      res.push({ ok: got.every((v, i) => v === want[i]), label });
+    }
+  } else if (ch.clock) {
+    const o = ch.clock.output;
+    if (!need(o, ['lamp'], 'Lampe')) return res;
+    let edges = 0, prev = isOn(o);
+    for (let i = 0; i < ch.clock.ticks; i++) { tick(1); const v = isOn(o); if (v && !prev) edges++; prev = v; }
+    res.push({ ok: edges >= ch.clock.minEdges, label: `La lampe clignote (${edges} allumage${edges > 1 ? 's' : ''} en ${ch.clock.ticks / 10} s)` });
+  } else if (ch.seq === 'rs') {
+    const set = [6, 0, 3], reset = [0, 0, 3], lamp = [3, 0, 1];
+    if (!need(set, ['button_stone'], 'Bouton') || !need(reset, ['button_stone'], 'Bouton') || !need(lamp, ['lamp'], 'Lampe')) return res;
+    press(set); tick(30); res.push({ ok: isOn(lamp), label: 'Bouton de droite → lampe allumée' });
+    tick(30); res.push({ ok: isOn(lamp), label: '… et elle reste allumée' });
+    press(reset); tick(30); res.push({ ok: !isOn(lamp), label: 'Bouton de gauche → lampe éteinte' });
+    tick(30); res.push({ ok: !isOn(lamp), label: '… et elle reste éteinte' });
+    press(set); tick(30); res.push({ ok: isOn(lamp), label: 'Bouton de droite → rallumée' });
+  } else if (ch.seq === 'tff') {
+    const btn = [0, 0, 1], lamp = [9, 0, 4];
+    if (!need(btn, ['button_stone'], 'Bouton') || !need(lamp, ['lamp'], 'Lampe')) return res;
+    tick(20);
+    let prev = isOn(lamp);
+    for (let k = 1; k <= 4; k++) { press(btn); tick(30); const v = isOn(lamp); res.push({ ok: v !== prev, label: `Appui ${k} : la lampe s’inverse` }); prev = v; }
+  } else if (ch.seq === 'counter') {
+    const btn = [0, 0, 1], lamps = [[9, 0, 4], [21, 0, 4], [33, 0, 4]];
+    if (!need(btn, ['button_stone'], 'Bouton') || !lamps.every(p => need(p, ['lamp'], 'Lampe'))) return res;
+    tick(20);
+    const read = () => lamps.reduce((v, p, i) => v + (isOn(p) ? 1 << i : 0), 0);
+    const start = read();
+    for (let k = 1; k <= 8; k++) { press(btn); tick(45); const v = read(); res.push({ ok: v === (start + k) % 8, label: `Appui ${k} : ${((start + k) % 8).toString(2).padStart(3, '0')} attendu, ${v.toString(2).padStart(3, '0')} affiché` }); }
+  }
+  return res;
+}
 
 /* =====================================================================
    13. SAUVEGARDE (localStorage, JSON, PNG)
@@ -2169,23 +2724,9 @@ const el = (tag, attrs, ...kids) => {
   return e;
 };
 const svgIcon = name => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('class', 'i'); s.innerHTML = ICONS[name] || ''; return s; };
-function iconCanvas(t, size = 60, opts = {}) {
-  const c = document.createElement('canvas'); c.width = c.height = size;
-  const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
-  const b = mk(t, 0, 0, 0, { f: opts.f ?? DEFAULT_F[t] ?? 0 });
-  switch (t) {
-    case 'dust': b.lvl = 15; b.pt = 15; break;
-    case 'lamp': b.on = true; break;
-    case 'repeater': b.on = true; break;
-    case 'comparator': b.lvl = 12; break;
-    case 'lever': b.on = true; break;
-    case 'rail': b.on = true; break;
-    case 'piston': case 'sticky': b.f = N; break;
-    case 'observer': b.f = N; break;
-    case 'door': b.f = S; break;
-  }
-  if (t === 'glass') { g.fillStyle = '#1b2430'; g.fillRect(0, 0, size, size); }
-  drawBlock(g, b, 0, 0, size, 0, true);
+function iconCanvas(t, size = 64) {
+  const c = cnv(size, size), g = c.getContext('2d');
+  g.drawImage(itemIcon(t, size), 0, 0);
   return c;
 }
 
@@ -2203,7 +2744,7 @@ const UI = {
     this.buildPalette(); this.buildHotbar(); this.bind();
     this.setTool('build'); this.setLayer(0); this.updateUndo(); this.syncOptions(); this.updatePlay();
     const lg = $('logo').getContext('2d'); lg.imageSmoothingEnabled = false;
-    drawDust(lg, { lvl: 15, pt: 15, upm: 0, dnm: 0 }, 0, 0, 16, 0, false);
+    lg.drawImage(TEX.itemDust, 0, 0, 16, 16);
   },
   buildPalette(filter = '') {
     const root = $('palette'); root.innerHTML = '';
@@ -2290,6 +2831,7 @@ const UI = {
   },
   tickChanged() {
     $('tickLbl').textContent = 'tick ' + Sim.T;
+    if (Sim.hint) { this.toast(Sim.hint); Sim.hint = null; }
     if (Sim.dayCycle && (Sim.T % 5 === 0)) this.syncDay();
     const w = $('warn');
     const unst = Sim.unstableUntil > Sim.T, slow = this.slowUntil > performance.now();
@@ -2337,7 +2879,7 @@ const UI = {
       case 'repeater': rows.push(['Délai', b.d + ' tick' + (b.d > 1 ? 's' : '')], ['Verrouillé', b.lk ? 'oui' : 'non']); break;
       case 'comparator': rows.push(['Mode', b.m ? 'soustraction' : 'comparaison'], ['Arrière / côté', Sim.compBack(b) + ' / ' + Sim.compSide(b)]); break;
       case 'lamp': rows.push(['État', on('allumée', 'éteinte')]); pw = Sim.received(b); break;
-      case 'piston': case 'sticky': rows.push(['État', b.ext ? 'sorti' : 'rentré'], ['Alimenté', Sim.pistonPowered(b) ? 'oui' : 'non']); pw = Sim.received(b); break;
+      case 'piston': case 'sticky': rows.push(['État', b.ext ? 'sorti' : 'rentré'], ['Alimenté', Sim.pistonPowered(b) ? 'oui' : 'non'], ['Face avant', 'ne reçoit pas de signal']); pw = Sim.received(b); break;
       case 'observer': rows.push(['État', on('impulsion', 'repos')]); break;
       case 'note': rows.push(['Note', NOTE_NAMES[b.p % 12] + ' (' + b.p + ')']); break;
       case 'hopper': rows.push(['Remplissage', '≈ ' + hopperItems(b.lvl) + ' objets'], ['Verrouillée', on('oui', 'non')]); break;
@@ -2391,9 +2933,9 @@ const UI = {
     if (this.pasting && this.clip) {
       const clip = this.clip;
       for (const o of clip.items) {
-        const y = clip.all ? o.y : Y; const x = c.x + o.x, z = c.z + o.z;
+        const y = clip.rel ? Y + o.y : clip.all ? o.y : Y; const x = c.x + o.x, z = c.z + o.z;
         const b = deser({ ...o, x, y, z }); if (!b) continue;
-        b.pt = b.t === 'dust' ? 15 : 0;
+        b.pt = b.t === 'dust' ? (o._pt ?? 15) : 0;
         g.globalAlpha = y === Y ? 0.6 : 0.18;
         drawBlock(g, b, sx(x), sz(z), cs, now, false);
       }
@@ -2480,7 +3022,12 @@ const UI = {
       if (e.button === 2 || (e.button === 0 && this.space)) { this.drag = { kind: e.button === 2 ? 'rpan' : 'pan', sx: m.x, sy: m.y, cx: R.cam.x, cy: R.cam.y, moved: e.button !== 2, c }; this.hideTip(); if (e.button !== 2) cv.classList.add('pan'); return; }
       if (e.button !== 0) return;
       const Y = this.layer;
-      if (this.pasting) { const lost = Ed.pasteClip(this.clip, c.x, c.z, Y); if (lost) this.toast(lost + ' bloc(s) sans support retiré(s).'); return; }
+      if (this.pasting) {
+        const lost = Ed.pasteClip(this.clip, c.x, c.z, Y);
+        if (this.clip.kick) { kickObservers(Ed.lastPasted); Sim.settle(); }
+        if (lost) this.toast(lost + ' bloc(s) sans support retiré(s).');
+        this.layerInfo(); return;
+      }
       switch (this.tool) {
         case 'select': this.setSel({ x0: c.x, z0: c.z, x1: c.x, z1: c.z, all: this.selAll }); this.drag = { kind: 'sel', ax: c.x, az: c.z }; break;
         case 'erase': Edit.begin('Gomme'); Ed.erase(c.x, Y, c.z); Sim.settle(); this.drag = { kind: 'erase', last: c }; break;
@@ -2551,7 +3098,8 @@ const UI = {
     $('btnClear').onclick = () => this.confirm('Tout effacer ?', 'Le circuit entier sera supprimé. Tu pourras l’annuler avec Ctrl+Z.', 'Effacer', () => {
       Edit.begin('Tout effacer'); for (const b of [...W.all()]) W.remove(b); Edit.commit(); Sim.settle(); this.layerInfo();
     });
-    $('btnExamples').onclick = e => this.openMenu(e.currentTarget, EXAMPLES.map(x => ({ label: x.name, sub: x.desc, run: () => this.loadExample(x.id) })));
+    $('btnLibrary').onclick = () => this.libraryDialog();
+    $('btnLessons').onclick = () => this.toggleLessons();
     $('btnExport').onclick = e => this.openMenu(e.currentTarget, [
       { label: 'Fichier JSON', sub: 'Tout le circuit, réimportable', icon: 'file', run: () => this.exportJson() },
       { label: 'Image PNG de la couche Y ' + this.layer, sub: 'Vue du dessus', icon: 'image', run: () => this.exportPng(false) },
@@ -2717,40 +3265,45 @@ const UI = {
   welcome(force) {
     if (!force && store.get(WELCOME_KEY)) return;
     const logo = el('canvas', { width: 16, height: 16 });
-    const lg = logo.getContext('2d'); drawDust(lg, { lvl: 15, pt: 15, upm: 0, dnm: 0 }, 0, 0, 16, 0, false);
+    const lg = logo.getContext('2d'); lg.imageSmoothingEnabled = false; lg.drawImage(TEX.itemDust, 0, 0, 16, 16);
     const body = el('div', null,
       el('div', { class: 'hero' }, logo, el('div', null, el('h2', null, 'Redstone Planner'), el('p', null, 'Dessine tes circuits avant de les construire. Ils fonctionnent comme dans Minecraft Java.'))),
       el('ol', { html: `
         <li><span>Choisis un bloc à gauche ou avec <kbd>1</kbd>…<kbd>9</kbd>, clic gauche pour poser, glisse pour tracer un fil.</span></li>
         <li><span>Clique sur un levier ou un bouton pour l’actionner ; clic droit sur un répéteur pour régler son délai.</span></li>
         <li><span>Molette pour zoomer, clic droit ou <kbd>Espace</kbd> + glisser pour te déplacer, <kbd>R</kbd> pour tourner.</span></li>
-        <li><span><kbd>E</kbd> / <kbd>Q</kbd> changent d’étage, <kbd>Ctrl</kbd>+<kbd>Z</kbd> annule, le menu Exemples contient des circuits prêts.</span></li>` }));
+        <li><span><kbd>E</kbd> / <kbd>Q</kbd> changent d’étage, <kbd>Ctrl</kbd>+<kbd>Z</kbd> annule. <b>Leçons</b> t’apprend la redstone pas à pas, la <b>Bibliothèque</b> contient des schémas prêts.</span></li>` }));
     const dlg = this.openModal({ body, cls: 'welcome', buttons: [{ label: 'C’est parti', primary: true, run: () => store.set(WELCOME_KEY, '1') }] });
     this.modal.onClose = () => store.set(WELCOME_KEY, '1');
     return dlg;
   },
 
   /* ---------- Exemples, import, export ---------- */
-  loadExample(id, quiet) {
-    const ex = EXAMPLES.find(x => x.id === id); if (!ex) return;
-    const list = [];
+  /* Ouvre un schéma de la bibliothèque (remplace le circuit, annulable).
+     keep : ne garder que ces positions (modèle d'un défi), marquées comme fixes. */
+  loadPreset(id, opts = {}) {
+    const ex = PRESETS.find(x => x.id === id); if (!ex) return;
+    let list = [];
     ex.build((x, y, z, t, props) => list.push(mk(t, x, y, z, props)));
-    if (quiet) { W.init(); Sim.reset(); }
-    else { Edit.begin('Exemple : ' + ex.name); for (const b of [...W.all()]) W.remove(b); }
+    if (opts.keep) { const k = new Set(opts.keep.map(p => p.join(','))); list = list.filter(b => k.has([b.x, b.y, b.z].join(','))); for (const b of list) { b.tpl = true; if (b.t === 'torch') b.on = true; } }
+    if (opts.quiet) { W.init(); Sim.reset(); }
+    else { Edit.begin(opts.label || 'Ouvrir : ' + ex.name); for (const b of [...W.all()]) W.remove(b); }
     Sim.q.clear(); Sim.moving = []; Sim.dayCycle = false;
     for (const b of list) { if (b.t === 'daylight') b.lvl = daylightLevel(Sim.time, b.m); W.add(b); }
-    if (!quiet) Edit.commit();
-    if (ex.setup) ex.setup();
+    if (!opts.quiet) Edit.commit();
+    if (ex.setup && !opts.keep) ex.setup();
+    if (ex.kick && !opts.keep) kickObservers(list);
     Sfx.muted = true;
     Sim.settle();
-    for (let i = 0; i < (ex.settle || 0); i++) Sim.tick();
+    if (!opts.keep) for (let i = 0; i < (ex.settle || 0); i++) Sim.tick();
     Sfx.muted = false;
     this.syncDay();
-    this.setLayer(ex.layer || 0); this.setSel(null); this.pasting = false;
+    this.setLayer(opts.keep ? 0 : ex.layer || 0); this.setSel(null); this.pasting = false;
     R.fit(); Iso.fitted = false; if (this.view === 'iso') { Iso.fit(R.w, R.h); Iso.fitted = true; }
-    this.tickChanged(); R.dirty = true;
-    if (!quiet) this.toast(ex.name + ' — ' + ex.desc);
+    this.tickChanged(); this.layerInfo(); R.dirty = true;
+    if (!opts.quiet && !opts.keep) this.toast(ex.name + ' — ' + ex.desc);
   },
+  loadExample(id, quiet) { this.loadPreset(id, { quiet }); },
   exportJson() {
     const txt = JSON.stringify(serialize());
     const ta = el('textarea', { readonly: '', 'aria-label': 'Circuit JSON' }); ta.value = txt;
@@ -2823,6 +3376,7 @@ Sim.running = true;
 Sim.structVer = 0;
 const _sc = Sim.structChanged.bind(Sim);
 Sim.structChanged = function () { this.structVer++; _sc(); };
+Sim.onBreak = b => R.burst(b);
 Sim.onChange = struct => { R.dirty = true; UI.saveSoon(); if (struct) UI._layerDirty = true; };
 
 function frame(now) {
@@ -2845,8 +3399,8 @@ function frame(now) {
   if ((R.dirty || ticked || animated) && !isoBusy) {
     if (UI.view === 'iso') {
       frame.isoAt = now;
-      const g = R.g; g.setTransform(R.dpr, 0, 0, R.dpr, 0, 0); g.imageSmoothingEnabled = true;
-      Iso.draw(g, R.w, R.h, now);
+      Iso.D = R.dpr;
+      Iso.draw(R.g, R.w, R.h, now);
       R.dirty = false;
     } else R.draw(now);
   }
@@ -2857,6 +3411,7 @@ function boot() {
   buildTextures(); buildGlows();
   W.init();
   UI.init();
+  buildPresetData();
   UI.updateSpeed();
   let loaded = false;
   const saved = store.get(STORE_KEY);
@@ -2866,9 +3421,222 @@ function boot() {
   if (!loaded) UI.loadExample('lamp', true);
   R.fit(); UI.layerInfo(); UI.tickChanged();
   UI.welcome(false);
-  window.RP = { W, Sim, Ed, Edit, UI, R, Iso, EXAMPLES, mk, ser, deser, K, loadData, serialize };   // accès console
+  UI.restoreLessons();
+  window.RP = { W, Sim, Ed, Edit, UI, R, Iso, EXAMPLES, PRESETS, LESSONS, mk, ser, deser, K, loadData, serialize, runChallengeChecks };   // accès console
   requestAnimationFrame(frame);
 }
+
+/* =====================================================================
+   17. BIBLIOTHÈQUE : aperçus, « Ouvrir » et « Insérer »
+   ===================================================================== */
+ICONS.cap = '<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5"/><path d="M22 9v6"/>';
+ICONS.plus = '<path d="M12 5v14M5 12h14"/>';
+ICONS.open = '<path d="M4 20h16"/><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/>';
+document.querySelectorAll('svg[data-i="cap"]').forEach(s => { s.innerHTML = ICONS.cap; });
+
+/* Construit chaque schéma une fois (au démarrage) : état stabilisé, aperçu, contenu à insérer. */
+function buildPresetData() {
+  const dc = Sim.dayCycle, tm = Sim.time;
+  Sfx.muted = true;
+  const onBreak = Sim.onBreak; Sim.onBreak = null;
+  for (const p of PRESETS) {
+    W.init(); Sim.reset(); Sim.dayCycle = false; Sim.time = 6000;
+    const list = [];
+    p.build((x, y, z, t, pr) => list.push(mk(t, x, y, z, pr)));
+    for (const b of list) { if (b.t === 'daylight') b.lvl = daylightLevel(Sim.time, b.m); W.add(b); }
+    if (p.setup) p.setup();
+    if (p.kick) kickObservers(list);
+    Sim.settle();
+    for (let i = 0; i < (p.settle || 0); i++) Sim.tick();
+    const bb = W.bounds();
+    p.items = [...W.all()].filter(b => b.t !== 'door_top' && !b.mv).map(b => { const o = ser(b); o.x -= bb.x0; o.z -= bb.z0; o.y -= bb.y0; if (b.t === 'dust') o._pt = b.pt; return o; });
+    p.size = { w: bb.x1 - bb.x0 + 1, h: bb.z1 - bb.z0 + 1, y: bb.y1 - bb.y0 + 1 };
+    p.count = list.filter(b => !BT[b.t].hidden).length;
+    p.thumb = presetThumb(bb);
+  }
+  W.init(); Sim.reset();
+  Sim.dayCycle = dc; Sim.time = tm; Sim.onBreak = onBreak;
+  Sfx.muted = false;
+}
+function presetThumb(bb) {
+  const c = cnv(360, 210), g = c.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  g.fillStyle = '#0c0e12'; g.fillRect(0, 0, c.width, c.height);
+  const wc = bb.x1 - bb.x0 + 1, hc = bb.z1 - bb.z0 + 1;
+  const cs = Math.max(4, Math.floor(Math.min((c.width - 24) / wc, (c.height - 24) / hc, 40)));
+  const ox = Math.round((c.width - wc * cs) / 2), oz = Math.round((c.height - hc * cs) / 2);
+  g.strokeStyle = '#171a20'; g.lineWidth = 1; g.beginPath();
+  for (let i = 0; i <= wc; i++) { g.moveTo(ox + i * cs + .5, oz); g.lineTo(ox + i * cs + .5, oz + hc * cs); }
+  for (let j = 0; j <= hc; j++) { g.moveTo(ox, oz + j * cs + .5); g.lineTo(ox + wc * cs, oz + j * cs + .5); }
+  g.stroke();
+  // vue du dessus : les étages supérieurs recouvrent les inférieurs
+  for (let y = bb.y0; y <= bb.y1; y++) for (const b of W.layers[y]) drawBlock(g, b, ox + (b.x - bb.x0) * cs, oz + (b.z - bb.z0) * cs, cs, 0, true);
+  return c;
+}
+
+Object.assign(UI, {
+  libraryDialog() {
+    const body = el('div', { class: 'body' });
+    const search = el('input', { type: 'search', placeholder: 'Chercher un schéma…', 'aria-label': 'Chercher un schéma' });
+    const lvlSel = el('select', { 'aria-label': 'Niveau', class: 'chip' });
+    lvlSel.append(el('option', { value: '0' }, 'Tous les niveaux'));
+    for (const L of LEVELS) lvlSel.append(el('option', { value: String(L.n) }, `Niveau ${L.n} · ${L.name}`));
+    const list = el('div');
+    const render = () => {
+      list.innerHTML = '';
+      const f = search.value.trim().toLowerCase(), lv = +lvlSel.value;
+      let any = false;
+      for (const [cat, label] of PRESET_CATS) {
+        const items = PRESETS.filter(p => p.cat === cat && (!lv || p.level === lv) && (!f || (p.name + ' ' + p.desc).toLowerCase().includes(f)));
+        if (!items.length) continue;
+        any = true;
+        const grid = el('div', { class: 'lib-grid' });
+        for (const p of items) {
+          const L = LEVELS[p.level - 1];
+          grid.append(el('div', { class: 'card' }, p.thumb,
+            el('div', { class: 'in' },
+              el('div', { class: 'hd' }, el('b', null, p.name), el('span', { class: 'lvl', title: 'Niveau ' + L.n + ' · ' + L.name }, 'Niv. ' + L.n)),
+              el('p', null, p.desc),
+              el('div', { class: 'meta' }, `${p.count} blocs · ${p.size.w}×${p.size.h}${p.size.y > 1 ? '×' + p.size.y + ' de haut' : ''}`),
+              el('div', { class: 'act' },
+                el('button', { class: 'btn', title: 'Remplace le circuit actuel (annulable)', onclick: () => { this.closeModal(); this.loadPreset(p.id); } }, svgIcon('open'), 'Ouvrir'),
+                el('button', { class: 'btn primary', title: 'Place le schéma à côté de ton circuit', onclick: () => { this.closeModal(); this.insertPreset(p.id); } }, svgIcon('plus'), 'Insérer')))));
+        }
+        list.append(el('h3', { class: 'lib-cat' }, label), grid);
+      }
+      if (!any) list.append(el('p', { class: 'muted' }, 'Aucun schéma ne correspond.'));
+    };
+    search.oninput = render; lvlSel.onchange = render;
+    body.append(el('div', { class: 'lib-tools' }, search, lvlSel), list);
+    render();
+    this.openModal({ title: 'Bibliothèque de schémas', body, cls: 'library' });
+    setTimeout(() => search.focus(), 0);
+  },
+  insertPreset(id) {
+    const p = PRESETS.find(x => x.id === id); if (!p) return;
+    if (this.view !== '2d') this.setView('2d');
+    this.clip = { items: p.items.map(o => ({ ...o })), w: p.size.w, h: p.size.h, all: true, rel: true, kick: !!p.kick, label: 'Insérer : ' + p.name };
+    if (this.tool === 'select') this.setTool('build');
+    this.pasting = true; this.setSel(null); this.status(); R.dirty = true;
+    this.toast(p.name + ' : clic pour poser à l’étage Y ' + this.layer + ' · R pour tourner · Échap pour finir');
+  },
+
+  /* =====================================================================
+     18. LEÇONS : liste par niveaux, théorie, exemple, défi vérifié
+     ===================================================================== */
+  lessonsDone: new Set(),
+  lessonView: null,           // null = liste ; sinon id de la leçon
+  challengeOf: null,          // id de la leçon dont le défi est chargé
+  lastResults: null,
+  restoreLessons() {
+    try { const v = JSON.parse(store.get('redstone-planner:lessons') || '[]'); if (Array.isArray(v)) this.lessonsDone = new Set(v); } catch (e) { /* ignore */ }
+    const st = store.get('redstone-planner:lessons-open');
+    $('lsClose').onclick = () => this.toggleLessons(false);
+    if (st) { this.lessonView = st === 'list' ? null : st; this.toggleLessons(true); }
+  },
+  saveLessons() { store.set('redstone-planner:lessons', JSON.stringify([...this.lessonsDone])); },
+  toggleLessons(open) {
+    const d = $('lessons');
+    open = open === undefined ? d.hidden : open;
+    d.hidden = !open;
+    $('stage').classList.toggle('has-drawer', open);
+    $('btnLessons').classList.toggle('on', open);
+    store.set('redstone-planner:lessons-open', open ? (this.lessonView || 'list') : '');
+    if (open) this.renderLessons();
+  },
+  levelReached() {
+    let reached = 0;
+    for (const L of LEVELS) { const ls = LESSONS.filter(l => l.level === L.n); if (ls.every(l => this.lessonsDone.has(l.id))) reached = L.n; else break; }
+    return reached;
+  },
+  openLesson(id) { this.lessonView = id; this.lastResults = null; store.set('redstone-planner:lessons-open', id || 'list'); this.renderLessons(); $('lsBody').scrollTop = 0; },
+  renderLessons() {
+    const root = $('lsBody'); root.innerHTML = '';
+    if (!this.lessonView) {
+      const done = this.lessonsDone.size, reached = this.levelReached();
+      const bar = el('div', { class: 'ls-bar' });
+      for (const L of LEVELS) {
+        const ls = LESSONS.filter(l => l.level === L.n), n = ls.filter(l => this.lessonsDone.has(l.id)).length;
+        bar.append(el('i', { title: `Niveau ${L.n} : ${n}/${ls.length}` }, el('span', { style: `width:${100 * n / ls.length}%` })));
+      }
+      root.append(el('div', { class: 'ls-sum' },
+        el('b', null, reached ? `Niveau atteint : ${reached} · ${LEVELS[reached - 1].name}` : 'Commence par le niveau 1'),
+        bar, el('small', null, `${done} leçon${done > 1 ? 's' : ''} terminée${done > 1 ? 's' : ''} sur ${LESSONS.length} · niveau maximal : 6 · Maître`)));
+      if (reached === 6) root.append(el('div', { class: 'ls-master' }, el('b', null, 'Niveau maximal atteint'), 'Tu maîtrises la redstone, jusqu’au calcul binaire.'));
+      for (const L of LEVELS) {
+        const ls = LESSONS.filter(l => l.level === L.n), n = ls.filter(l => this.lessonsDone.has(l.id)).length;
+        const box = el('div', { class: 'ls-level' }, el('h3', null, el('span', { class: 'lvl' }, 'Niveau ' + L.n), `${L.name} · ${L.theme}`, el('small', null, `${n}/${ls.length}`)));
+        ls.forEach((l, i) => {
+          const isDone = this.lessonsDone.has(l.id);
+          box.append(el('button', { class: 'ls-item' + (isDone ? ' done' : ''), onclick: () => this.openLesson(l.id) },
+            el('span', { class: 'num' }, isDone ? '✓' : String(i + 1)), el('span', { class: 't' }, l.title), l.challenge ? el('span', { class: 'chip-sm' }, 'défi') : null));
+        });
+        root.append(box);
+      }
+      return;
+    }
+    const l = LESSONS.find(x => x.id === this.lessonView);
+    if (!l) { this.lessonView = null; this.renderLessons(); return; }
+    const L = LEVELS[l.level - 1], idx = LESSONS.indexOf(l);
+    const lesson = el('div', { class: 'ls-lesson' },
+      el('button', { class: 'ls-back', onclick: () => this.openLesson(null) }, '← Toutes les leçons'),
+      el('div', { style: 'margin-top:8px' }, el('span', { class: 'lvl' }, `Niveau ${L.n} · ${L.name}`)),
+      el('h3', null, l.title));
+    const text = el('div', { class: 'ls-text', html: l.html });
+    const actions = el('div', { class: 'ls-actions' });
+    if (l.preset) actions.append(el('button', { class: 'btn', onclick: () => { this.loadPreset(l.preset); this.toggleLessons(true); } }, svgIcon('open'), 'Charger l’exemple'));
+    root.append(lesson, text, actions);
+    if (l.challenge) {
+      const ch = l.challenge, active = this.challengeOf === l.id;
+      const box = el('div', { class: 'ls-chal' }, el('h4', null, 'Défi'), el('p', null, ch.goal));
+      const btns = el('div', { class: 'ls-actions' });
+      btns.append(el('button', { class: 'btn' + (active ? '' : ' primary'), onclick: () => this.startChallenge(l) }, active ? 'Recommencer le défi' : 'Commencer le défi'));
+      if (active) btns.append(el('button', { class: 'btn primary', onclick: () => this.verifyChallenge(l) }, 'Vérifier'));
+      box.append(btns);
+      if (active) box.append(el('p', { class: 'muted', style: 'font-size:12px' }, 'Les blocs du défi sont fixés. Construis le reste, puis clique sur Vérifier : la simulation teste chaque cas.'));
+      if (this.lastResults && this.lastResults.id === l.id) {
+        const ul = el('ul', { class: 'ls-res' });
+        for (const r of this.lastResults.res) ul.append(el('li', { class: r.ok ? '' : 'ko' }, r.label));
+        box.append(ul);
+      }
+      if (this.lessonsDone.has(l.id)) box.append(el('p', { style: 'color:var(--ok);font-weight:600' }, 'Défi réussi.'));
+      root.append(box);
+    } else if (!this.lessonsDone.has(l.id)) {
+      root.append(el('div', { class: 'ls-actions' }, el('button', { class: 'btn primary', onclick: () => { this.lessonsDone.add(l.id); this.saveLessons(); this.renderLessons(); } }, 'J’ai compris')));
+    } else root.append(el('p', { style: 'margin:0;color:var(--ok);font-weight:600' }, 'Leçon terminée.'));
+    const nav = el('div', { class: 'ls-nav' });
+    nav.append(idx > 0 ? el('button', { class: 'btn', onclick: () => this.openLesson(LESSONS[idx - 1].id) }, '← Précédente') : el('span'));
+    nav.append(idx < LESSONS.length - 1 ? el('button', { class: 'btn', onclick: () => this.openLesson(LESSONS[idx + 1].id) }, 'Suivante →') : el('span'));
+    root.append(nav);
+  },
+  startChallenge(l) {
+    this.loadPreset(l.challenge.from, { keep: l.challenge.keep, label: 'Défi : ' + l.title });
+    this.challengeOf = l.id; this.lastResults = null;
+    if (this.view !== '2d') this.setView('2d');
+    this.setTool('build');
+    this.renderLessons();
+    this.toast('Défi chargé. Construis ton circuit, puis clique sur Vérifier.');
+  },
+  verifyChallenge(l) {
+    // on teste sur une copie de l'état, puis on remet le circuit exactement comme avant
+    const snap = serialize(), T = Sim.T, run = Sim.running, hinted = Sim.hinted, onBreak = Sim.onBreak;
+    Sim.running = false; Sfx.muted = true; Sim.onBreak = null;
+    let res;
+    try { res = runChallengeChecks(l.challenge); } catch (e) { res = [{ ok: false, label: 'Erreur pendant le test : ' + e.message }]; }
+    loadData(snap); Sim.T = T; Sim.running = run; Sim.hinted = hinted; Sim.hint = null; Sim.onBreak = onBreak; Sfx.muted = false;
+    this.updatePlay(); this.layerInfo(); R.dirty = true;
+    const ok = res.length > 0 && res.every(r => r.ok);
+    this.lastResults = { id: l.id, res };
+    if (ok) {
+      const before = this.levelReached();
+      this.lessonsDone.add(l.id); this.saveLessons();
+      const after = this.levelReached();
+      this.toast(after > before ? `Défi réussi ! Niveau ${after} · ${LEVELS[after - 1].name} atteint.` : 'Défi réussi !');
+    } else this.toast(`${res.filter(r => !r.ok).length} cas sur ${res.length} à corriger.`);
+    this.renderLessons();
+  },
+});
+
 boot();
 </script>
 </body>
