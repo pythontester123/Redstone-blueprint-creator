@@ -1,0 +1,22 @@
+{
+  "format": "redstone-planner",
+  "version": 1,
+  "name": "Horloge à répéteurs",
+  "description": "Torche + 2 répéteurs : une période de 1 s. Active le levier pour l’arrêter.",
+  "settings": {"burnout":true,"qc":true,"time":6000,"dayCycle":false},
+  "blocks": [
+    {"t":"lever","x":1,"y":0,"z":0,"f":2},
+    {"t":"solid","x":1,"y":0,"z":1,"f":0},
+    {"t":"torch","x":2,"y":0,"z":1,"f":3,"on":1},
+    {"t":"dust","x":3,"y":0,"z":1,"f":0,"lvl":15},
+    {"t":"repeater","x":4,"y":0,"z":1,"f":1,"d":2},
+    {"t":"lamp","x":5,"y":0,"z":1,"f":0},
+    {"t":"dust","x":1,"y":0,"z":2,"f":0},
+    {"t":"dust","x":5,"y":0,"z":2,"f":0},
+    {"t":"dust","x":1,"y":0,"z":3,"f":0},
+    {"t":"dust","x":2,"y":0,"z":3,"f":0},
+    {"t":"dust","x":3,"y":0,"z":3,"f":0},
+    {"t":"repeater","x":4,"y":0,"z":3,"f":3,"d":2},
+    {"t":"dust","x":5,"y":0,"z":3,"f":0}
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "format": "redstone-planner",
+  "version": 1,
+  "name": "Porte en fer à boutons",
+  "description": "Un bouton de chaque côté alimente le bloc voisin de la porte, qui s’ouvre pendant 1 s.",
+  "settings": {"burnout":true,"qc":true,"time":6000,"dayCycle":false},
+  "blocks": [
+    {"t":"button_stone","x":0,"y":0,"z":0,"f":2},
+    {"t":"solid","x":0,"y":0,"z":1,"f":0},
+    {"t":"door","x":1,"y":0,"z":1,"f":0},
+    {"t":"solid","x":2,"y":0,"z":1,"f":0},
+    {"t":"button_stone","x":2,"y":0,"z":2,"f":0},
+    {"t":"solid","x":0,"y":1,"z":1,"f":0},
+    {"t":"door_top","x":1,"y":1,"z":1,"f":0},
+    {"t":"solid","x":2,"y":1,"z":1,"f":0},
+    {"t":"solid","x":0,"y":2,"z":1,"f":0},
+    {"t":"solid","x":1,"y":2,"z":1,"f":0},
+    {"t":"solid","x":2,"y":2,"z":1,"f":0}
+  ]
+}

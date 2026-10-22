@@ -1,0 +1,19 @@
+{
+  "format": "redstone-planner",
+  "version": 1,
+  "name": "Seuil de remplissage",
+  "description": "Le comparateur lit la trémie (clic droit pour la remplir). La lampe s’allume à partir de 7/15.",
+  "settings": {"burnout":true,"qc":true,"time":6000,"dayCycle":false},
+  "blocks": [
+    {"t":"hopper","x":0,"y":0,"z":0,"f":0,"lvl":8},
+    {"t":"comparator","x":1,"y":0,"z":0,"f":1,"lvl":8},
+    {"t":"dust","x":2,"y":0,"z":0,"f":0,"lvl":8},
+    {"t":"dust","x":3,"y":0,"z":0,"f":0,"lvl":7},
+    {"t":"dust","x":4,"y":0,"z":0,"f":0,"lvl":6},
+    {"t":"dust","x":5,"y":0,"z":0,"f":0,"lvl":5},
+    {"t":"dust","x":6,"y":0,"z":0,"f":0,"lvl":4},
+    {"t":"dust","x":7,"y":0,"z":0,"f":0,"lvl":3},
+    {"t":"dust","x":8,"y":0,"z":0,"f":0,"lvl":2},
+    {"t":"lamp","x":9,"y":0,"z":0,"f":0,"on":1}
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "format": "redstone-planner",
+  "version": 1,
+  "name": "Levier → lampe",
+  "description": "Le circuit de base, plus un bouton qui passe par un répéteur.",
+  "settings": {"burnout":true,"qc":true,"time":6000,"dayCycle":false},
+  "blocks": [
+    {"t":"lever","x":0,"y":0,"z":0,"f":5},
+    {"t":"dust","x":1,"y":0,"z":0,"f":0},
+    {"t":"dust","x":2,"y":0,"z":0,"f":0},
+    {"t":"dust","x":3,"y":0,"z":0,"f":0},
+    {"t":"lamp","x":4,"y":0,"z":0,"f":0},
+    {"t":"button_stone","x":0,"y":0,"z":2,"f":5},
+    {"t":"dust","x":1,"y":0,"z":2,"f":0},
+    {"t":"repeater","x":2,"y":0,"z":2,"f":1,"d":2},
+    {"t":"dust","x":3,"y":0,"z":2,"f":0},
+    {"t":"lamp","x":4,"y":0,"z":2,"f":0}
+  ]
+}

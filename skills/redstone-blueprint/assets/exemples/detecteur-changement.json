@@ -1,0 +1,15 @@
+{
+  "format": "redstone-planner",
+  "version": 1,
+  "name": "Détecteur de changement",
+  "description": "L’observateur regarde la lampe : chaque fois qu’elle change, il envoie une impulsion et le bloc musical joue.",
+  "settings": {"burnout":true,"qc":true,"time":6000,"dayCycle":false},
+  "blocks": [
+    {"t":"lever","x":0,"y":0,"z":0,"f":5},
+    {"t":"dust","x":1,"y":0,"z":0,"f":0},
+    {"t":"lamp","x":2,"y":0,"z":0,"f":0},
+    {"t":"observer","x":3,"y":0,"z":0,"f":3},
+    {"t":"dust","x":4,"y":0,"z":0,"f":0},
+    {"t":"note","x":5,"y":0,"z":0,"f":0,"p":12}
+  ]
+}

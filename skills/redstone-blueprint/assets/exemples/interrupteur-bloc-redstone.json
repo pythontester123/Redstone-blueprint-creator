@@ -1,0 +1,13 @@
+{
+  "format": "redstone-planner",
+  "version": 1,
+  "name": "Interrupteur à bloc de redstone",
+  "description": "Le piston collant pousse le bloc de redstone contre la lampe, puis le ramène.",
+  "settings": {"burnout":true,"qc":true,"time":6000,"dayCycle":false},
+  "blocks": [
+    {"t":"lever","x":0,"y":0,"z":0,"f":5},
+    {"t":"sticky","x":1,"y":0,"z":0,"f":1},
+    {"t":"rblock","x":2,"y":0,"z":0,"f":0},
+    {"t":"lamp","x":4,"y":0,"z":0,"f":0}
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "format": "redstone-planner",
+  "version": 1,
+  "name": "Piston qui casse la poudre",
+  "description": "En haut : levier derrière le piston, la poudre devant est cassée. En bas : le signal arrive par la face avant, le piston ne bouge pas (règle Java).",
+  "settings": {"burnout":true,"qc":true,"time":6000,"dayCycle":false},
+  "blocks": [
+    {"t":"lever","x":0,"y":0,"z":0,"f":5},
+    {"t":"piston","x":1,"y":0,"z":0,"f":1},
+    {"t":"dust","x":2,"y":0,"z":0,"f":0},
+    {"t":"dust","x":3,"y":0,"z":0,"f":0},
+    {"t":"piston","x":1,"y":0,"z":3,"f":1},
+    {"t":"dust","x":2,"y":0,"z":3,"f":0},
+    {"t":"lever","x":3,"y":0,"z":3,"f":5}
+  ]
+}

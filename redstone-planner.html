@@ -2730,9 +2730,11 @@ function attachOk(x, y, z, f) {
   const d = DIRS[f];
   return sideSturdy(W.get(x + d[0], y + d[1], z + d[2]));
 }
+/* Les cultures poussent sur la terre labourée et le chemin de terre, qui ne sont pas des blocs pleins */
+function soilBelow(x, y, z) { const b = W.get(x, y, z); return !!(b && !b.mv && (b.t === 'mc:farmland' || b.t === 'mc:dirt_path')); }
 function supportOk(t, x, y, z, f) {
   switch (BT[t].needs) {
-    case 'floor': return topSupport(x, y - 1, z, false);
+    case 'floor': return topSupport(x, y - 1, z, false) || (BT[t].mc && BT[t].mc.cls === 'plant' && soilBelow(x, y - 1, z));
     case 'dustFloor': return topSupport(x, y - 1, z, true);
     case 'att': return attachOk(x, y, z, f);
   }

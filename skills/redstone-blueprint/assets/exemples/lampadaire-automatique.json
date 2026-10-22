@@ -1,0 +1,19 @@
+{
+  "format": "redstone-planner",
+  "version": 1,
+  "name": "Lampadaire automatique",
+  "description": "Capteur de lumière + inverseur : les lampes s’allument la nuit. Active le cycle jour/nuit accéléré à gauche.",
+  "settings": {"burnout":true,"qc":true,"time":11400,"dayCycle":true},
+  "blocks": [
+    {"t":"lamp","x":4,"y":0,"z":0,"f":0},
+    {"t":"daylight","x":0,"y":0,"z":1,"f":0,"lvl":9},
+    {"t":"dust","x":1,"y":0,"z":1,"f":0,"lvl":9},
+    {"t":"dust","x":2,"y":0,"z":1,"f":0,"lvl":8},
+    {"t":"solid","x":3,"y":0,"z":1,"f":0},
+    {"t":"torch","x":4,"y":0,"z":1,"f":3},
+    {"t":"dust","x":5,"y":0,"z":1,"f":0},
+    {"t":"dust","x":6,"y":0,"z":1,"f":0},
+    {"t":"lamp","x":7,"y":0,"z":1,"f":0},
+    {"t":"lamp","x":4,"y":0,"z":2,"f":0}
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "format": "redstone-planner",
+  "version": 1,
+  "name": "Porte NON-OU",
+  "description": "Une porte OU suivie d’une torche : la lampe est allumée seulement si aucun levier n’est activé.",
+  "settings": {"burnout":true,"qc":true,"time":6000,"dayCycle":false},
+  "blocks": [
+    {"t":"lever","x":0,"y":0,"z":0,"f":5},
+    {"t":"dust","x":1,"y":0,"z":0,"f":0},
+    {"t":"dust","x":2,"y":0,"z":0,"f":0},
+    {"t":"dust","x":2,"y":0,"z":1,"f":0},
+    {"t":"dust","x":3,"y":0,"z":1,"f":0},
+    {"t":"dust","x":4,"y":0,"z":1,"f":0},
+    {"t":"solid","x":5,"y":0,"z":1,"f":0},
+    {"t":"torch","x":6,"y":0,"z":1,"f":3,"on":1},
+    {"t":"dust","x":7,"y":0,"z":1,"f":0,"lvl":15},
+    {"t":"lamp","x":8,"y":0,"z":1,"f":0,"on":1},
+    {"t":"lever","x":0,"y":0,"z":2,"f":5},
+    {"t":"dust","x":1,"y":0,"z":2,"f":0},
+    {"t":"dust","x":2,"y":0,"z":2,"f":0}
+  ]
+}

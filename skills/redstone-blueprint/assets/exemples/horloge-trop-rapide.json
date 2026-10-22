@@ -1,0 +1,18 @@
+{
+  "format": "redstone-planner",
+  "version": 1,
+  "name": "Horloge trop rapide",
+  "description": "Une torche qui s’alimente elle-même grille après 8 extinctions, puis se rallume 8 s plus tard.",
+  "settings": {"burnout":true,"qc":true,"time":6000,"dayCycle":false},
+  "blocks": [
+    {"t":"lamp","x":3,"y":0,"z":1,"f":0,"on":1},
+    {"t":"solid","x":2,"y":0,"z":2,"f":0},
+    {"t":"torch","x":3,"y":0,"z":2,"f":3,"on":1},
+    {"t":"dust","x":4,"y":0,"z":2,"f":0,"lvl":15},
+    {"t":"dust","x":2,"y":0,"z":3,"f":0,"lvl":10},
+    {"t":"dust","x":4,"y":0,"z":3,"f":0,"lvl":14},
+    {"t":"dust","x":2,"y":0,"z":4,"f":0,"lvl":11},
+    {"t":"dust","x":3,"y":0,"z":4,"f":0,"lvl":12},
+    {"t":"dust","x":4,"y":0,"z":4,"f":0,"lvl":13}
+  ]
+}

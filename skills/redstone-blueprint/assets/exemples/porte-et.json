@@ -1,0 +1,20 @@
+{
+  "format": "redstone-planner",
+  "version": 1,
+  "name": "Porte ET",
+  "description": "Lampe allumée si les deux leviers sont activés. Les deux torches d’entrée sont à l’étage Y 1.",
+  "settings": {"burnout":true,"qc":true,"time":6000,"dayCycle":false},
+  "blocks": [
+    {"t":"lever","x":1,"y":0,"z":0,"f":2},
+    {"t":"lever","x":3,"y":0,"z":0,"f":2},
+    {"t":"solid","x":1,"y":0,"z":1,"f":0},
+    {"t":"solid","x":2,"y":0,"z":1,"f":0},
+    {"t":"solid","x":3,"y":0,"z":1,"f":0},
+    {"t":"torch","x":2,"y":0,"z":2,"f":0},
+    {"t":"dust","x":2,"y":0,"z":3,"f":0},
+    {"t":"lamp","x":2,"y":0,"z":4,"f":0},
+    {"t":"torch","x":1,"y":1,"z":1,"f":5,"on":1},
+    {"t":"dust","x":2,"y":1,"z":1,"f":0,"lvl":15},
+    {"t":"torch","x":3,"y":1,"z":1,"f":5,"on":1}
+  ]
+}

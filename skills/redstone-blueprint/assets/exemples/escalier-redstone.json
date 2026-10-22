@@ -1,0 +1,21 @@
+{
+  "format": "redstone-planner",
+  "version": 1,
+  "name": "Escalier de redstone",
+  "description": "La poudre monte d’un bloc à chaque marche tant qu’aucun bloc opaque ne la coupe par le dessus.",
+  "settings": {"burnout":true,"qc":true,"time":6000,"dayCycle":false},
+  "blocks": [
+    {"t":"lever","x":0,"y":0,"z":0,"f":5},
+    {"t":"dust","x":1,"y":0,"z":0,"f":0},
+    {"t":"solid","x":2,"y":0,"z":0,"f":0},
+    {"t":"solid","x":3,"y":0,"z":0,"f":0},
+    {"t":"solid","x":4,"y":0,"z":0,"f":0},
+    {"t":"dust","x":2,"y":1,"z":0,"f":0},
+    {"t":"solid","x":3,"y":1,"z":0,"f":0},
+    {"t":"solid","x":4,"y":1,"z":0,"f":0},
+    {"t":"dust","x":3,"y":2,"z":0,"f":0},
+    {"t":"solid","x":4,"y":2,"z":0,"f":0},
+    {"t":"dust","x":4,"y":3,"z":0,"f":0},
+    {"t":"lamp","x":5,"y":3,"z":0,"f":0}
+  ]
+}

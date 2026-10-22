@@ -1,0 +1,15 @@
+{
+  "format": "redstone-planner",
+  "version": 1,
+  "name": "Tour de torches",
+  "description": "Le signal monte en alternant blocs et torches. Deux inversions : la lampe du sommet suit le levier.",
+  "settings": {"burnout":true,"qc":true,"time":6000,"dayCycle":false},
+  "blocks": [
+    {"t":"lever","x":-1,"y":0,"z":0,"f":1},
+    {"t":"solid","x":0,"y":0,"z":0,"f":0},
+    {"t":"torch","x":0,"y":1,"z":0,"f":5,"on":1},
+    {"t":"solid","x":0,"y":2,"z":0,"f":0},
+    {"t":"torch","x":0,"y":3,"z":0,"f":5},
+    {"t":"lamp","x":0,"y":4,"z":0,"f":0}
+  ]
+}
