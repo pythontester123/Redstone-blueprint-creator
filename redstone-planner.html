@@ -325,6 +325,33 @@ table.bom canvas { width: 24px; height: 24px; vertical-align: middle; image-rend
 .mc-fn { width: 100%; height: 96px; resize: vertical; padding: 8px; border-radius: 8px; background: #0c0e12; border: 1px solid var(--line); font: 11px/1.45 var(--mono); }
 @media (max-width: 760px) { .mc-top, .mc-grid { grid-template-columns: 1fr; } }
 
+/* ---------- Import Minecraft ---------- */
+.dialog.impdlg { width: min(760px, 100%); }
+.imp { display: flex; flex-direction: column; gap: 12px; }
+.imp-drop { border: 2px dashed var(--line-2); border-radius: var(--radius); padding: 22px 16px; text-align: center; cursor: pointer; display: grid; gap: 6px; transition: border-color .15s, background .15s; }
+.imp-drop:hover, .imp-drop.over, .imp-drop:focus-visible { border-color: var(--accent); background: var(--accent-soft); outline: none; }
+.imp-drop span { color: var(--muted); font-size: 12px; }
+.imp-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 12px; }
+.imp textarea { width: 100%; height: 70px; resize: vertical; padding: 8px 10px; border-radius: 8px; background: #0c0e12; border: 1px solid var(--line); font: 12px/1.45 var(--mono); }
+.imp-status { display: flex; flex-direction: column; gap: 10px; }
+.imp-status:empty { display: none; }
+.imp-bar { height: 6px; border-radius: 3px; background: var(--panel-3); overflow: hidden; }
+.imp-bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+.imp-card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel-2); padding: 12px; display: grid; gap: 7px; }
+.imp-card .hd { display: flex; align-items: baseline; gap: 8px; }
+.imp-card .hd b { flex: 1; font-size: 14px; }
+.imp-card p { margin: 0; font-size: 12.5px; }
+.imp-card .act { display: flex; gap: 8px; justify-content: flex-end; align-items: center; }
+.imp-card .act > span { flex: 1; }
+.imp-err { margin: 0; padding: 9px 11px; border-radius: 8px; background: rgba(224, 68, 58, .1); border: 1px solid rgba(224, 68, 58, .45); color: #ffcfc8; }
+.imp-warn { color: var(--warn); }
+.imp-list { display: grid; gap: 6px; max-height: 300px; overflow-y: auto; scrollbar-width: thin; }
+.imp-item { display: flex; gap: 10px; align-items: center; justify-content: space-between; padding: 9px 11px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel-2); }
+.imp-item .small, .imp-card .small { font-size: 11.5px; }
+.imp-item .coords { font: 11.5px var(--mono); color: var(--faint); margin-top: 2px; }
+.imp-coords { display: grid; grid-template-columns: auto repeat(3, minmax(0, 1fr)); gap: 6px; align-items: center; font-size: 12px; }
+.imp-coords input { height: 30px; padding: 0 8px; border-radius: 7px; background: #0c0e12; border: 1px solid var(--line); min-width: 0; font: 12px var(--mono); }
+
 /* ---------- Écran d'accueil ---------- */
 .welcome { width: min(560px, 100%); }
 .welcome .hero { display: flex; gap: 14px; align-items: center; padding: 18px 18px 6px; }
@@ -3450,7 +3477,7 @@ function boot() {
   R.fit(); UI.layerInfo(); UI.tickChanged();
   UI.welcome(false);
   UI.restoreLessons();
-  window.RP = { W, Sim, Ed, Edit, UI, R, Iso, EXAMPLES, PRESETS, LESSONS, mk, ser, deser, K, loadData, serialize, runChallengeChecks, buildMcExport, mcFile, mcfunctionText, gzipStored, zipStore };
+  window.RP = { W, Sim, Ed, Edit, UI, R, Iso, EXAMPLES, PRESETS, LESSONS, mk, ser, deser, K, loadData, serialize, runChallengeChecks, buildMcExport, mcFile, mcfunctionText, gzipStored, zipStore, importLitematic, importStructure, importSchem, importMcfunction, readMinecraftInput, findCircuits, importWorldArea };
   downloadsCap();   // accès console
   requestAnimationFrame(frame);
 }
@@ -3887,6 +3914,737 @@ Object.assign(UI, {
           el('div', null, fnArea, el('button', { class: 'chip', style: 'margin-top:6px', onclick: () => copy(fnArea.value, 'Liste de commandes') }, svgIcon('copy'), 'Copier les commandes')))));
     refresh();
     this.openModal({ title: 'Exporter vers Minecraft', body, cls: 'library mcdlg', buttons: [{ label: 'Fermer' }, { label: 'Tout télécharger (.zip)', icon: 'download', primary: true, keep: true, run: () => { zipBtn.onclick(); } }] });
+  },
+});
+
+/* =====================================================================
+   20. IMPORT DEPUIS MINECRAFT
+   Schémas Java (.litematic, .nbt, .schem, .mcfunction), mondes Java
+   (dossier ou .zip, fichiers région .mca) et mondes Bedrock (.mcworld).
+   Dans un monde, les circuits sont repérés automatiquement.
+   ===================================================================== */
+
+/* ---------- Lecture binaire : décompression, NBT, zip ---------- */
+async function inflateBytes(u8, fmt) {
+  if (typeof DecompressionStream === 'undefined') throw new Error('Ce navigateur ne sait pas décompresser les fichiers Minecraft (DecompressionStream manquant).');
+  const s = new Blob([u8]).stream().pipeThrough(new DecompressionStream(fmt));
+  return new Uint8Array(await new Response(s).arrayBuffer());
+}
+const maybeGunzip = async u8 => (u8[0] === 0x1f && u8[1] === 0x8b) ? inflateBytes(u8, 'gzip') : u8;
+const UTF8 = new TextDecoder();
+class NbtReader {
+  constructor(u8, le = false) { this.u8 = u8; this.v = new DataView(u8.buffer, u8.byteOffset, u8.byteLength); this.p = 0; this.le = le; }
+  i8() { return this.v.getInt8(this.p++); }
+  i16() { const x = this.v.getInt16(this.p, this.le); this.p += 2; return x; }
+  i32() { const x = this.v.getInt32(this.p, this.le); this.p += 4; return x; }
+  str() { const n = this.v.getUint16(this.p, this.le); this.p += 2; const s = UTF8.decode(this.u8.subarray(this.p, this.p + n)); this.p += n; return s; }
+  payload(t) {
+    switch (t) {
+      case 1: return this.i8();
+      case 2: return this.i16();
+      case 3: return this.i32();
+      case 4: { const x = this.v.getBigInt64(this.p, this.le); this.p += 8; return x; }
+      case 5: { const x = this.v.getFloat32(this.p, this.le); this.p += 4; return x; }
+      case 6: { const x = this.v.getFloat64(this.p, this.le); this.p += 8; return x; }
+      case 7: { const n = this.i32(); const a = new Int8Array(this.u8.slice(this.p, this.p + n).buffer); this.p += n; return a; }
+      case 8: return this.str();
+      case 9: { const et = this.i8(), n = this.i32(), a = new Array(Math.max(0, n)); for (let i = 0; i < n; i++) a[i] = this.payload(et); return a; }
+      case 10: { const o = {}; for (;;) { const tt = this.i8(); if (tt === 0) return o; const k = this.str(); o[k] = this.payload(tt); } }
+      case 11: { const n = this.i32(), a = new Int32Array(n); for (let i = 0; i < n; i++) a[i] = this.i32(); return a; }
+      case 12: {   // tableau de longs → mots de 32 bits (poids faible d'abord), pratique pour extraire des bits
+        const n = this.i32(), w = new Uint32Array(n * 2);
+        for (let i = 0; i < n; i++) {
+          if (this.le) { w[i * 2] = this.v.getUint32(this.p, true); w[i * 2 + 1] = this.v.getUint32(this.p + 4, true); }
+          else { w[i * 2 + 1] = this.v.getUint32(this.p, false); w[i * 2] = this.v.getUint32(this.p + 4, false); }
+          this.p += 8;
+        }
+        w.longs = true; return w;
+      }
+    }
+    throw new Error('Fichier NBT illisible (type ' + t + ').');
+  }
+  root() { const t = this.i8(); if (t !== 10) throw new Error('Fichier NBT illisible.'); this.str(); return this.payload(10); }
+}
+const readNbt = (u8, le) => new NbtReader(u8, le).root();
+/* bits [off, off+bits) d'un tableau de mots 32 bits */
+function getBits(w, off, bits) {
+  const k = off >>> 5, o = off & 31;
+  let v = w[k] >>> o;
+  if (o + bits > 32) v |= w[k + 1] << (32 - o);
+  return bits >= 32 ? v >>> 0 : v & ((1 << bits) - 1);
+}
+/* Lecteur de .zip (à partir d'un Blob, lecture à la demande) */
+async function openZip(blob) {
+  const tailLen = Math.min(blob.size, 65557), tail = new Uint8Array(await blob.slice(blob.size - tailLen).arrayBuffer());
+  let e = -1;
+  for (let i = tail.length - 22; i >= 0; i--) if (tail[i] === 0x50 && tail[i + 1] === 0x4b && tail[i + 2] === 5 && tail[i + 3] === 6) { e = i; break; }
+  if (e < 0) throw new Error('Archive .zip illisible.');
+  const ev = new DataView(tail.buffer, e);
+  const count = ev.getUint16(10, true), cdSize = ev.getUint32(12, true), cdOff = ev.getUint32(16, true);
+  if (cdOff === 0xffffffff) throw new Error('Archive trop grande (zip64) : compresse le monde sans les dossiers inutiles.');
+  const cd = new Uint8Array(await blob.slice(cdOff, cdOff + cdSize).arrayBuffer()), v = new DataView(cd.buffer);
+  const entries = new Map();
+  for (let p = 0, i = 0; i < count && p < cd.length; i++) {
+    const method = v.getUint16(p + 10, true), csize = v.getUint32(p + 20, true), size = v.getUint32(p + 24, true);
+    const nl = v.getUint16(p + 28, true), xl = v.getUint32(p + 30, true) & 0xffff, cl = v.getUint16(p + 32, true), off = v.getUint32(p + 42, true);
+    const name = UTF8.decode(cd.subarray(p + 46, p + 46 + nl)).replace(/\\/g, '/');
+    if (!name.endsWith('/')) entries.set(name, { method, csize, size, off });
+    p += 46 + nl + xl + cl;
+  }
+  return {
+    names: [...entries.keys()],
+    async read(name) {
+      const en = entries.get(name); if (!en) return null;
+      const h = new DataView(await blob.slice(en.off, en.off + 30).arrayBuffer());
+      const start = en.off + 30 + h.getUint16(26, true) + h.getUint16(28, true);
+      const raw = new Uint8Array(await blob.slice(start, start + en.csize).arrayBuffer());
+      if (en.method === 0) return raw;
+      if (en.method === 8) return inflateBytes(raw, 'deflate-raw');
+      throw new Error('Méthode de compression non gérée dans le .zip (' + en.method + ').');
+    },
+  };
+}
+
+/* ---------- Bloc Java → bloc du planificateur ---------- */
+const WOOD_BUTTON = /^(oak|spruce|birch|jungle|acacia|dark_oak|mangrove|cherry|bamboo|crimson|warped|pale_oak)_button$/;
+const SKIP_RX = /(^|_)(air|grass|fern|flower|tulip|poppy|dandelion|orchid|allium|bluet|daisy|cornflower|lily_of_the_valley|rose_bush|peony|lilac|sunflower|bush|sapling|vine|vines|carpet|sign|banner|torch|lantern|candle|ladder|cobweb|sugar_cane|kelp|kelp_plant|seagrass|coral|coral_fan|snow|water|lava|bubble_column|fire|tripwire|tripwire_hook|head|skull|flower_pot|sea_pickle|scaffolding|chain|light|structure_void|moss_carpet|glow_lichen|sculk_vein|pointed_dripstone|hanging_roots|spore_blossom|azalea|roots|sprouts|wheat|carrots|potatoes|beetroots|melon_stem|pumpkin_stem|cave_vines|big_dripleaf|small_dripleaf|pink_petals|leaf_litter|rail|pressure_plate|cake|bed|end_rod|lightning_rod|frogspawn|item_frame|button)$/;
+const SEE_THROUGH_RX = /(glass|leaves|_slab|stairs|ice$|glowstone|sea_lantern|beacon|chest$|slime_block|honey_block|fence|_wall$|pane|iron_bars|farmland|dirt_path|soul_sand|mud$|cactus|anvil|enchanting_table|brewing_stand|cauldron|hopper|composter|lectern|bell|grindstone|stonecutter|campfire|conduit|shulker_box|dragon_egg|tnt$|barrier|mangrove_roots|chorus|bamboo$|heavy_core|vault|trial_spawner|spawner|decorated_pot|crafter)/;
+const IMMOVABLE_RX = /^(bedrock|crying_obsidian|respawn_anchor|reinforced_deepslate|end_portal_frame|ender_chest|enchanting_table)$/;
+function hopperLevel(be) {
+  const items = be && (be.Items || be.items);
+  if (!Array.isArray(items) || !items.length) return 0;
+  let full = 0;
+  for (const it of items) full += Number(it.count ?? it.Count ?? 1) / 64;
+  return Math.max(1, Math.min(15, Math.floor(1 + full / 5 * 14)));
+}
+/* Renvoie {b: propriétés d'un bloc du planificateur, kind: 'exact'|'approx'} ou null (ignoré) */
+function fromJavaBlock(rawName, P = {}, be) {
+  const name = String(rawName).replace(/^minecraft:/, ''), tr = v => String(v) === 'true', dir = s => MC_DIR.indexOf(String(s));
+  const ex = (t, props) => ({ b: { t, ...props }, kind: 'exact' });
+  const attach = () => P.face === 'floor' ? D : P.face === 'ceiling' ? U : OPP[Math.max(0, dir(P.facing))];
+  switch (name) {
+    case 'air': case 'cave_air': case 'void_air': case 'moving_piston': return null;
+    case 'stone': return ex('solid');
+    case 'glass': return ex('glass');
+    case 'obsidian': return ex('obsidian');
+    case 'redstone_block': return ex('rblock');
+    case 'redstone_lamp': return ex('lamp', { on: tr(P.lit) });
+    case 'note_block': return ex('note', { p: +P.note || 0, on: tr(P.powered) });
+    case 'command_block': case 'chain_command_block': case 'repeating_command_block': return ex('command');
+    case 'daylight_detector': return ex('daylight', { m: tr(P.inverted) ? 1 : 0, lvl: +P.power || 0 });
+    case 'hopper': return ex('hopper', { on: P.enabled === 'false', lvl: hopperLevel(be) });
+    case 'redstone_wire': {
+      const sides = ['north', 'east', 'south', 'west'].map(k => P[k] || 'none');
+      return ex('dust', { lvl: +P.power || 0, dot: sides.every(s => s === 'none') });
+    }
+    case 'repeater': return ex('repeater', { f: OPP[Math.max(0, dir(P.facing))], d: clamp(+P.delay || 1, 1, 4), on: tr(P.powered), lk: tr(P.locked) });
+    case 'comparator': return ex('comparator', { f: OPP[Math.max(0, dir(P.facing))], m: P.mode === 'subtract' ? 1 : 0, lvl: be && be.OutputSignal !== undefined ? Number(be.OutputSignal) : tr(P.powered) ? 15 : 0 });
+    case 'redstone_torch': return ex('torch', { f: D, on: P.lit !== 'false' });
+    case 'redstone_wall_torch': return ex('torch', { f: OPP[Math.max(0, dir(P.facing))], on: P.lit !== 'false' });
+    case 'lever': return ex('lever', { f: attach(), on: tr(P.powered) });
+    case 'stone_button': case 'polished_blackstone_button': return ex('button_stone', { f: attach(), on: tr(P.powered) });
+    case 'stone_pressure_plate': return ex('plate', { on: tr(P.powered) });
+    case 'piston': case 'sticky_piston': return ex(name === 'piston' ? 'piston' : 'sticky', { f: Math.max(0, dir(P.facing)), ext: tr(P.extended) });
+    case 'piston_head': return ex('piston_head', { f: Math.max(0, dir(P.facing)), sticky: P.type === 'sticky' });
+    case 'observer': return ex('observer', { f: Math.max(0, dir(P.facing)), on: tr(P.powered) });
+    case 'powered_rail': return ex('rail', { f: /east|west/.test(P.shape || '') ? 1 : 0, on: tr(P.powered) });
+    case 'iron_trapdoor': return ex('trapdoor', { f: OPP[Math.max(0, dir(P.facing))], on: tr(P.open) });
+    case 'iron_door': return ex(P.half === 'upper' ? 'door_top' : 'door', { f: OPP[Math.max(0, dir(P.facing))], on: tr(P.open) });
+  }
+  // proches cousins, convertis au plus juste
+  if (WOOD_BUTTON.test(name)) return ex('button_wood', { f: attach(), on: tr(P.powered) });
+  if (/pressure_plate$/.test(name)) return { b: { t: 'plate', on: tr(P.powered) || +P.power > 0 }, kind: 'approx' };
+  if (/^(activator_rail|detector_rail)$/.test(name)) return { b: { t: 'rail', f: /east|west/.test(P.shape || '') ? 1 : 0, on: tr(P.powered) }, kind: 'approx' };
+  if (/_trapdoor$/.test(name)) return { b: { t: 'trapdoor', f: OPP[Math.max(0, dir(P.facing))], on: tr(P.open) }, kind: 'approx' };
+  if (/_door$/.test(name)) return { b: { t: P.half === 'upper' ? 'door_top' : 'door', f: OPP[Math.max(0, dir(P.facing))], on: tr(P.open) }, kind: 'approx' };
+  if (/_slab$/.test(name) && P.type === 'double') return { b: { t: 'solid' }, kind: 'approx' };
+  if (IMMOVABLE_RX.test(name)) return { b: { t: 'obsidian' }, kind: 'approx' };
+  if (SKIP_RX.test(name)) return null;
+  if (SEE_THROUGH_RX.test(name)) return { b: { t: 'glass' }, kind: 'approx' };
+  return { b: { t: 'solid' }, kind: 'approx' };
+}
+/* Composants qui signalent un circuit (pour le repérage automatique) */
+const JAVA_COMPONENT_RX = /^(minecraft:)?(redstone_wire|repeater|comparator|redstone_torch|redstone_wall_torch|lever|redstone_block|redstone_lamp|piston|sticky_piston|observer|daylight_detector|note_block|powered_rail|iron_door|iron_trapdoor|.*_button|.*_pressure_plate|dispenser|dropper|target)$/;
+function parseStateString(s) {
+  const m = /^([a-z0-9_:.\-/]+)(?:\[([^\]]*)\])?/.exec(s.trim());
+  if (!m) return null;
+  const props = {};
+  if (m[2]) for (const kv of m[2].split(',')) { const [k, v] = kv.split('='); if (k && v !== undefined) props[k.trim()] = v.trim(); }
+  return { name: m[1].includes(':') ? m[1] : 'minecraft:' + m[1], props };
+}
+
+/* ---------- Zone importée (liste de blocs du planificateur) ---------- */
+function makeImport(title, source) { return { title, source, cells: [], exact: 0, approx: 0, skipped: 0, size: null, warnings: [] }; }
+function pushJava(imp, x, y, z, name, props, be) {
+  const r = fromJavaBlock(name, props, be);
+  if (!r) { if (!/air$/.test(String(name))) imp.skipped++; return; }
+  imp.cells.push({ x, y, z, ...r.b });
+  if (r.kind === 'exact') imp.exact++; else imp.approx++;
+}
+/* Normalise : coin à (0,0,0), contrôle des limites du planificateur */
+function finishImport(imp) {
+  if (!imp.cells.length) throw new Error('Aucun bloc à importer dans cette zone.');
+  let x0 = Infinity, y0 = Infinity, z0 = Infinity, x1 = -Infinity, y1 = -Infinity, z1 = -Infinity;
+  for (const c of imp.cells) { x0 = Math.min(x0, c.x); y0 = Math.min(y0, c.y); z0 = Math.min(z0, c.z); x1 = Math.max(x1, c.x); y1 = Math.max(y1, c.y); z1 = Math.max(z1, c.z); }
+  if (y1 - y0 + 1 > MAXY) { imp.warnings.push(`Zone trop haute : seuls les ${MAXY} étages du bas sont gardés.`); }
+  if (x1 - x0 + 1 > 2 * HALF || z1 - z0 + 1 > 2 * HALF) throw new Error(`Zone trop large (${x1 - x0 + 1} × ${z1 - z0 + 1}) : le planificateur accepte au plus ${2 * HALF} blocs de côté.`);
+  imp.origin = { x: x0, y: y0, z: z0 };
+  imp.cells = imp.cells.filter(c => c.y - y0 < MAXY).map(c => ({ ...c, x: c.x - x0, y: c.y - y0, z: c.z - z0 }));
+  imp.size = { x: x1 - x0 + 1, y: Math.min(MAXY, y1 - y0 + 1), z: z1 - z0 + 1 };
+  return imp;
+}
+
+/* ---------- Schémas Java ---------- */
+async function importLitematic(u8) {
+  const root = readNbt(await maybeGunzip(u8));
+  if (!root.Regions) throw new Error('Ce fichier .litematic ne contient pas de région.');
+  const imp = makeImport(root.Metadata && root.Metadata.Name || 'Schéma Litematica', 'Litematica');
+  for (const reg of Object.values(root.Regions)) {
+    const pos = reg.Position, size = reg.Size, sx = Math.abs(size.x), sy = Math.abs(size.y), sz = Math.abs(size.z);
+    const ox = pos.x + (size.x < 0 ? size.x + 1 : 0), oy = pos.y + (size.y < 0 ? size.y + 1 : 0), oz = pos.z + (size.z < 0 ? size.z + 1 : 0);
+    const pal = reg.BlockStatePalette.map(e => ({ name: e.Name, props: e.Properties || {} }));
+    const bits = Math.max(2, Math.ceil(Math.log2(pal.length))), w = reg.BlockStates;
+    const bes = new Map(); for (const te of reg.TileEntities || []) bes.set(te.x + ',' + te.y + ',' + te.z, te);
+    for (let y = 0; y < sy; y++) for (let z = 0; z < sz; z++) for (let x = 0; x < sx; x++) {
+      const i = (y * sz + z) * sx + x, id = getBits(w, i * bits, bits), s = pal[id];
+      if (!s || /air$/.test(s.name)) continue;
+      pushJava(imp, ox + x, oy + y, oz + z, s.name, s.props, bes.get(x + ',' + y + ',' + z));
+    }
+  }
+  return finishImport(imp);
+}
+async function importStructure(u8) {
+  const root = readNbt(await maybeGunzip(u8));
+  const pal = (root.palette || (root.palettes && root.palettes[0]) || []).map(e => ({ name: e.Name, props: e.Properties || {} }));
+  if (!root.blocks) throw new Error('Ce fichier .nbt n’est pas une structure Minecraft.');
+  const imp = makeImport('Structure', 'structure vanilla');
+  for (const b of root.blocks) { const s = pal[b.state]; if (!s || /air$/.test(s.name)) continue; pushJava(imp, b.pos[0], b.pos[1], b.pos[2], s.name, s.props, b.nbt); }
+  return finishImport(imp);
+}
+async function importSchem(u8) {
+  let root = readNbt(await maybeGunzip(u8));
+  if (root.Schematic) root = root.Schematic;                       // version 3
+  const blocks = root.Blocks || root;                              // v3 : Blocks{Palette, Data} ; v1/v2 : à la racine
+  const palette = blocks.Palette, data = blocks.Data || blocks.BlockData;
+  if (!palette || !data) throw new Error('Ce fichier .schem n’est pas un schéma Sponge/WorldEdit lisible (les anciens .schematic ne sont pas gérés).');
+  const pal = []; for (const k in palette) pal[palette[k]] = parseStateString(k);
+  const X = root.Width, Y = root.Height, Z = root.Length;
+  const bes = new Map();
+  for (const be of blocks.BlockEntities || root.TileEntities || []) { const p = be.Pos; if (p) bes.set(p[0] + ',' + p[1] + ',' + p[2], be.Data ? { ...be.Data, id: be.Id } : be); }
+  const imp = makeImport(root.Metadata && root.Metadata.Name || 'Schéma WorldEdit', 'WorldEdit');
+  for (let p = 0, idx = 0; p < data.length && idx < X * Y * Z; idx++) {
+    let v = 0, sh = 0, b;
+    do { b = data[p++] & 0xff; v |= (b & 0x7f) << sh; sh += 7; } while (b & 0x80);
+    const s = pal[v]; if (!s || /air$/.test(s.name)) continue;
+    const x = idx % X, z = Math.floor(idx / X) % Z, y = Math.floor(idx / (X * Z));
+    pushJava(imp, x, y, z, s.name, s.props, bes.get(x + ',' + y + ',' + z));
+  }
+  return finishImport(imp);
+}
+function importMcfunction(text) {
+  const imp = makeImport('Commandes', 'commandes');
+  const num = s => +String(s).replace(/^[~^]/, '') || 0;
+  const cells = new Map();
+  const put = (x, y, z, st, nbt) => cells.set(x + ',' + y + ',' + z, { x, y, z, st, nbt });
+  for (const line of text.split(/\r?\n/)) {
+    const l = line.trim().replace(/^\//, '');
+    let m = /^setblock\s+(\S+)\s+(\S+)\s+(\S+)\s+([^\s{]+(?:\[[^\]]*\])?)(\{.*\})?/.exec(l);
+    if (m) { put(num(m[1]), num(m[2]), num(m[3]), m[4], m[5]); continue; }
+    m = /^fill\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+([^\s{]+(?:\[[^\]]*\])?)/.exec(l);
+    if (m) {
+      const a = [m[1], m[2], m[3], m[4], m[5], m[6]].map(num), st = m[7];
+      const n = (Math.abs(a[3] - a[0]) + 1) * (Math.abs(a[4] - a[1]) + 1) * (Math.abs(a[5] - a[2]) + 1);
+      if (n > 200000) { imp.warnings.push('Une commande fill trop grande a été ignorée.'); continue; }
+      for (let x = Math.min(a[0], a[3]); x <= Math.max(a[0], a[3]); x++) for (let y = Math.min(a[1], a[4]); y <= Math.max(a[1], a[4]); y++) for (let z = Math.min(a[2], a[5]); z <= Math.max(a[2], a[5]); z++) {
+        if (/air$/.test(st)) cells.delete(x + ',' + y + ',' + z); else put(x, y, z, st);
+      }
+    }
+  }
+  for (const c of cells.values()) {
+    const s = parseStateString(c.st); if (!s) continue;
+    let be = null;
+    if (c.nbt) { const o = /OutputSignal:(\d+)/.exec(c.nbt); be = o ? { OutputSignal: +o[1] } : null; const cnt = [...c.nbt.matchAll(/[Cc]ount:(\d+)/g)].map(r => ({ count: +r[1] })); if (cnt.length) be = { Items: cnt }; }
+    pushJava(imp, c.x, c.y, c.z, s.name, s.props, be);
+  }
+  if (!imp.cells.length) throw new Error('Aucune commande setblock ou fill reconnue dans ce texte.');
+  return finishImport(imp);
+}
+
+/* ---------- Monde Java : fichiers région .mca ---------- */
+/* Une section de 16×16×16 : palette + indices compactés (avant/après 1.16 détecté par la taille) */
+function javaSection(s) {
+  const bs = s.block_states, pal = bs ? bs.palette : s.Palette, data = bs ? bs.data : s.BlockStates;
+  if (!pal || !pal.length) return null;
+  const palette = pal.map(e => ({ name: e.Name, props: e.Properties || {} }));
+  let bits = 0, padded = true;
+  if (palette.length > 1 && data) {
+    bits = Math.max(4, Math.ceil(Math.log2(palette.length)));
+    const longs = data.length / 2;
+    if (longs !== Math.ceil(4096 / Math.floor(64 / bits))) { padded = false; if (longs * 64 / 4096 > bits) bits = Math.round(longs * 64 / 4096); }
+  }
+  return { y: s.Y, palette, data, bits, padded };
+}
+function sectionIndex(sec, i) {
+  if (!sec.bits) return 0;
+  if (!sec.padded) return getBits(sec.data, i * sec.bits, sec.bits);
+  const per = Math.floor(64 / sec.bits), li = Math.floor(i / per);
+  return getBits(sec.data, li * 64 + (i % per) * sec.bits, sec.bits);
+}
+async function readJavaChunk(buf, off) {
+  const v = new DataView(buf.buffer, buf.byteOffset);
+  const len = v.getUint32(off), type = buf[off + 4], raw = buf.subarray(off + 5, off + 4 + len);
+  if (type & 0x80) return { skipped: 'chunk externe (.mcc)' };
+  let u8;
+  if (type === 1) u8 = await inflateBytes(raw, 'gzip');
+  else if (type === 2) u8 = await inflateBytes(raw, 'deflate');
+  else if (type === 3) u8 = raw;
+  else return { skipped: 'compression LZ4 non gérée' };
+  return { nbt: readNbt(u8) };
+}
+function javaChunkInfo(nbt) {
+  const lvl = nbt.Level || nbt, secs = nbt.sections || lvl.Sections || lvl.sections || [];
+  const sections = new Map();
+  for (const s of secs) { const sec = javaSection(s); if (sec) sections.set(sec.y, sec); }
+  const bes = new Map();
+  for (const be of nbt.block_entities || lvl.TileEntities || lvl.block_entities || []) bes.set(be.x + ',' + be.y + ',' + be.z, be);
+  if ((nbt.DataVersion || 0) < 1451 && !sections.size) return { tooOld: true };
+  return { cx: lvl.xPos, cz: lvl.zPos, sections, bes };
+}
+/* Source « monde » commune Java/Bedrock : chunks chargés à la demande + composants repérés */
+async function scanJavaWorld(regionFiles, progress) {
+  const world = { edition: 'Java', chunks: new Map(), components: [], skipped: 0, tooOld: 0, files: regionFiles };
+  let done = 0;
+  for (const rf of regionFiles) {
+    const buf = new Uint8Array(await rf.blob.arrayBuffer());
+    if (buf.length < 8192) { done++; continue; }
+    for (let i = 0; i < 1024; i++) {
+      const off = ((buf[i * 4] << 16) | (buf[i * 4 + 1] << 8) | buf[i * 4 + 2]) * 4096;
+      if (!off || off + 5 > buf.length) continue;
+      let ch;
+      try { ch = await readJavaChunk(buf, off); } catch (e) { world.skipped++; continue; }
+      if (ch.skipped) { world.skipped++; continue; }
+      const info = javaChunkInfo(ch.nbt);
+      if (info.tooOld) { world.tooOld++; continue; }
+      world.chunks.set(info.cx + ',' + info.cz, info);
+      for (const sec of info.sections.values()) {
+        const hits = sec.palette.map((p, k) => JAVA_COMPONENT_RX.test(p.name) ? k : -1).filter(k => k >= 0);
+        if (!hits.length) continue;
+        const hs = new Set(hits);
+        for (let j = 0; j < 4096; j++) {
+          const id = sectionIndex(sec, j);
+          if (hs.has(id)) world.components.push([info.cx * 16 + (j & 15), sec.y * 16 + (j >> 8), info.cz * 16 + ((j >> 4) & 15), sec.palette[id].name.replace(/^minecraft:/, '')]);
+        }
+      }
+    }
+    done++; if (progress) progress(done / regionFiles.length, `Région ${done}/${regionFiles.length} · ${world.components.length} composants`);
+  }
+  world.blockAt = (x, y, z) => {
+    const ch = world.chunks.get((x >> 4) + ',' + (z >> 4)); if (!ch) return null;
+    const sec = ch.sections.get(y >> 4); if (!sec) return null;
+    const p = sec.palette[sectionIndex(sec, ((y & 15) << 8) | ((z & 15) << 4) | (x & 15))];
+    return p ? { name: p.name, props: p.props, be: ch.bes.get(x + ',' + y + ',' + z) } : null;
+  };
+  return world;
+}
+/* Extrait une zone d'un monde déjà scanné */
+function importWorldArea(world, box, title) {
+  const imp = makeImport(title, 'monde ' + world.edition);
+  for (let y = box.y0; y <= box.y1; y++) for (let z = box.z0; z <= box.z1; z++) for (let x = box.x0; x <= box.x1; x++) {
+    const b = world.blockAt(x, y, z);
+    if (!b || /air$/.test(b.name)) continue;
+    if (world.edition === 'Bedrock') pushBedrock(imp, x, y, z, b.name, b.props);
+    else pushJava(imp, x, y, z, b.name, b.props, b.be);
+  }
+  if (world.edition === 'Bedrock') fixPistonExt(imp);
+  return finishImport(imp);
+}
+/* Regroupe les composants proches (3 blocs au plus) en circuits */
+function findCircuits(components) {
+  const n = components.length, parent = new Int32Array(n).map((_, i) => i);
+  const find = i => { while (parent[i] !== i) { parent[i] = parent[parent[i]]; i = parent[i]; } return i; };
+  const at = new Map(); components.forEach((c, i) => at.set(c[0] + ',' + c[1] + ',' + c[2], i));
+  const R = 3;
+  components.forEach((c, i) => {
+    for (let dx = -R; dx <= R; dx++) for (let dy = -R; dy <= R; dy++) for (let dz = -R; dz <= R; dz++) {
+      const j = at.get((c[0] + dx) + ',' + (c[1] + dy) + ',' + (c[2] + dz));
+      if (j !== undefined && j !== i) { const a = find(i), b = find(j); if (a !== b) parent[a] = b; }
+    }
+  });
+  const groups = new Map();
+  components.forEach((c, i) => {
+    const r = find(i); let g = groups.get(r);
+    if (!g) groups.set(r, g = { n: 0, x0: Infinity, y0: Infinity, z0: Infinity, x1: -Infinity, y1: -Infinity, z1: -Infinity, kinds: {} });
+    g.n++; g.x0 = Math.min(g.x0, c[0]); g.y0 = Math.min(g.y0, c[1]); g.z0 = Math.min(g.z0, c[2]); g.x1 = Math.max(g.x1, c[0]); g.y1 = Math.max(g.y1, c[1]); g.z1 = Math.max(g.z1, c[2]);
+    const k = c[3].replace(/^(unpowered_|powered_|unlit_|lit_)/, '').replace(/_wall_torch$/, '_torch').replace(/^.*_button$/, 'button').replace(/^.*_pressure_plate$/, 'pressure_plate').replace(/^(wooden_button)$/, 'button');
+    g.kinds[k] = (g.kinds[k] || 0) + 1;
+  });
+  return [...groups.values()].filter(g => g.n >= 2).sort((a, b) => b.n - a.n);
+}
+
+/* ---------- Monde Bedrock (.mcworld) : base LevelDB de Mojang ---------- */
+function ldbVarint(u8, p) { let v = 0, m = 1, b; do { b = u8[p++]; v += (b & 0x7f) * m; m *= 128; } while (b & 0x80); return [v, p]; }
+async function ldbBlock(u8, off, size) {
+  const raw = u8.subarray(off, off + size), type = u8[off + size];
+  if (type === 0) return raw;
+  if (type === 2) return inflateBytes(raw, 'deflate');          // zlib
+  if (type === 4) return inflateBytes(raw, 'deflate-raw');      // zlib brut (format Mojang)
+  throw new Error('Compression LevelDB non gérée (' + type + ').');
+}
+function ldbEntries(b, cb) {
+  const dv = new DataView(b.buffer, b.byteOffset, b.byteLength), nr = dv.getUint32(b.length - 4, true), end = b.length - 4 - 4 * nr;
+  let p = 0, key = new Uint8Array(0);
+  while (p < end) {
+    let sh, ns, vl; [sh, p] = ldbVarint(b, p); [ns, p] = ldbVarint(b, p); [vl, p] = ldbVarint(b, p);
+    const k = new Uint8Array(sh + ns); k.set(key.subarray(0, sh)); k.set(b.subarray(p, p + ns), sh); p += ns;
+    cb(k, b.subarray(p, p + vl)); p += vl; key = k;
+  }
+}
+/* Seules les clés de sous-chunks de l'Overworld nous intéressent : x, z (int32), 47, y */
+const isSubchunkKey = k => k.length === 10 && k[8] === 47;
+function ldbPut(map, uk, seq, val) {
+  if (!isSubchunkKey(uk)) return;
+  const s = String.fromCharCode(...uk), cur = map.get(s);
+  if (!cur || cur.seq < seq) map.set(s, { seq, val: val ? val.slice() : null });
+}
+async function ldbReadTable(u8, map) {
+  let p = u8.length - 48, mo, ms, io, is;
+  [mo, p] = ldbVarint(u8, p); [ms, p] = ldbVarint(u8, p); [io, p] = ldbVarint(u8, p); [is, p] = ldbVarint(u8, p);
+  const index = await ldbBlock(u8, io, is), handles = [];
+  ldbEntries(index, (k, v) => { const [o, q] = ldbVarint(v, 0); const [s] = ldbVarint(v, q); handles.push([o, s]); });
+  for (const [o, s] of handles) {
+    const blk = await ldbBlock(u8, o, s);
+    ldbEntries(blk, (ik, val) => {
+      const n = ik.length - 8; if (n !== 10 || ik[8] !== 47) return;
+      let seq = 0; for (let i = 7; i >= 1; i--) seq = seq * 256 + ik[n + i];
+      ldbPut(map, ik.subarray(0, n), seq, ik[n] === 1 ? val : null);
+    });
+  }
+}
+function ldbReadLog(u8, map) {
+  const recs = []; let p = 0, frag = [];
+  while (p + 7 <= u8.length) {
+    const rem = 32768 - (p % 32768);
+    if (rem < 7) { p += rem; continue; }
+    const len = u8[p + 4] | (u8[p + 5] << 8), type = u8[p + 6];
+    if (type === 0) { p += rem; continue; }
+    const data = u8.subarray(p + 7, p + 7 + len); p += 7 + len;
+    if (type === 1) recs.push(data);
+    else if (type === 2) frag = [data];
+    else if (type === 3) frag.push(data);
+    else if (type === 4) { frag.push(data); const t = new Uint8Array(frag.reduce((a, f) => a + f.length, 0)); let o = 0; for (const f of frag) { t.set(f, o); o += f.length; } recs.push(t); frag = []; }
+  }
+  for (const r of recs) {
+    if (r.length < 12) continue;
+    const dv = new DataView(r.buffer, r.byteOffset, r.byteLength);
+    const seq0 = dv.getUint32(0, true) + dv.getUint32(4, true) * 4294967296, count = dv.getUint32(8, true);
+    let q = 12;
+    for (let i = 0; i < count && q < r.length; i++) {
+      const tag = r[q++]; let kl, vl; [kl, q] = ldbVarint(r, q);
+      const key = r.subarray(q, q + kl); q += kl;
+      if (tag === 1) { [vl, q] = ldbVarint(r, q); ldbPut(map, key, seq0 + i, r.subarray(q, q + vl)); q += vl; }
+      else ldbPut(map, key, seq0 + i, null);
+    }
+  }
+}
+/* Sous-chunk Bedrock (versions 1, 8 et 9) : palette NBT petit-boutiste + indices sur des mots de 32 bits */
+function bedrockSubchunk(u8, keyY) {
+  const ver = u8[0]; let p = 1, n = 1, y = keyY;
+  if (ver === 8 || ver === 9) { n = u8[p++]; if (ver === 9) y = (u8[p++] << 24) >> 24; }
+  else if (ver !== 1) return null;
+  const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+  if (!n) return null;
+  const hdr = u8[p++], bits = hdr >> 1;
+  let words = null, count;
+  if (bits === 0) { if (u8[p] === 0x0a) count = 1; else { count = dv.getInt32(p, true); p += 4; } }
+  else {
+    const bpw = Math.floor(32 / bits), nw = Math.ceil(4096 / bpw);
+    words = new Uint32Array(nw); for (let i = 0; i < nw; i++) words[i] = dv.getUint32(p + i * 4, true);
+    p += nw * 4; count = dv.getInt32(p, true); p += 4;
+  }
+  const rd = new NbtReader(u8.subarray(p), true), palette = [];
+  for (let i = 0; i < count; i++) { rd.i8(); rd.str(); const e = rd.payload(10); palette.push({ name: e.name, props: e.states || {} }); }
+  return { y, bits, words, palette, bpw: bits ? Math.floor(32 / bits) : 0 };
+}
+function bedrockIndex(sc, i) { if (!sc.bits) return 0; const w = sc.words[Math.floor(i / sc.bpw)]; return (w >>> ((i % sc.bpw) * sc.bits)) & ((1 << sc.bits) - 1); }
+async function scanBedrockWorld(files, progress) {
+  const map = new Map(), tables = files.filter(f => /\.(ldb|sst)$/.test(f.name)), logs = files.filter(f => /\.log$/.test(f.name));
+  let k = 0;
+  for (const f of tables) { await ldbReadTable(new Uint8Array(await f.blob.arrayBuffer()), map); k++; if (progress) progress(k / (tables.length + logs.length) * 0.7, `Base LevelDB : table ${k}/${tables.length}`); }
+  for (const f of logs) { ldbReadLog(new Uint8Array(await f.blob.arrayBuffer()), map); k++; }
+  const world = { edition: 'Bedrock', chunks: new Map(), components: [], skipped: 0, tooOld: 0 };
+  let i = 0;
+  for (const [key, e] of map) {
+    i++;
+    if (!e.val) continue;
+    const kb = Uint8Array.from(key, c => c.charCodeAt(0)), kd = new DataView(kb.buffer);
+    const cx = kd.getInt32(0, true), cz = kd.getInt32(4, true), ky = (kb[9] << 24) >> 24;
+    let sc; try { sc = bedrockSubchunk(e.val, ky); } catch (err) { world.skipped++; continue; }
+    if (!sc) { world.skipped++; continue; }
+    const ck = cx + ',' + cz; let ch = world.chunks.get(ck);
+    if (!ch) world.chunks.set(ck, ch = { cx, cz, sections: new Map() });
+    ch.sections.set(sc.y, sc);
+    const hits = new Set(sc.palette.map((pp, j) => BEDROCK_COMPONENT_RX.test(pp.name) ? j : -1).filter(j => j >= 0));
+    if (hits.size) for (let j = 0; j < 4096; j++) {
+      const id = bedrockIndex(sc, j);
+      if (hits.has(id)) world.components.push([cx * 16 + (j >> 8), sc.y * 16 + (j & 15), cz * 16 + ((j >> 4) & 15), sc.palette[id].name.replace(/^minecraft:/, '')]);
+    }
+    if (progress && i % 200 === 0) progress(0.7 + 0.3 * i / map.size, `Sous-chunks : ${i}/${map.size} · ${world.components.length} composants`);
+  }
+  world.blockAt = (x, y, z) => {
+    const ch = world.chunks.get((x >> 4) + ',' + (z >> 4)); if (!ch) return null;
+    const sc = ch.sections.get(y >> 4); if (!sc) return null;
+    return sc.palette[bedrockIndex(sc, ((x & 15) << 8) | ((z & 15) << 4) | (y & 15))] || null;
+  };
+  return world;
+}
+
+/* ---------- Bloc Bedrock → équivalent Java → bloc du planificateur ----------
+   Les états Bedrock (facing_direction, lever_direction, …) sont traduits vers les
+   propriétés Java puis passent par la même conversion que les mondes Java.
+   Tables issues des correspondances officielles des deux éditions. */
+const BEDROCK_COMPONENT_RX = /^(minecraft:)?(redstone_wire|unpowered_repeater|powered_repeater|unpowered_comparator|powered_comparator|redstone_torch|unlit_redstone_torch|lever|.*button|.*pressure_plate|redstone_block|redstone_lamp|lit_redstone_lamp|piston|sticky_piston|observer|daylight_detector|daylight_detector_inverted|noteblock|golden_rail|iron_door|iron_trapdoor|dispenser|dropper|target)$/;
+const BEDROCK_SKIP_RX = /^(tallgrass|short_grass|double_plant|red_flower|yellow_flower|deadbush|waterlily|reeds|snow_layer|web|standing_sign|wall_sign|.*_standing_sign|.*_wall_sign|.*_hanging_sign|frame|glow_frame|flowing_water|flowing_lava|water|lava|torch|soul_torch|unlit_redstone_torch_off|tripwire|trip_wire|tripwire_hook|skull|flower_pot|carpet|.*_carpet|vine|double_plant|seagrass|kelp|sapling|.*_sapling|rail|detector_rail_off|bed|cake|ladder|portal|fire|soul_fire|light_block|structure_void|lit_pumpkin_stem|pumpkin_stem|melon_stem|wheat|carrots|potatoes|beetroot|sweet_berry_bush|bubble_column)$/;
+const BR_CARD = ['south', 'west', 'north', 'east'];                     // ancien « direction » (0..3)
+const BR_PISTON = ['down', 'up', 'south', 'north', 'east', 'west'];     // facing_direction des pistons
+const BR_FACING = ['down', 'up', 'north', 'south', 'west', 'east'];     // facing_direction usuel
+const BR_OPP = { north: 'south', south: 'north', east: 'west', west: 'east', up: 'down', down: 'up' };
+const bBit = v => v === 1 || v === true || v === '1' || v === 'true' || v === '1b';
+function bedrockToJava(rawName, S = {}) {
+  const n = String(rawName).replace(/^minecraft:/, ''), sig = +S.redstone_signal || 0;
+  const card = () => S['minecraft:cardinal_direction'] || BR_CARD[+S.direction & 3] || 'north';
+  const face6 = (tbl) => typeof S['minecraft:facing_direction'] === 'string' ? S['minecraft:facing_direction'] : tbl[+S.facing_direction] || tbl[0];
+  switch (n) {
+    case 'redstone_wire': return ['redstone_wire', { power: sig, north: 'side', south: 'side' }];
+    case 'unpowered_repeater': case 'powered_repeater':
+      return ['repeater', { facing: card(), delay: (+S.repeater_delay || 0) + 1, powered: String(n === 'powered_repeater') }];
+    case 'unpowered_comparator': case 'powered_comparator':
+      return ['comparator', { facing: card(), mode: bBit(S.output_subtract_bit) ? 'subtract' : 'compare', powered: String(n === 'powered_comparator' || bBit(S.output_lit_bit)) }];
+    case 'redstone_torch': case 'unlit_redstone_torch': {
+      const t = String(S.torch_facing_direction || 'top'), lit = String(n === 'redstone_torch');
+      if (t === 'top' || t === 'unknown') return ['redstone_torch', { lit }];
+      return ['redstone_wall_torch', { facing: BR_OPP[t] || 'north', lit }];
+    }
+    case 'lever': {
+      const d = String(S.lever_direction || 'up_north_south'), powered = String(bBit(S.open_bit));
+      if (d.startsWith('down')) return ['lever', { face: 'ceiling', facing: d.endsWith('east_west') ? 'west' : 'north', powered }];
+      if (d.startsWith('up')) return ['lever', { face: 'floor', facing: d.endsWith('east_west') ? 'east' : 'north', powered }];
+      return ['lever', { face: 'wall', facing: d, powered }];
+    }
+    case 'golden_rail': case 'detector_rail': case 'activator_rail': {
+      const shapes = ['north_south', 'east_west', 'ascending_east', 'ascending_west', 'ascending_north', 'ascending_south'];
+      return [n === 'golden_rail' ? 'powered_rail' : n, { shape: shapes[+S.rail_direction] || 'north_south', powered: String(bBit(S.rail_data_bit)) }];
+    }
+    case 'piston': case 'sticky_piston': return [n, { facing: face6(BR_PISTON), extended: 'false' }];
+    case 'piston_arm_collision': case 'sticky_piston_arm_collision':
+      return ['piston_head', { facing: face6(BR_PISTON), type: n.startsWith('sticky') ? 'sticky' : 'normal' }];
+    case 'observer': return ['observer', { facing: face6(BR_FACING), powered: String(bBit(S.powered_bit)) }];
+    case 'hopper': return ['hopper', { enabled: String(!bBit(S.toggle_bit)) }];
+    case 'daylight_detector': case 'daylight_detector_inverted':
+      return ['daylight_detector', { power: sig, inverted: String(n.endsWith('inverted')) }];
+    case 'redstone_lamp': case 'lit_redstone_lamp': return ['redstone_lamp', { lit: String(n.startsWith('lit')) }];
+    case 'noteblock': return ['note_block', {}];
+    case 'grass': return ['grass_block', {}];                 // ancien nom Bedrock du bloc d'herbe
+    case 'wooden_button': return ['oak_button', btnProps(S)];
+    case 'wooden_door': return ['oak_door', doorProps(S)];
+    case 'trapdoor': return ['oak_trapdoor', trapProps(S)];
+    case 'wooden_pressure_plate': return ['oak_pressure_plate', { powered: String(sig > 0) }];
+  }
+  if (/_button$/.test(n)) return [n, btnProps(S)];
+  if (/_pressure_plate$/.test(n)) return [n, { powered: String(sig > 0), power: sig }];
+  if (/_door$/.test(n)) return [n, doorProps(S)];
+  if (/_trapdoor$/.test(n)) return [n, trapProps(S)];
+  if (BEDROCK_SKIP_RX.test(n)) return null;
+  if (/^double_.*slab|^.*double_slab$/.test(n)) return ['stone', {}];
+  return [n, {}];
+}
+function btnProps(S) {
+  const f = +S.facing_direction || 0, powered = String(bBit(S.button_pressed_bit));
+  if (f === 0) return { face: 'ceiling', facing: 'north', powered };
+  if (f === 1) return { face: 'floor', facing: 'north', powered };
+  return { face: 'wall', facing: BR_FACING[f], powered };
+}
+function doorProps(S) {
+  const open = String(bBit(S.open_bit));
+  if (bBit(S.upper_block_bit)) return { half: 'upper', facing: 'north', open };
+  const c = S['minecraft:cardinal_direction'];
+  const facing = c ? { south: 'east', west: 'south', north: 'west', east: 'north' }[c] || 'north' : ['east', 'south', 'west', 'north'][+S.direction & 3];
+  return { half: 'lower', facing, open };
+}
+function trapProps(S) {
+  const c = S['minecraft:cardinal_direction'];
+  return { facing: c || ['east', 'west', 'south', 'north'][+S.direction & 3], open: String(bBit(S.open_bit)) };
+}
+function pushBedrock(imp, x, y, z, name, props) {
+  const j = bedrockToJava(name, props);
+  if (!j) { if (!/air$/.test(String(name))) imp.skipped++; return; }
+  pushJava(imp, x, y, z, j[0], j[1]);
+}
+/* Bedrock ne stocke pas « extended » : un piston est sorti si sa tête est devant lui */
+function fixPistonExt(imp) {
+  const at = new Map(imp.cells.map(c => [c.x + ',' + c.y + ',' + c.z, c]));
+  for (const c of imp.cells) if (c.t === 'piston' || c.t === 'sticky') {
+    const d = DIRS[c.f], h = at.get((c.x + d[0]) + ',' + (c.y + d[1]) + ',' + (c.z + d[2]));
+    c.ext = !!(h && h.t === 'piston_head' && h.f === c.f);
+  }
+}
+
+/* ---------- Détection du type de fichier et lecture ---------- */
+/* files : liste de {name (chemin), blob}. Renvoie {kind:'import', imp} | {kind:'world', world} | {kind:'planner', data} */
+async function readMinecraftInput(files, progress) {
+  const one = files.length === 1 ? files[0] : null;
+  const ext = n => (n.match(/\.([a-z0-9]+)$/i) || [])[1]?.toLowerCase();
+  if (one) {
+    const e = ext(one.name);
+    if (e === 'json') return { kind: 'planner', data: JSON.parse(await one.blob.text()) };
+    if (e === 'litematic') return { kind: 'import', imp: await importLitematic(new Uint8Array(await one.blob.arrayBuffer())) };
+    if (e === 'nbt') return { kind: 'import', imp: await importStructure(new Uint8Array(await one.blob.arrayBuffer())) };
+    if (e === 'schem') return { kind: 'import', imp: await importSchem(new Uint8Array(await one.blob.arrayBuffer())) };
+    if (e === 'schematic') throw new Error('Les anciens .schematic (MCEdit, avant 1.13) ne sont pas gérés : réenregistre-le en .schem avec WorldEdit.');
+    if (e === 'mcfunction' || e === 'txt') return { kind: 'import', imp: importMcfunction(await one.blob.text()) };
+    if (e === 'mcworld' || e === 'zip') {
+      const z = await openZip(one.blob);
+      const entries = z.names.map(n => ({ name: n, blob: { arrayBuffer: async () => (await z.read(n)).buffer, text: async () => UTF8.decode(await z.read(n)) } }));
+      return readMinecraftInput(entries, progress);
+    }
+  }
+  // plusieurs fichiers : dossier de monde, contenu d'archive, ou fichiers .mca
+  const names = files.map(f => f.name.replace(/\\/g, '/'));
+  const db = files.filter((f, i) => /(^|\/)db\/[^/]+\.(ldb|sst|log)$/i.test(names[i]));
+  if (db.length) return { kind: 'world', world: await scanBedrockWorld(db.map(f => ({ name: f.name, blob: f.blob })), progress) };
+  const regions = files.filter((f, i) => /\.mca$/i.test(names[i]) && !/(^|\/)(DIM-?1|dimensions|entities|poi)\//.test(names[i]) && (/(^|\/)region\//.test(names[i]) || !/\//.test(names[i])));
+  if (regions.length) return { kind: 'world', world: await scanJavaWorld(regions, progress) };
+  const schem = files.find((f, i) => /\.(litematic|nbt|schem|mcfunction)$/i.test(names[i]));
+  if (schem) return readMinecraftInput([schem], progress);
+  throw new Error('Rien de reconnu : choisis un .mcworld, un monde Java (.zip ou dossier), un .litematic, .nbt, .schem, .mcfunction ou un .json du planificateur.');
+}
+
+Object.assign(UI, {
+  /* Fenêtre d'import : planificateur, schémas et mondes Minecraft */
+  importDialog() {
+    const body = el('div', { class: 'body imp' });
+    const fileIn = el('input', { type: 'file', id: 'impFile', multiple: '', accept: '.json,.litematic,.nbt,.schem,.schematic,.mcfunction,.txt,.mcworld,.zip,.mca', hidden: '' });
+    const dirIn = el('input', { type: 'file', id: 'impDir', hidden: '' }); dirIn.webkitdirectory = true;
+    const ta = el('textarea', { placeholder: 'Ou colle ici un .json du planificateur ou des commandes /setblock…', 'aria-label': 'Texte à importer' });
+    const status = el('div', { class: 'imp-status', 'aria-live': 'polite' });
+    const drop = el('div', { class: 'imp-drop', tabindex: '0', role: 'button', 'aria-label': 'Choisir un fichier' },
+      el('b', null, 'Dépose un fichier ici ou clique pour le choisir'),
+      el('span', null, 'Monde Bedrock .mcworld · monde Java (.zip ou dossier) · .litematic · .nbt · .schem · .mcfunction · .json'));
+    drop.onclick = () => fileIn.click();
+    drop.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileIn.click(); } };
+    drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+    drop.ondragleave = () => drop.classList.remove('over');
+    drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); this.importFiles([...e.dataTransfer.files].map(f => ({ name: f.name, blob: f })), status); };
+    fileIn.onchange = () => { const fs = [...fileIn.files].map(f => ({ name: f.name, blob: f })); fileIn.value = ''; if (fs.length) this.importFiles(fs, status); };
+    dirIn.onchange = () => { const fs = [...dirIn.files].map(f => ({ name: f.webkitRelativePath || f.name, blob: f })); dirIn.value = ''; if (fs.length) this.importFiles(fs, status); };
+    body.append(drop, fileIn, dirIn,
+      el('div', { class: 'imp-row' }, el('button', { class: 'btn', onclick: () => dirIn.click() }, svgIcon('file'), 'Choisir un dossier de monde…'),
+        el('span', { class: 'muted' }, 'Java : .minecraft/saves/<monde>. Bedrock : exporte le monde en .mcworld depuis le jeu.')),
+      ta, status);
+    this.openModal({ title: 'Importer', body, cls: 'library impdlg', buttons: [
+      { label: 'Fermer' },
+      { label: 'Charger le texte', primary: true, keep: true, run: () => {
+        const t = ta.value.trim(); if (!t) { this.toast('Le champ texte est vide.'); return; }
+        if (t[0] === '{') { try { this.importText(t); this.closeModal(); } catch (e) { this.toast(e.message); } return; }
+        try { this.showImport(importMcfunction(t), status); } catch (e) { status.innerHTML = ''; status.append(el('p', { class: 'imp-err' }, e.message)); }
+      } },
+    ] });
+  },
+  async importFiles(files, status) {
+    status.innerHTML = '';
+    const bar = el('div', { class: 'imp-bar' }, el('i')), msg = el('p', { class: 'muted' }, 'Lecture…');
+    status.append(msg, bar);
+    const progress = (f, text) => { bar.firstChild.style.width = Math.round(f * 100) + '%'; msg.textContent = text; };
+    try {
+      const r = await readMinecraftInput(files, progress);
+      if (r.kind === 'planner') { const n = loadData(r.data, { undoable: true, label: 'Importer' }); R.fit(); Iso.fitted = false; this.layerInfo(); this.closeModal(); this.toast(n + ' blocs importés.'); return; }
+      if (r.kind === 'import') { this.showImport(r.imp, status); return; }
+      this.showWorld(r.world, status);
+    } catch (e) {
+      status.innerHTML = ''; status.append(el('p', { class: 'imp-err' }, e.message || String(e)));
+    }
+  },
+  /* Résumé d'une zone importée, avec Ouvrir / Insérer */
+  showImport(imp, status, back) {
+    status.innerHTML = '';
+    const s = imp.size;
+    const info = el('div', { class: 'imp-card' },
+      el('div', { class: 'hd' }, el('b', null, imp.title), el('span', { class: 'lvl' }, imp.source)),
+      el('p', null, `${imp.cells.length} blocs · ${s.x} × ${s.y} × ${s.z} (X × Y × Z)` + (imp.origin && imp.source.startsWith('monde') ? ` · coin à X ${imp.origin.x}, Y ${imp.origin.y}, Z ${imp.origin.z}` : '')),
+      el('p', { class: 'muted' }, `${imp.exact} blocs reproduits à l’identique, ${imp.approx} convertis au plus proche (bloc solide, verre…)` + (imp.skipped ? `, ${imp.skipped} décors ignorés (herbe, fleurs, rails simples…)` : '') + '.'),
+      ...imp.warnings.map(w => el('p', { class: 'imp-warn' }, w)),
+      el('div', { class: 'act' },
+        back ? el('button', { class: 'btn', onclick: back }, '← Autres circuits') : el('span'),
+        el('button', { class: 'btn', title: 'Remplace le circuit actuel (annulable)', onclick: () => { this.applyImport(imp, 'open'); } }, svgIcon('open'), 'Ouvrir'),
+        el('button', { class: 'btn primary', title: 'Place-le à côté de ton circuit', onclick: () => { this.applyImport(imp, 'insert'); } }, svgIcon('plus'), 'Insérer')));
+    status.append(info);
+  },
+  applyImport(imp, mode) {
+    const cells = imp.cells;
+    if (mode === 'insert') {
+      this.closeModal();
+      if (this.view !== '2d') this.setView('2d');
+      const items = cells.filter(c => c.t !== 'door_top').map(c => ({ ...c, f: c.f ?? DEFAULT_F[c.t] ?? 0 }));
+      this.clip = { items, w: imp.size.x, h: imp.size.z, all: true, rel: true, label: 'Importer : ' + imp.title };
+      if (this.tool === 'select') this.setTool('build');
+      this.pasting = true; this.setSel(null); this.status(); R.dirty = true;
+      this.toast('Clic pour poser à l’étage Y ' + this.layer + ' · R pour tourner · Échap pour finir');
+      return;
+    }
+    Edit.begin('Importer : ' + imp.title);
+    for (const b of [...W.all()]) W.remove(b);
+    Sim.q.clear(); Sim.moving = [];
+    for (const c of cells) { const { x, y, z, t, ...props } = c; W.add(mk(t, x, y, z, props)); }
+    Edit.commit();
+    Sfx.muted = true; Sim.settle(); Sfx.muted = false;
+    this.closeModal();
+    // étage montré : celui qui porte le plus de composants (pas le sol)
+    const per = new Map(); for (const c of cells) if (!/^(solid|glass|obsidian)$/.test(c.t)) per.set(c.y, (per.get(c.y) || 0) + 1);
+    const best = [...per].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0];
+    this.setLayer(best ? best[0] : 0); this.setSel(null); R.fit(); Iso.fitted = false; if (this.view === 'iso') { Iso.fit(R.w, R.h); Iso.fitted = true; }
+    this.layerInfo(); R.dirty = true;
+    this.toast(`${imp.title} importé : ${cells.length} blocs. Ctrl+Z pour revenir.`);
+  },
+  /* Monde scanné : liste des circuits trouvés + zone manuelle */
+  showWorld(world, status) {
+    status.innerHTML = '';
+    const circuits = findCircuits(world.components);
+    const head = el('div', { class: 'imp-card' },
+      el('div', { class: 'hd' }, el('b', null, 'Monde ' + world.edition), el('span', { class: 'lvl' }, world.chunks.size + ' chunks')),
+      el('p', null, circuits.length ? `${circuits.length} circuit${circuits.length > 1 ? 's' : ''} trouvé${circuits.length > 1 ? 's' : ''} (${world.components.length} composants redstone).` : 'Aucun circuit redstone trouvé : indique une zone à la main ci-dessous.'),
+      world.skipped || world.tooOld ? el('p', { class: 'imp-warn' }, `${world.skipped + world.tooOld} chunk(s) illisible(s) ignoré(s)` + (world.tooOld ? ' (format d’avant la 1.13)' : '') + '.') : null);
+    status.append(head);
+    const LABEL = { redstone_wire: 'poudres', repeater: 'répéteurs', comparator: 'comparateurs', redstone_torch: 'torches', lever: 'leviers', button: 'boutons', pressure_plate: 'plaques',
+      redstone_block: 'blocs de redstone', redstone_lamp: 'lampes', piston: 'pistons', sticky_piston: 'pistons collants', observer: 'observateurs', daylight_detector: 'capteurs', daylight_detector_inverted: 'capteurs',
+      note_block: 'blocs musicaux', noteblock: 'blocs musicaux', powered_rail: 'rails', golden_rail: 'rails', iron_door: 'portes', iron_trapdoor: 'trappes', dispenser: 'distributeurs', dropper: 'droppers', target: 'cibles' };
+    const list = el('div', { class: 'imp-list' });
+    const back = () => this.showWorld(world, status);
+    const importBox = (box, title) => {
+      try { this.showImport(importWorldArea(world, box, title), status, back); }
+      catch (e) { status.append(el('p', { class: 'imp-err' }, e.message)); }
+    };
+    circuits.slice(0, 60).forEach((g, i) => {
+      const kinds = Object.entries(g.kinds).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, n]) => { const l = LABEL[k] || k.replace(/_/g, ' '); return n + ' ' + (n > 1 ? l : l.split(' ').map(w => w === 'musicaux' ? 'musical' : /^(de|redstone)$/.test(w) ? w : w.replace(/s$/, '')).join(' ')); }).join(', ');
+      // marge d'un bloc autour, et l'étage du dessous pour garder les supports
+      const box = { x0: g.x0 - 1, x1: g.x1 + 1, y0: g.y0 - 1, y1: Math.min(g.y1 + 1, g.y0 - 1 + MAXY - 1), z0: g.z0 - 1, z1: g.z1 + 1 };
+      list.append(el('div', { class: 'imp-item' },
+        el('div', null, el('b', null, `Circuit ${i + 1}`), el('span', { class: 'muted' }, ` · ${g.n} composants`), el('div', { class: 'muted small' }, kinds),
+          el('div', { class: 'coords' }, `X ${g.x0} → ${g.x1} · Y ${g.y0} → ${g.y1} · Z ${g.z0} → ${g.z1}`)),
+        el('button', { class: 'btn', onclick: () => importBox(box, `Circuit ${i + 1}`) }, 'Choisir')));
+    });
+    if (circuits.length) status.append(list);
+    // zone manuelle (coordonnées du jeu, touche F3)
+    const inp = (id, v) => el('input', { id, type: 'number', value: String(v), 'aria-label': id });
+    const g0 = circuits[0] || { x0: 0, y0: 60, z0: 0, x1: 15, y1: 70, z1: 15 };
+    const f = { x1: inp('x1', g0.x0 - 1), y1: inp('y1', g0.y0 - 1), z1: inp('z1', g0.z0 - 1), x2: inp('x2', g0.x1 + 1), y2: inp('y2', g0.y1 + 1), z2: inp('z2', g0.z1 + 1) };
+    status.append(el('div', { class: 'imp-card' },
+      el('div', { class: 'hd' }, el('b', null, 'Zone précise'), el('span', { class: 'muted small' }, 'coordonnées du jeu (F3)')),
+      el('div', { class: 'imp-coords' }, el('span', null, 'De'), f.x1, f.y1, f.z1, el('span', null, 'à'), f.x2, f.y2, f.z2),
+      el('div', { class: 'act' }, el('button', { class: 'btn primary', onclick: () => {
+        const v = k => Math.round(+f[k].value || 0);
+        const box = { x0: Math.min(v('x1'), v('x2')), x1: Math.max(v('x1'), v('x2')), y0: Math.min(v('y1'), v('y2')), y1: Math.max(v('y1'), v('y2')), z0: Math.min(v('z1'), v('z2')), z1: Math.max(v('z1'), v('z2')) };
+        if ((box.x1 - box.x0 + 1) * (box.y1 - box.y0 + 1) * (box.z1 - box.z0 + 1) > 4e6) { this.toast('Zone trop grande : 4 millions de blocs au plus.'); return; }
+        importBox(box, `Zone ${box.x0} ${box.y0} ${box.z0}`);
+      } }, 'Importer cette zone'))));
   },
 });
 
