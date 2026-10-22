@@ -301,6 +301,30 @@ table.bom canvas { width: 24px; height: 24px; vertical-align: middle; image-rend
 .card .act { display: flex; gap: 6px; margin-top: 4px; }
 .card .act .btn { height: 28px; padding: 0 9px; font-size: 12px; flex: 1; justify-content: center; }
 
+/* ---------- Export Minecraft ---------- */
+.mc-btn { border-color: rgba(76, 195, 138, .45); color: #c9f0dc; }
+.mc-btn:hover { background: rgba(76, 195, 138, .12); border-color: rgba(76, 195, 138, .7); }
+.mc-top { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 16px; margin-bottom: 14px; align-items: start; }
+.mc-prev { width: 100%; height: auto; border-radius: var(--radius); border: 1px solid var(--line); background: #0f1115; }
+.mc-form { display: grid; gap: 10px; min-width: 0; }
+.mc-sum { line-height: 1.6; }
+.mc-sum .warn-t { color: var(--warn); }
+.mc-row { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 10px; align-items: center; font-size: 12.5px; }
+.mc-row input, .mc-row select { height: 32px; padding: 0 10px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line); outline: none; min-width: 0; }
+.mc-row input:focus, .mc-row select:focus { border-color: var(--accent); }
+.mc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.mc-card { border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel-2); padding: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.mc-card .hd { display: flex; align-items: baseline; gap: 8px; }
+.mc-card .hd b { flex: 1; font-size: 14px; }
+.mc-card p { margin: 0; color: var(--muted); font-size: 12.5px; }
+.mc-card ol { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.6; flex: 1; }
+.mc-card code, .mc-cmd { font: 11.5px var(--mono); background: #0c0e12; border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; overflow-wrap: anywhere; }
+.mc-cmdrow { display: flex; gap: 6px; align-items: center; }
+.mc-cmdrow .mc-cmd { flex: 1; padding: 6px 8px; min-width: 0; }
+.mc-card .act { display: flex; justify-content: flex-end; }
+.mc-fn { width: 100%; height: 96px; resize: vertical; padding: 8px; border-radius: 8px; background: #0c0e12; border: 1px solid var(--line); font: 11px/1.45 var(--mono); }
+@media (max-width: 760px) { .mc-top, .mc-grid { grid-template-columns: 1fr; } }
+
 /* ---------- Écran d'accueil ---------- */
 .welcome { width: min(560px, 100%); }
 .welcome .hero { display: flex; gap: 14px; align-items: center; padding: 18px 18px 6px; }
@@ -355,6 +379,7 @@ table.bom canvas { width: 24px; height: 24px; vertical-align: middle; image-rend
     <div class="sep"></div>
     <button class="btn" id="btnLessons" title="Leçons de redstone"><svg class="i" data-i="cap"></svg><span class="lbl-mid">Leçons</span></button>
     <button class="btn" id="btnLibrary" title="Bibliothèque de schémas"><svg class="i" data-i="book"></svg><span class="lbl-mid">Bibliothèque</span></button>
+    <button class="btn mc-btn" id="btnMc" title="Exporter vers Minecraft (Litematica, structure, WorldEdit, commandes)"><svg class="i" data-i="pick"></svg><span class="lbl-mid">Minecraft</span></button>
     <button class="btn" id="btnExport" title="Exporter (JSON, PNG)"><svg class="i" data-i="download"></svg><span class="lbl-wide">Exporter</span></button>
     <button class="btn" id="btnImport" title="Importer un circuit"><svg class="i" data-i="upload"></svg><span class="lbl-wide">Importer</span></button>
     <button class="btn" id="btnBom" title="Liste de matériaux"><svg class="i" data-i="list"></svg><span class="lbl-wide">Matériaux</span></button>
@@ -2714,6 +2739,7 @@ const ICONS = {
   fit: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>', search: '<circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/>',
   image: '<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/>',
   file: '<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4"/>',
+  pick: '<path d="M14.5 3.5c3 0 5.5 1.3 7 3-2.5-.6-5-.4-7 .6"/><path d="M14.5 3.5c0 3-1.3 5.5-3 7 .6-2.5.4-5-.6-7"/><path d="M13 8L3 18l3 3L16 11"/>',
 };
 const SPEEDS = [0.1, 0.25, 0.5, 1, 2, 4, 8, 16, 40];
 const $ = id => document.getElementById(id);
@@ -3100,7 +3126,9 @@ const UI = {
     });
     $('btnLibrary').onclick = () => this.libraryDialog();
     $('btnLessons').onclick = () => this.toggleLessons();
+    $('btnMc').onclick = () => this.mcDialog();
     $('btnExport').onclick = e => this.openMenu(e.currentTarget, [
+      { label: 'Vers Minecraft…', sub: 'Litematica, structure, WorldEdit, commandes', icon: 'pick', run: () => this.mcDialog() },
       { label: 'Fichier JSON', sub: 'Tout le circuit, réimportable', icon: 'file', run: () => this.exportJson() },
       { label: 'Image PNG de la couche Y ' + this.layer, sub: 'Vue du dessus', icon: 'image', run: () => this.exportPng(false) },
       { label: 'Image PNG du circuit entier', sub: 'Vue isométrique 3D', icon: 'cube', run: () => this.exportPng(true) },
@@ -3422,9 +3450,445 @@ function boot() {
   R.fit(); UI.layerInfo(); UI.tickChanged();
   UI.welcome(false);
   UI.restoreLessons();
-  window.RP = { W, Sim, Ed, Edit, UI, R, Iso, EXAMPLES, PRESETS, LESSONS, mk, ser, deser, K, loadData, serialize, runChallengeChecks };   // accès console
+  window.RP = { W, Sim, Ed, Edit, UI, R, Iso, EXAMPLES, PRESETS, LESSONS, mk, ser, deser, K, loadData, serialize, runChallengeChecks, buildMcExport, mcFile, mcfunctionText, gzipStored, zipStore };
+  downloadsCap();   // accès console
   requestAnimationFrame(frame);
 }
+
+/* =====================================================================
+   19. EXPORT VERS MINECRAFT JAVA
+   Formats : Litematica (.litematic), structure vanilla (.nbt),
+   WorldEdit/Sponge v2 (.schem), commandes (.mcfunction), et une archive
+   .zip qui regroupe tout. Encodeur NBT, gzip et zip écrits à la main :
+   aucune dépendance.
+   ===================================================================== */
+const MC_TARGETS = [
+  { id: 'modern', label: 'Java 1.20.5 et plus (1.21…)', dv: 3837, newItems: true, pack: 41 },
+  { id: 'classic', label: 'Java 1.16.5 à 1.20.4', dv: 2586, newItems: false, pack: 6 },
+];
+const MC_DIR = ['north', 'east', 'south', 'west', 'up', 'down'];
+
+/* ---------- Bloc du planificateur → état de bloc Minecraft ---------- */
+function noteInstrument(b) {
+  const below = W.get(b.x, b.y - 1, b.z);
+  if (!below) return b.y === 0 ? 'basedrum' : 'harp';
+  switch (below.t) { case 'solid': case 'obsidian': case 'rblock': case 'command': return 'basedrum'; case 'glass': return 'hat'; case 'note': return 'bass'; }
+  return 'harp';
+}
+function mcBlock(b, target) {
+  const tf = v => v ? 'true' : 'false', on = tf(b.on);
+  const attachFace = f => f === D ? 'floor' : f === U ? 'ceiling' : 'wall';
+  const attachFacing = f => f < 4 ? MC_DIR[OPP[f]] : 'north';
+  switch (b.t) {
+    case 'solid': return { name: 'stone' };
+    case 'glass': return { name: 'glass' };
+    case 'obsidian': return { name: 'obsidian' };
+    case 'rblock': return { name: 'redstone_block' };
+    case 'lamp': return { name: 'redstone_lamp', props: { lit: on } };
+    case 'note': return { name: 'note_block', props: { instrument: noteInstrument(b), note: String(b.p), powered: on } };
+    case 'command': return { name: 'command_block', props: { conditional: 'false', facing: 'up' } };
+    case 'daylight': return { name: 'daylight_detector', props: { inverted: tf(b.m), power: String(b.lvl) } };
+    case 'hopper': {
+      const items = [], n = hopperItems(b.lvl);
+      for (let s = 0, left = n; left > 0 && s < 5; s++, left -= 64) {
+        const c = Math.min(64, left);
+        items.push(target.newItems ? { Slot: ['byte', s], id: ['string', 'minecraft:redstone'], count: ['int', c] } : { Slot: ['byte', s], id: ['string', 'minecraft:redstone'], Count: ['byte', c] });
+      }
+      return { name: 'hopper', props: { enabled: tf(!b.on), facing: 'down' }, be: { id: ['string', 'minecraft:hopper'], Items: ['list', 'compound', items], TransferCooldown: ['int', 0] } };
+    }
+    case 'dust': {
+      const p = { power: String(b.lvl) };
+      for (let h = 0; h < 4; h++) p[MC_DIR[h]] = (b.upm >> h & 1) ? 'up' : (b.pt >> h & 1) ? 'side' : 'none';
+      return { name: 'redstone_wire', props: p };
+    }
+    // Le répéteur et le comparateur de Minecraft « regardent » vers leur entrée : facing = opposé de la sortie
+    case 'repeater': return { name: 'repeater', props: { delay: String(b.d), facing: MC_DIR[OPP[b.f]], locked: tf(b.lk), powered: on } };
+    case 'comparator': return { name: 'comparator', props: { facing: MC_DIR[OPP[b.f]], mode: b.m ? 'subtract' : 'compare', powered: tf(b.lvl > 0) },
+      be: { id: ['string', 'minecraft:comparator'], OutputSignal: ['int', b.lvl] } };
+    case 'torch': return b.f === D || b.f === U ? { name: 'redstone_torch', props: { lit: on } } : { name: 'redstone_wall_torch', props: { facing: MC_DIR[OPP[b.f]], lit: on } };
+    case 'lever': return { name: 'lever', props: { face: attachFace(b.f), facing: attachFacing(b.f), powered: on } };
+    case 'button_stone': return { name: 'stone_button', props: { face: attachFace(b.f), facing: attachFacing(b.f), powered: on } };
+    case 'button_wood': return { name: 'oak_button', props: { face: attachFace(b.f), facing: attachFacing(b.f), powered: on } };
+    case 'plate': return { name: 'stone_pressure_plate', props: { powered: on } };
+    case 'piston': case 'sticky': return { name: b.t === 'sticky' ? 'sticky_piston' : 'piston', props: { extended: tf(b.ext), facing: MC_DIR[b.f] } };
+    case 'piston_head': return { name: 'piston_head', props: { facing: MC_DIR[b.f], short: 'false', type: b.sticky ? 'sticky' : 'normal' } };
+    case 'observer': return { name: 'observer', props: { facing: MC_DIR[b.f], powered: on } };
+    case 'rail': return { name: 'powered_rail', props: { powered: on, shape: b.f ? 'east_west' : 'north_south' } };
+    case 'trapdoor': return { name: 'iron_trapdoor', props: { facing: MC_DIR[OPP[b.f]], half: 'bottom', open: on, powered: on } };
+    case 'door': case 'door_top': return { name: 'iron_door', props: { facing: MC_DIR[OPP[b.f]], half: b.t === 'door' ? 'lower' : 'upper', hinge: 'left', open: on, powered: on } };
+  }
+  return { name: 'stone' };
+}
+function stateKey(c) {
+  const p = c.props ? Object.keys(c.props).sort().map(k => k + '=' + c.props[k]) : [];
+  return 'minecraft:' + c.name + (p.length ? '[' + p.join(',') + ']' : '');
+}
+/* Blocs qui doivent être posés avant les autres (supports) */
+const MC_FULL = new Set(['stone', 'glass', 'obsidian', 'redstone_block', 'redstone_lamp', 'note_block', 'command_block', 'observer', 'piston', 'sticky_piston', 'hopper', 'daylight_detector']);
+
+/* ---------- Construction de la liste des blocs à exporter ---------- */
+function buildMcExport(opts) {
+  const all = [...W.all()];
+  if (!all.length) return null;
+  const bb = W.bounds();
+  const target = MC_TARGETS.find(t => t.id === opts.target) || MC_TARGETS[0];
+  const floor = !!opts.floor && bb.y0 === 0;
+  const oy = floor ? -1 : bb.y0;
+  const size = { x: bb.x1 - bb.x0 + 1, y: bb.y1 - oy + 1, z: bb.z1 - bb.z0 + 1 };
+  const cells = [];
+  if (floor) for (let z = 0; z < size.z; z++) for (let x = 0; x < size.x; x++) cells.push({ x, y: 0, z, name: 'stone' });
+  for (const b of all) { const m = mcBlock(b, target); cells.push({ x: b.x - bb.x0, y: b.y - oy, z: b.z - bb.z0, ...m }); }
+  for (const c of cells) c.key = stateKey(c);
+  const name = (opts.name || 'circuit_redstone').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9_.-]+/g, '_').replace(/^_+|_+$/g, '') || 'circuit_redstone';
+  return { cells, size, floor, target, name, air: !!opts.air, count: all.filter(b => !BT[b.t].hidden).length, title: opts.title || name };
+}
+
+/* ---------- Encodeur NBT (big-endian, comme Minecraft Java) ---------- */
+/* Une valeur balisée s'écrit [type, valeur] ; une liste ['list', typeÉléments, valeursBrutes]. */
+const NBT_ID = { byte: 1, short: 2, int: 3, long: 4, float: 5, double: 6, bytes: 7, string: 8, list: 9, compound: 10, ints: 11, longs: 12 };
+class NbtWriter {
+  constructor() { this.b = new Uint8Array(4096); this.n = 0; this.v = new DataView(this.b.buffer); }
+  room(k) { if (this.n + k <= this.b.length) return; let s = this.b.length * 2; while (s < this.n + k) s *= 2; const nb = new Uint8Array(s); nb.set(this.b); this.b = nb; this.v = new DataView(nb.buffer); }
+  u8(x) { this.room(1); this.v.setInt8(this.n, x); this.n += 1; }
+  i16(x) { this.room(2); this.v.setInt16(this.n, x); this.n += 2; }
+  i32(x) { this.room(4); this.v.setInt32(this.n, x); this.n += 4; }
+  i64(x) { this.room(8); this.v.setBigInt64(this.n, BigInt.asIntN(64, BigInt(x))); this.n += 8; }
+  str(s) {
+    s = String(s).replace(/[\u0000\ud800-\udfff]/g, '');                 // UTF-8 « modifié » de Java : identique ici
+    const e = new TextEncoder().encode(s); this.room(2 + e.length); this.v.setUint16(this.n, e.length); this.n += 2; this.b.set(e, this.n); this.n += e.length;
+  }
+  payload(type, val) {
+    switch (type) {
+      case 'byte': return this.u8(val);
+      case 'short': return this.i16(val);
+      case 'int': return this.i32(val);
+      case 'long': return this.i64(val);
+      case 'string': return this.str(val);
+      case 'bytes': this.i32(val.length); this.room(val.length); for (let i = 0; i < val.length; i++) this.v.setInt8(this.n + i, val[i] << 24 >> 24); this.n += val.length; return;
+      case 'ints': this.i32(val.length); for (const x of val) this.i32(x); return;
+      case 'longs': this.i32(val.length); for (const x of val) this.i64(x); return;
+      case 'compound': for (const k in val) { const [t, ...rest] = val[k]; this.u8(NBT_ID[t]); this.str(k); this.payload(t, rest.length === 1 ? rest[0] : rest); } this.u8(0); return;
+      case 'list': { const [et, arr] = val; this.u8(arr.length ? NBT_ID[et] : 0); this.i32(arr.length); for (const x of arr) this.payload(et, x); return; }
+    }
+    throw new Error('Type NBT inconnu : ' + type);
+  }
+  root(name, compound) { this.u8(10); this.str(name); this.payload('compound', compound); return this.b.slice(0, this.n); }
+}
+const nbtRoot = (name, comp) => new NbtWriter().root(name, comp);
+
+/* ---------- CRC32, gzip, zip ---------- */
+const CRC_TABLE = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u8) { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC_TABLE[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+/* gzip sans compression (blocs « stockés ») : valide partout, utilisé si CompressionStream manque */
+function gzipStored(u8) {
+  const nb = Math.max(1, Math.ceil(u8.length / 65535)), out = new Uint8Array(10 + u8.length + nb * 5 + 8), v = new DataView(out.buffer);
+  out.set([0x1f, 0x8b, 8, 0, 0, 0, 0, 0, 0, 0xff]); let p = 10;
+  for (let i = 0; i < nb; i++) {
+    const chunk = u8.subarray(i * 65535, Math.min(u8.length, (i + 1) * 65535));
+    out[p++] = i === nb - 1 ? 1 : 0; v.setUint16(p, chunk.length, true); v.setUint16(p + 2, ~chunk.length & 0xffff, true); p += 4;
+    out.set(chunk, p); p += chunk.length;
+  }
+  v.setUint32(p, crc32(u8), true); v.setUint32(p + 4, u8.length >>> 0, true);
+  return out;
+}
+async function gzip(u8) {
+  if (typeof CompressionStream !== 'undefined') {
+    try { const s = new Blob([u8]).stream().pipeThrough(new CompressionStream('gzip')); return new Uint8Array(await new Response(s).arrayBuffer()); } catch (e) { /* repli ci-dessous */ }
+  }
+  return gzipStored(u8);
+}
+/* Archive .zip (fichiers stockés, noms UTF-8) */
+function zipStore(files) {
+  const enc = new TextEncoder(), parts = [], central = [];
+  let off = 0;
+  const d = new Date(), time = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1), date = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+  for (const f of files) {
+    const name = enc.encode(f.name), data = typeof f.data === 'string' ? enc.encode(f.data) : f.data, crc = crc32(data);
+    const h = new Uint8Array(30 + name.length), v = new DataView(h.buffer);
+    v.setUint32(0, 0x04034b50, true); v.setUint16(4, 20, true); v.setUint16(6, 0x0800, true); v.setUint16(8, 0, true); v.setUint16(10, time, true); v.setUint16(12, date, true);
+    v.setUint32(14, crc, true); v.setUint32(18, data.length, true); v.setUint32(22, data.length, true); v.setUint16(26, name.length, true); h.set(name, 30);
+    const c = new Uint8Array(46 + name.length), w = new DataView(c.buffer);
+    w.setUint32(0, 0x02014b50, true); w.setUint16(4, 20, true); w.setUint16(6, 20, true); w.setUint16(8, 0x0800, true); w.setUint16(10, 0, true); w.setUint16(12, time, true); w.setUint16(14, date, true);
+    w.setUint32(16, crc, true); w.setUint32(20, data.length, true); w.setUint32(24, data.length, true); w.setUint16(28, name.length, true); w.setUint32(42, off, true); c.set(name, 46);
+    parts.push(h, data); central.push(c); off += h.length + data.length;
+  }
+  const cdSize = central.reduce((s, c) => s + c.length, 0), end = new Uint8Array(22), e = new DataView(end.buffer);
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true); e.setUint32(12, cdSize, true); e.setUint32(16, off, true);
+  const out = new Uint8Array(off + cdSize + 22); let p = 0;
+  for (const x of parts.concat(central, [end])) { out.set(x, p); p += x.length; }
+  return out;
+}
+
+/* ---------- Palette commune ---------- */
+function paletteOf(exp, withAir) {
+  const pal = [], idx = new Map(), byKey = new Map();
+  const add = c => { if (!idx.has(c.key)) { idx.set(c.key, pal.length); pal.push(c); byKey.set(c.key, c); } };
+  if (withAir) add({ name: 'air', key: 'minecraft:air' });
+  for (const c of exp.cells) add(c);
+  return { pal, idx };
+}
+const palEntry = c => { const o = { Name: ['string', 'minecraft:' + c.name] }; if (c.props) { const p = {}; for (const k of Object.keys(c.props).sort()) p[k] = ['string', c.props[k]]; o.Properties = ['compound', p]; } return o; };
+
+/* ---------- Litematica (.litematic) ---------- */
+async function litematicBytes(exp, preview) {
+  const { pal, idx } = paletteOf(exp, true);
+  const { x: X, y: Y, z: Z } = exp.size, vol = X * Y * Z;
+  const bits = Math.max(2, Math.ceil(Math.log2(pal.length)));
+  const words = new Array(Math.ceil(vol * bits / 64)).fill(0n), mask = (1n << 64n) - 1n;
+  for (const c of exp.cells) {
+    const i = (c.y * Z + c.z) * X + c.x, v = BigInt(idx.get(c.key)), bit = i * bits, w = bit >> 6, o = bit & 63;
+    words[w] = (words[w] | (v << BigInt(o))) & mask;
+    if (o + bits > 64) words[w + 1] = (words[w + 1] | (v >> BigInt(64 - o))) & mask;
+  }
+  const tiles = exp.cells.filter(c => c.be).map(c => ({ x: ['int', c.x], y: ['int', c.y], z: ['int', c.z], ...c.be }));
+  const now = BigInt(Date.now());
+  const root = {
+    Version: ['int', 6], SubVersion: ['int', 1], MinecraftDataVersion: ['int', exp.target.dv],
+    Metadata: ['compound', {
+      Name: ['string', exp.title], Author: ['string', 'Redstone Planner'], Description: ['string', 'Circuit conçu dans Redstone Planner'],
+      RegionCount: ['int', 1], TotalVolume: ['int', vol], TotalBlocks: ['int', exp.cells.length], TimeCreated: ['long', now], TimeModified: ['long', now],
+      EnclosingSize: ['compound', { x: ['int', X], y: ['int', Y], z: ['int', Z] }], PreviewImageData: ['ints', preview || []],
+    }],
+    Regions: ['compound', { [exp.title]: ['compound', {
+      Position: ['compound', { x: ['int', 0], y: ['int', 0], z: ['int', 0] }], Size: ['compound', { x: ['int', X], y: ['int', Y], z: ['int', Z] }],
+      BlockStatePalette: ['list', 'compound', pal.map(palEntry)], TileEntities: ['list', 'compound', tiles], Entities: ['list', 'compound', []],
+      PendingBlockTicks: ['list', 'compound', []], PendingFluidTicks: ['list', 'compound', []], BlockStates: ['longs', words],
+    }] }],
+  };
+  return gzip(nbtRoot('', root));
+}
+/* ---------- Structure vanilla (.nbt) ---------- */
+async function structureBytes(exp) {
+  const cells = exp.cells.slice();
+  if (exp.air) {
+    const used = new Set(cells.map(c => c.x + ',' + c.y + ',' + c.z));
+    for (let y = 0; y < exp.size.y; y++) for (let z = 0; z < exp.size.z; z++) for (let x = 0; x < exp.size.x; x++) if (!used.has(x + ',' + y + ',' + z)) cells.push({ x, y, z, name: 'air', key: 'minecraft:air' });
+  }
+  const { pal, idx } = paletteOf({ cells }, false);
+  const blocks = cells.map(c => { const o = { pos: ['list', 'int', [c.x, c.y, c.z]], state: ['int', idx.get(c.key)] }; if (c.be) o.nbt = ['compound', c.be]; return o; });
+  return gzip(nbtRoot('', {
+    DataVersion: ['int', exp.target.dv], size: ['list', 'int', [exp.size.x, exp.size.y, exp.size.z]],
+    palette: ['list', 'compound', pal.map(palEntry)], blocks: ['list', 'compound', blocks], entities: ['list', 'compound', []],
+  }));
+}
+/* ---------- WorldEdit / Sponge v2 (.schem) ---------- */
+async function schemBytes(exp) {
+  const { pal, idx } = paletteOf(exp, true);
+  const { x: X, y: Y, z: Z } = exp.size, grid = new Int32Array(X * Y * Z);
+  for (const c of exp.cells) grid[c.x + c.z * X + c.y * X * Z] = idx.get(c.key);
+  const data = [];
+  for (let v of grid) { while (v & ~0x7f) { data.push((v & 0x7f) | 0x80); v >>>= 7; } data.push(v); }
+  const palette = {}; pal.forEach((c, i) => { palette[c.key] = ['int', i]; });
+  const bes = exp.cells.filter(c => c.be).map(c => { const { id, ...rest } = c.be; return { Pos: ['ints', [c.x, c.y, c.z]], Id: id, ...rest }; });
+  return gzip(nbtRoot('Schematic', {
+    Version: ['int', 2], DataVersion: ['int', exp.target.dv], Width: ['short', X], Height: ['short', Y], Length: ['short', Z],
+    Offset: ['ints', [0, 0, 0]], PaletteMax: ['int', pal.length], Palette: ['compound', palette], BlockData: ['bytes', data], BlockEntities: ['list', 'compound', bes],
+    Metadata: ['compound', { Name: ['string', exp.title], Author: ['string', 'Redstone Planner'] }],
+  }));
+}
+/* ---------- Commandes (.mcfunction) ---------- */
+function snbt(v) {
+  const [t, ...r] = v, x = r.length === 1 ? r[0] : r;
+  switch (t) {
+    case 'byte': return x + 'b'; case 'short': return x + 's'; case 'int': return String(x); case 'long': return x + 'L';
+    case 'string': return JSON.stringify(x);
+    case 'list': return '[' + x[1].map(e => snbt([x[0], e])).join(',') + ']';
+    case 'compound': return '{' + Object.keys(x).map(k => k + ':' + snbt(x[k])).join(',') + '}';
+  }
+  return '';
+}
+function mcfunctionText(exp) {
+  const { x: X, y: Y, z: Z } = exp.size, oy = exp.floor ? -1 : 0;
+  const L = [];
+  L.push('# Redstone Planner — ' + exp.title);
+  L.push(`# ${exp.count} blocs, ${X} × ${Y} × ${Z} (X × Y × Z). ${exp.target.label}.`);
+  L.push('# Lance la fonction debout sur un sol plat : le circuit se construit au sud-est de toi,');
+  L.push('# son coin nord-ouest à 1 bloc en X et en Z de tes pieds.');
+  // /fill est limité à 32 768 blocs : on découpe en tranches si besoin
+  const fill = (y0, y1, block) => {
+    const per = Math.max(1, Math.floor(32768 / (X * Z)));
+    for (let y = y0; y <= y1; y += per) {
+      const ye = Math.min(y1, y + per - 1);
+      if (X * Z <= 32768) L.push(`fill ~1 ~${y} ~1 ~${X} ~${ye} ~${Z} ${block}`);
+      else for (let z = 0; z < Z; z += Math.max(1, Math.floor(32768 / X))) L.push(`fill ~1 ~${y} ~${z + 1} ~${X} ~${y} ~${Math.min(Z, z + Math.floor(32768 / X))} ${block}`);
+    }
+  };
+  const top = oy + Y - 1;
+  if (exp.air) fill(0, top, 'minecraft:air');
+  if (exp.floor) fill(-1, -1, 'minecraft:stone');
+  const ordered = exp.cells.slice().sort((a, b) => (MC_FULL.has(b.name) - MC_FULL.has(a.name)) || a.y - b.y || a.z - b.z || a.x - b.x);
+  for (const c of ordered) {
+    if (exp.floor && c.y === 0) continue;                                    // déjà posé par /fill
+    L.push(`setblock ~${c.x + 1} ~${c.y + oy} ~${c.z + 1} ${c.key}${c.be ? snbt(['compound', (({ id, ...r }) => r)(c.be)]) : ''}`);
+  }
+  return L.join('\n') + '\n';
+}
+function placeCommand(exp) { return `/place template minecraft:${exp.name} ~1 ~${exp.floor ? -1 : 0} ~1`; }
+function packMeta(exp) {
+  return JSON.stringify({ pack: { pack_format: exp.target.pack, supported_formats: { min_inclusive: exp.target.pack, max_inclusive: 9999 }, min_format: exp.target.pack, max_format: 9999, description: 'Circuits exportés depuis Redstone Planner' } }, null, 2);
+}
+function readmeText(exp) {
+  return [
+    `Redstone Planner — ${exp.title}`, `${exp.count} blocs · ${exp.size.x} × ${exp.size.y} × ${exp.size.z} (X × Y × Z) · ${exp.target.label}`, '',
+    'Orientation : le haut de la grille du planificateur est le nord dans Minecraft (Z négatif), la droite est l’est.', '',
+    '1) LITEMATICA (construire en survie avec un hologramme)',
+    `   Copie ${exp.name}.litematic dans .minecraft/schematics/, puis en jeu : touche M → Load Schematics.`, '',
+    '2) STRUCTURE VANILLA (sans mod)',
+    `   Copie ${exp.name}.nbt dans .minecraft/saves/<ton monde>/generated/minecraft/structures/`,
+    `   Java 1.19+ : ${placeCommand(exp)}`, '   Java 1.16–1.18 : bloc de structure en mode « Charger », nom minecraft:' + exp.name + ' (48 blocs max par côté).', '',
+    '3) WORLDEDIT',
+    `   Copie ${exp.name}.schem dans le dossier schematics de WorldEdit, puis : //schem load ${exp.name} et //paste`, '',
+    '4) COMMANDES',
+    '   Copie le dossier datapack_redstone_planner dans .minecraft/saves/<ton monde>/datapacks/, puis /reload',
+    `   et /function planner:${exp.name}`, '',
+  ].join('\n');
+}
+/* Aperçu 140×140 au format Litematica (entiers ARGB) */
+function litematicPreview() {
+  try {
+    const src = Iso.image(), c = cnv(140, 140), g = c.getContext('2d');
+    g.fillStyle = '#0f1115'; g.fillRect(0, 0, 140, 140);
+    const k = Math.min(140 / src.width, 140 / src.height); g.drawImage(src, (140 - src.width * k) / 2, (140 - src.height * k) / 2, src.width * k, src.height * k);
+    const d = g.getImageData(0, 0, 140, 140).data, out = new Array(140 * 140);
+    for (let i = 0; i < out.length; i++) out[i] = ((d[i * 4 + 3] << 24) | (d[i * 4] << 16) | (d[i * 4 + 1] << 8) | d[i * 4 + 2]) | 0;
+    return out;
+  } catch (e) { return []; }
+}
+async function mcFile(fmt, exp) {
+  switch (fmt) {
+    case 'litematic': return { name: exp.name + '.litematic', data: await litematicBytes(exp, litematicPreview()) };
+    case 'nbt': return { name: exp.name + '.nbt', data: await structureBytes(exp) };
+    case 'schem': return { name: exp.name + '.schem', data: await schemBytes(exp) };
+    case 'mcfunction': return { name: exp.name + '.mcfunction', data: new TextEncoder().encode(mcfunctionText(exp)) };
+    case 'zip': {
+      const fn = new TextEncoder().encode(mcfunctionText(exp));
+      return { name: exp.name + '_minecraft.zip', data: zipStore([
+        { name: 'LISEZMOI.txt', data: readmeText(exp) },
+        { name: exp.name + '.litematic', data: await litematicBytes(exp, litematicPreview()) },
+        { name: exp.name + '.nbt', data: await structureBytes(exp) },
+        { name: exp.name + '.schem', data: await schemBytes(exp) },
+        { name: 'datapack_redstone_planner/pack.mcmeta', data: packMeta(exp) },
+        { name: 'datapack_redstone_planner/data/planner/function/' + exp.name + '.mcfunction', data: fn },
+        { name: 'datapack_redstone_planner/data/planner/functions/' + exp.name + '.mcfunction', data: fn },
+      ]) };
+    }
+  }
+  throw new Error('Format inconnu');
+}
+
+/* ---------- Enregistrement : capacité « downloads » si la page est publiée, sinon lien local ---------- */
+function downloadsCap() {
+  if (downloadsCap.p === undefined) {
+    const c = window.claude;
+    downloadsCap.p = c && typeof c.use === 'function' ? Promise.resolve(c.use('downloads')).catch(() => null) : Promise.resolve(null);
+  }
+  return downloadsCap.p;
+}
+async function saveFile(name, data) {
+  const blob = data instanceof Blob ? data : new Blob([data]);
+  const dl = await downloadsCap();
+  if (dl) {
+    try { await dl.save({ filename: name, data: blob }); UI.toast('Enregistré : ' + name); return true; }
+    catch (e) {
+      const code = e && e.code;
+      if (code === 'declined') return false;
+      if (code === 'rejected_extension') {           // .litematic, .nbt… : on les emballe dans un .zip
+        try {
+          await dl.save({ filename: name.replace(/\.[^.]+$/, '') + '.zip', data: new Blob([zipStore([{ name, data: new Uint8Array(await blob.arrayBuffer()) }])]) });
+          UI.toast('Enregistré dans une archive .zip : ' + name); return true;
+        } catch (e2) { if (e2 && e2.code !== 'declined') UI.toast('Téléchargement impossible ici.'); return false; }
+      }
+      UI.toast('Téléchargement impossible ici (' + (code || 'erreur') + ').'); return false;
+    }
+  }
+  try {
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    return true;
+  } catch (e) { UI.toast('Téléchargement impossible : ' + e.message); return false; }
+}
+/* L'ancien téléchargement (JSON, PNG) passe aussi par saveFile */
+download = function (name, blobOrUrl) {
+  if (typeof blobOrUrl === 'string' && blobOrUrl.startsWith('data:')) {
+    const [head, b64] = blobOrUrl.split(','), bin = atob(b64), u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    return saveFile(name, new Blob([u8], { type: head.slice(5).split(';')[0] }));
+  }
+  return saveFile(name, blobOrUrl);
+};
+
+/* ---------- Fenêtre « Exporter vers Minecraft » ---------- */
+Object.assign(UI, {
+  mcOpts: { target: 'modern', floor: true, air: true, name: 'circuit_redstone' },
+  mcDialog() {
+    if (!W.count) { this.toast('Le circuit est vide : pose d’abord quelques blocs.'); return; }
+    try { const s = JSON.parse(store.get('redstone-planner:mc') || 'null'); if (s) Object.assign(this.mcOpts, s); } catch (e) { /* ignore */ }
+    const o = this.mcOpts;
+    const body = el('div', { class: 'body mc' });
+    const nameIn = el('input', { id: 'mcName', type: 'text', value: o.name, maxlength: '48', 'aria-label': 'Nom du schéma', spellcheck: 'false' });
+    const verSel = el('select', { id: 'mcVer', 'aria-label': 'Version de Minecraft' });
+    for (const t of MC_TARGETS) verSel.append(el('option', { value: t.id }, t.label));
+    verSel.value = o.target;
+    const floorCk = el('input', { id: 'mcFloor', type: 'checkbox' }); floorCk.checked = o.floor;
+    const airCk = el('input', { id: 'mcAir', type: 'checkbox' }); airCk.checked = o.air;
+    const summary = el('div', { class: 'mc-sum' });
+    const cmdOut = el('code', { class: 'mc-cmd' });
+    const fnArea = el('textarea', { readonly: '', 'aria-label': 'Commandes setblock', class: 'mc-fn' });
+    const prev = Iso.image(); prev.className = 'mc-prev';
+    const current = () => {
+      Object.assign(o, { name: nameIn.value, target: verSel.value, floor: floorCk.checked, air: airCk.checked });
+      store.set('redstone-planner:mc', JSON.stringify(o));
+      return buildMcExport({ ...o, title: nameIn.value.trim() || 'Circuit redstone' });
+    };
+    const refresh = () => {
+      const exp = current();
+      const big = Math.max(exp.size.x, exp.size.y, exp.size.z) > 48;
+      summary.innerHTML = `<b>${exp.count} blocs</b> · ${exp.size.x} × ${exp.size.y} × ${exp.size.z} <span class="muted">(X × Y × Z${exp.floor ? ', sol compris' : ''})</span>`
+        + `<br><span class="muted">Fichiers : <b>${exp.name}</b>.litematic, .nbt, .schem, .mcfunction</span>`
+        + (big ? '<br><span class="warn-t">Plus de 48 blocs de côté : utilise /place, Litematica ou WorldEdit (le bloc de structure est limité à 48).</span>' : '');
+      cmdOut.textContent = placeCommand(exp);
+      body.querySelectorAll('.mc-n').forEach(n => { n.textContent = exp.name; });
+      fnArea.value = mcfunctionText(exp);
+    };
+    for (const i of [nameIn, verSel, floorCk, airCk]) i.addEventListener('input', refresh);
+    const dl = (fmt, btn) => async () => {
+      const exp = current(); btn.disabled = true;
+      try { const f = await mcFile(fmt, exp); await saveFile(f.name, f.data); } catch (e) { this.toast('Export impossible : ' + e.message); }
+      btn.disabled = false;
+    };
+    const copy = (text, what) => { (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => this.toast(what + ' copiée.'), () => this.toast('Sélectionne le texte et copie-le.')); };
+    const card = (title, tag, desc, steps, fmt, extra) => {
+      const b = el('button', { class: 'btn primary' }, svgIcon('download'), 'Télécharger');
+      b.onclick = dl(fmt, b);
+      return el('div', { class: 'mc-card' }, el('div', { class: 'hd' }, el('b', null, title), tag ? el('span', { class: 'lvl' }, tag) : null), el('p', null, desc),
+        el('ol', { html: steps }), extra || null, el('div', { class: 'act' }, b));
+    };
+    const zipBtn = el('button', { class: 'btn primary' }, svgIcon('download'), 'Tout télécharger (.zip)');
+    zipBtn.onclick = dl('zip', zipBtn);
+    body.append(
+      el('div', { class: 'mc-top' }, prev, el('div', { class: 'mc-form' },
+        summary,
+        el('label', { class: 'mc-row' }, el('span', null, 'Nom du schéma'), nameIn),
+        el('label', { class: 'mc-row' }, el('span', null, 'Version'), verSel),
+        el('label', { class: 'opt' }, el('span', null, 'Ajouter un sol en pierre', el('small', null, 'la poudre et les répéteurs de l’étage 0 ont besoin d’un support')), el('span', { class: 'switch' }, floorCk, el('i'))),
+        el('label', { class: 'opt' }, el('span', null, 'Vider l’espace', el('small', null, 'remplace le terrain par de l’air dans la zone (.nbt, .schem, commandes)')), el('span', { class: 'switch' }, airCk, el('i'))),
+        el('p', { class: 'muted', style: 'margin:0;font-size:12px' }, 'Tout est exporté dans l’état actuel de la simulation : orientation, délais, leviers, torches, poudre connectée. Le nord de la grille (en haut) est le nord dans Minecraft.'))),
+      el('div', { class: 'mc-grid' },
+        card('Litematica', 'survie', 'Affiche un hologramme du circuit dans ton monde, couche par couche, avec la liste des matériaux.',
+          '<li>Copie le fichier dans <code>.minecraft/schematics/</code>.</li><li>En jeu, touche <kbd>M</kbd> → <i>Load Schematics</i>, puis place-le.</li><li>Construis bloc par bloc en suivant l’hologramme.</li>', 'litematic'),
+        card('Structure vanilla', 'sans mod', 'Une seule commande pose tout le circuit, sans aucun mod.',
+          '<li>Copie le fichier dans <code>saves/&lt;ton monde&gt;/generated/minecraft/structures/</code>.</li><li>Java 1.19+ : tape la commande ci-dessous, debout sur un sol plat.</li><li>Java 1.16–1.18 : bloc de structure en mode « Charger ».</li>', 'nbt',
+          el('div', { class: 'mc-cmdrow' }, cmdOut, el('button', { class: 'chip', onclick: () => copy(cmdOut.textContent, 'Commande') }, svgIcon('copy'), 'Copier'))),
+        card('WorldEdit', 'créatif', 'Pour coller le circuit avec WorldEdit ou FastAsyncWorldEdit.',
+          '<li>Copie le fichier dans le dossier <code>schematics</code> de WorldEdit.</li><li><code>//schem load <span class="mc-n"></span></code> puis <code>//paste</code> (ajoute <code>-a</code> pour garder le terrain).</li>', 'schem'),
+        card('Commandes /setblock', 'vanilla', 'Une commande par bloc, à lancer depuis un pack de données (inclus dans le .zip).',
+          '<li>Mets le dossier <code>datapack_redstone_planner</code> du .zip dans <code>saves/&lt;ton monde&gt;/datapacks/</code>.</li><li><code>/reload</code> puis <code>/function planner:<span class="mc-n"></span></code></li>', 'mcfunction',
+          el('div', null, fnArea, el('button', { class: 'chip', style: 'margin-top:6px', onclick: () => copy(fnArea.value, 'Liste de commandes') }, svgIcon('copy'), 'Copier les commandes')))));
+    refresh();
+    this.openModal({ title: 'Exporter vers Minecraft', body, cls: 'library mcdlg', buttons: [{ label: 'Fermer' }, { label: 'Tout télécharger (.zip)', icon: 'download', primary: true, keep: true, run: () => { zipBtn.onclick(); } }] });
+  },
+});
 
 /* =====================================================================
    17. BIBLIOTHÈQUE : aperçus, « Ouvrir » et « Insérer »
