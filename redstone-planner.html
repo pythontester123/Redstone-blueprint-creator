@@ -3477,7 +3477,7 @@ function boot() {
   R.fit(); UI.layerInfo(); UI.tickChanged();
   UI.welcome(false);
   UI.restoreLessons();
-  window.RP = { W, Sim, Ed, Edit, UI, R, Iso, EXAMPLES, PRESETS, LESSONS, mk, ser, deser, K, loadData, serialize, runChallengeChecks, buildMcExport, mcFile, mcfunctionText, gzipStored, zipStore, importLitematic, importStructure, importSchem, importMcfunction, readMinecraftInput, findCircuits, importWorldArea };
+  window.RP = { W, Sim, Ed, Edit, UI, R, Iso, EXAMPLES, PRESETS, LESSONS, mk, ser, deser, K, loadData, serialize, runChallengeChecks, buildMcExport, mcFile, mcworldBytes, javaToBedrock, mcfunctionText, gzipStored, zipStore, importLitematic, importStructure, importSchem, importMcfunction, readMinecraftInput, findCircuits, importWorldArea };
   downloadsCap();   // accès console
   requestAnimationFrame(frame);
 }
@@ -3574,15 +3574,17 @@ function buildMcExport(opts) {
 /* Une valeur balisée s'écrit [type, valeur] ; une liste ['list', typeÉléments, valeursBrutes]. */
 const NBT_ID = { byte: 1, short: 2, int: 3, long: 4, float: 5, double: 6, bytes: 7, string: 8, list: 9, compound: 10, ints: 11, longs: 12 };
 class NbtWriter {
-  constructor() { this.b = new Uint8Array(4096); this.n = 0; this.v = new DataView(this.b.buffer); }
+  constructor(le = false) { this.le = le; this.b = new Uint8Array(4096); this.n = 0; this.v = new DataView(this.b.buffer); }   // le : petit-boutiste (Bedrock)
   room(k) { if (this.n + k <= this.b.length) return; let s = this.b.length * 2; while (s < this.n + k) s *= 2; const nb = new Uint8Array(s); nb.set(this.b); this.b = nb; this.v = new DataView(nb.buffer); }
   u8(x) { this.room(1); this.v.setInt8(this.n, x); this.n += 1; }
-  i16(x) { this.room(2); this.v.setInt16(this.n, x); this.n += 2; }
-  i32(x) { this.room(4); this.v.setInt32(this.n, x); this.n += 4; }
-  i64(x) { this.room(8); this.v.setBigInt64(this.n, BigInt.asIntN(64, BigInt(x))); this.n += 8; }
+  i16(x) { this.room(2); this.v.setInt16(this.n, x, this.le); this.n += 2; }
+  i32(x) { this.room(4); this.v.setInt32(this.n, x, this.le); this.n += 4; }
+  i64(x) { this.room(8); this.v.setBigInt64(this.n, BigInt.asIntN(64, BigInt(x)), this.le); this.n += 8; }
+  f32(x) { this.room(4); this.v.setFloat32(this.n, x, this.le); this.n += 4; }
+  f64(x) { this.room(8); this.v.setFloat64(this.n, x, this.le); this.n += 8; }
   str(s) {
     s = String(s).replace(/[\u0000\ud800-\udfff]/g, '');                 // UTF-8 « modifié » de Java : identique ici
-    const e = new TextEncoder().encode(s); this.room(2 + e.length); this.v.setUint16(this.n, e.length); this.n += 2; this.b.set(e, this.n); this.n += e.length;
+    const e = new TextEncoder().encode(s); this.room(2 + e.length); this.v.setUint16(this.n, e.length, this.le); this.n += 2; this.b.set(e, this.n); this.n += e.length;
   }
   payload(type, val) {
     switch (type) {
@@ -3590,6 +3592,8 @@ class NbtWriter {
       case 'short': return this.i16(val);
       case 'int': return this.i32(val);
       case 'long': return this.i64(val);
+      case 'float': return this.f32(val);
+      case 'double': return this.f64(val);
       case 'string': return this.str(val);
       case 'bytes': this.i32(val.length); this.room(val.length); for (let i = 0; i < val.length; i++) this.v.setInt8(this.n + i, val[i] << 24 >> 24); this.n += val.length; return;
       case 'ints': this.i32(val.length); for (const x of val) this.i32(x); return;
@@ -3765,7 +3769,10 @@ function readmeText(exp) {
     `   Java 1.19+ : ${placeCommand(exp)}`, '   Java 1.16–1.18 : bloc de structure en mode « Charger », nom minecraft:' + exp.name + ' (48 blocs max par côté).', '',
     '3) WORLDEDIT',
     `   Copie ${exp.name}.schem dans le dossier schematics de WorldEdit, puis : //schem load ${exp.name} et //paste`, '',
-    '4) COMMANDES',
+    '4) BEDROCK (Windows, mobile, consoles)',
+    `   Ouvre bedrock/${exp.name}.mcworld : Minecraft l’importe comme un nouveau monde plat, en créatif, circuit posé.`,
+    '   Attention : la redstone de Bedrock ne suit pas toutes les règles de Java (pistons, quasi-connectivité, délais).', '',
+    '5) COMMANDES',
     '   Copie le dossier datapack_redstone_planner dans .minecraft/saves/<ton monde>/datapacks/, puis /reload',
     `   et /function planner:${exp.name}`, '',
   ].join('\n');
@@ -3787,6 +3794,7 @@ async function mcFile(fmt, exp) {
     case 'nbt': return { name: exp.name + '.nbt', data: await structureBytes(exp) };
     case 'schem': return { name: exp.name + '.schem', data: await schemBytes(exp) };
     case 'mcfunction': return { name: exp.name + '.mcfunction', data: new TextEncoder().encode(mcfunctionText(exp)) };
+    case 'mcworld': return { name: exp.name + '.mcworld', data: mcworldBytes(exp, mcworldIcon()) };
     case 'zip': {
       const fn = new TextEncoder().encode(mcfunctionText(exp));
       return { name: exp.name + '_minecraft.zip', data: zipStore([
@@ -3794,6 +3802,7 @@ async function mcFile(fmt, exp) {
         { name: exp.name + '.litematic', data: await litematicBytes(exp, litematicPreview()) },
         { name: exp.name + '.nbt', data: await structureBytes(exp) },
         { name: exp.name + '.schem', data: await schemBytes(exp) },
+        { name: 'bedrock/' + exp.name + '.mcworld', data: mcworldBytes(exp, mcworldIcon()) },
         { name: 'datapack_redstone_planner/pack.mcmeta', data: packMeta(exp) },
         { name: 'datapack_redstone_planner/data/planner/function/' + exp.name + '.mcfunction', data: fn },
         { name: 'datapack_redstone_planner/data/planner/functions/' + exp.name + '.mcfunction', data: fn },
@@ -3822,7 +3831,7 @@ async function saveFile(name, data) {
       if (code === 'rejected_extension') {           // .litematic, .nbt… : on les emballe dans un .zip
         try {
           await dl.save({ filename: name.replace(/\.[^.]+$/, '') + '.zip', data: new Blob([zipStore([{ name, data: new Uint8Array(await blob.arrayBuffer()) }])]) });
-          UI.toast('Enregistré dans une archive .zip : ' + name); return true;
+          UI.toast(/\.mcworld$/.test(name) ? 'Enregistré dans un .zip : ouvre-le, puis ouvre ' + name + ' avec Minecraft.' : 'Enregistré dans une archive .zip : ' + name); return true;
         } catch (e2) { if (e2 && e2.code !== 'declined') UI.toast('Téléchargement impossible ici.'); return false; }
       }
       UI.toast('Téléchargement impossible ici (' + (code || 'erreur') + ').'); return false;
@@ -3872,7 +3881,7 @@ Object.assign(UI, {
       const exp = current();
       const big = Math.max(exp.size.x, exp.size.y, exp.size.z) > 48;
       summary.innerHTML = `<b>${exp.count} blocs</b> · ${exp.size.x} × ${exp.size.y} × ${exp.size.z} <span class="muted">(X × Y × Z${exp.floor ? ', sol compris' : ''})</span>`
-        + `<br><span class="muted">Fichiers : <b>${exp.name}</b>.litematic, .nbt, .schem, .mcfunction</span>`
+        + `<br><span class="muted">Fichiers : <b>${exp.name}</b>.litematic, .nbt, .schem, .mcfunction, .mcworld</span>`
         + (big ? '<br><span class="warn-t">Plus de 48 blocs de côté : utilise /place, Litematica ou WorldEdit (le bloc de structure est limité à 48).</span>' : '');
       cmdOut.textContent = placeCommand(exp);
       body.querySelectorAll('.mc-n').forEach(n => { n.textContent = exp.name; });
@@ -3897,11 +3906,14 @@ Object.assign(UI, {
       el('div', { class: 'mc-top' }, prev, el('div', { class: 'mc-form' },
         summary,
         el('label', { class: 'mc-row' }, el('span', null, 'Nom du schéma'), nameIn),
-        el('label', { class: 'mc-row' }, el('span', null, 'Version'), verSel),
+        el('label', { class: 'mc-row' }, el('span', null, 'Version Java'), verSel),
         el('label', { class: 'opt' }, el('span', null, 'Ajouter un sol en pierre', el('small', null, 'la poudre et les répéteurs de l’étage 0 ont besoin d’un support')), el('span', { class: 'switch' }, floorCk, el('i'))),
         el('label', { class: 'opt' }, el('span', null, 'Vider l’espace', el('small', null, 'remplace le terrain par de l’air dans la zone (.nbt, .schem, commandes)')), el('span', { class: 'switch' }, airCk, el('i'))),
         el('p', { class: 'muted', style: 'margin:0;font-size:12px' }, 'Tout est exporté dans l’état actuel de la simulation : orientation, délais, leviers, torches, poudre connectée. Le nord de la grille (en haut) est le nord dans Minecraft.'))),
       el('div', { class: 'mc-grid' },
+        card('Bedrock', '.mcworld', 'Un monde plat en créatif, avec le circuit déjà posé. Pour Minecraft Bedrock 1.21 et plus (Windows, mobile, consoles).',
+          '<li>Télécharge le fichier <code>.mcworld</code>.</li><li>Ouvre-le : Minecraft l’importe dans tes mondes (sur mobile : <i>Ouvrir avec Minecraft</i>).</li><li>Tu apparais juste au nord du circuit, en créatif.</li>', 'mcworld',
+          el('p', { class: 'warn-t', style: 'margin:0;font-size:12px' }, 'La redstone de Bedrock ne suit pas toutes les règles de Java : pistons, quasi-connectivité et certains délais diffèrent.')),
         card('Litematica', 'survie', 'Affiche un hologramme du circuit dans ton monde, couche par couche, avec la liste des matériaux.',
           '<li>Copie le fichier dans <code>.minecraft/schematics/</code>.</li><li>En jeu, touche <kbd>M</kbd> → <i>Load Schematics</i>, puis place-le.</li><li>Construis bloc par bloc en suivant l’hologramme.</li>', 'litematic'),
         card('Structure vanilla', 'sans mod', 'Une seule commande pose tout le circuit, sans aucun mod.',
@@ -3916,6 +3928,225 @@ Object.assign(UI, {
     this.openModal({ title: 'Exporter vers Minecraft', body, cls: 'library mcdlg', buttons: [{ label: 'Fermer' }, { label: 'Tout télécharger (.zip)', icon: 'download', primary: true, keep: true, run: () => { zipBtn.onclick(); } }] });
   },
 });
+
+/* =====================================================================
+   19 bis. EXPORT VERS MINECRAFT BEDROCK (.mcworld)
+   Un monde plat créatif prêt à ouvrir, avec le circuit posé dessus.
+   Le .mcworld est une archive zip : level.dat (NBT petit-boutiste) et
+   la base LevelDB de Mojang (db/), écrite ici sous forme de journal.
+   États de blocs : Bedrock 1.21.0 (le jeu met à jour les plus récents).
+   ===================================================================== */
+const BR_VERSION = 18153475;                 // 1.21.0.3, version des états de blocs
+const BR_CHUNK_VERSION = 40;                 // format de chunk 1.18.30 → 1.21.x
+const BR_GROUND = -61;                       // dernière couche (herbe) du monde plat
+const BR_LAYERS = ['minecraft:bedrock', 'minecraft:dirt', 'minecraft:dirt', 'minecraft:grass_block'];
+
+/* ---------- État Java (celui de l'export Java) → état Bedrock ---------- */
+const brByte = v => ['byte', v ? 1 : 0], brInt = v => ['int', v | 0], brStr = v => ['string', String(v)];
+const BR_PISTON_DIR = { down: 0, up: 1, south: 2, north: 3, east: 4, west: 5 };
+const BR_BUTTON_DIR = { north: 2, south: 3, west: 4, east: 5 };
+function javaToBedrock(c) {
+  const P = c.props || {}, t = v => v === 'true', be = c.be || {};
+  const B = (name, states = {}, ent = null) => ({ name: 'minecraft:' + name, states, be: ent });
+  const BE = (id, extra = {}) => ({ id: ['string', id], isMovable: ['byte', 1], ...extra });
+  switch (c.name) {
+    case 'air': return null;
+    case 'stone': case 'glass': case 'obsidian': case 'redstone_block': return B(c.name);
+    case 'redstone_lamp': return B(t(P.lit) ? 'lit_redstone_lamp' : 'redstone_lamp');
+    case 'note_block': return B('noteblock', {}, BE('Music', { note: ['byte', +P.note || 0] }));
+    case 'command_block': return B('command_block', { conditional_bit: brByte(0), facing_direction: brInt(1) },
+      BE('CommandBlock', { Command: ['string', ''], auto: ['byte', 0], powered: ['byte', 0], conditionMet: ['byte', 0], TrackOutput: ['byte', 1], Version: ['int', 39] }));
+    case 'daylight_detector': return B(t(P.inverted) ? 'daylight_detector_inverted' : 'daylight_detector', { redstone_signal: brInt(+P.power || 0) }, BE('DaylightDetector'));
+    case 'hopper': {
+      const items = ((be.Items && be.Items[2]) || []).map(it => ({ Count: ['byte', (it.count || it.Count)[1]], Damage: ['short', 0], Name: ['string', 'minecraft:redstone'], Slot: ['byte', it.Slot[1]], WasPickedUp: ['byte', 0] }));
+      return B('hopper', { facing_direction: brInt(0), toggle_bit: brByte(!t(P.enabled)) }, BE('Hopper', { Items: ['list', 'compound', items], TransferCooldown: ['int', 0] }));
+    }
+    case 'redstone_wire': return B('redstone_wire', { redstone_signal: brInt(+P.power || 0) });
+    case 'repeater': return B(t(P.powered) ? 'powered_repeater' : 'unpowered_repeater', { 'minecraft:cardinal_direction': brStr(P.facing), repeater_delay: brInt((+P.delay || 1) - 1) });
+    case 'comparator': {
+      const out = be.OutputSignal ? be.OutputSignal[1] : 0;
+      return B(out > 0 ? 'powered_comparator' : 'unpowered_comparator', { 'minecraft:cardinal_direction': brStr(P.facing), output_lit_bit: brByte(out > 0), output_subtract_bit: brByte(P.mode === 'subtract') },
+        BE('Comparator', { OutputSignal: ['int', out] }));
+    }
+    case 'redstone_torch': return B(t(P.lit) ? 'redstone_torch' : 'unlit_redstone_torch', { torch_facing_direction: brStr('top') });
+    case 'redstone_wall_torch': return B(t(P.lit) ? 'redstone_torch' : 'unlit_redstone_torch', { torch_facing_direction: brStr(BR_OPP[P.facing]) });
+    case 'lever': {
+      const ew = P.facing === 'east' || P.facing === 'west';
+      const d = P.face === 'floor' ? (ew ? 'up_east_west' : 'up_north_south') : P.face === 'ceiling' ? (ew ? 'down_east_west' : 'down_north_south') : P.facing;
+      return B('lever', { lever_direction: brStr(d), open_bit: brByte(t(P.powered)) });
+    }
+    case 'stone_button': case 'oak_button':
+      return B(c.name === 'oak_button' ? 'wooden_button' : 'stone_button', { button_pressed_bit: brByte(t(P.powered)), facing_direction: brInt(P.face === 'ceiling' ? 0 : P.face === 'floor' ? 1 : BR_BUTTON_DIR[P.facing]) });
+    case 'stone_pressure_plate': return B('stone_pressure_plate', { redstone_signal: brInt(t(P.powered) ? 15 : 0) });
+    case 'piston': case 'sticky_piston': {
+      const ext = t(P.extended);
+      return B(c.name, { facing_direction: brInt(BR_PISTON_DIR[P.facing]) }, BE('PistonArm', {
+        Sticky: ['byte', c.name === 'sticky_piston' ? 1 : 0], State: ['byte', ext ? 2 : 0], NewState: ['byte', ext ? 2 : 0],
+        Progress: ['float', ext ? 1 : 0], LastProgress: ['float', ext ? 1 : 0], AttachedBlocks: ['list', 'int', []], BreakBlocks: ['list', 'int', []] }));
+    }
+    case 'piston_head': return B(P.type === 'sticky' ? 'sticky_piston_arm_collision' : 'piston_arm_collision', { facing_direction: brInt(BR_PISTON_DIR[P.facing]) });
+    case 'observer': return B('observer', { 'minecraft:facing_direction': brStr(P.facing), powered_bit: brByte(t(P.powered)) });
+    case 'powered_rail': return B('golden_rail', { rail_data_bit: brByte(t(P.powered)), rail_direction: brInt(P.shape === 'east_west' ? 1 : 0) });
+    case 'iron_trapdoor': return B('iron_trapdoor', { direction: brInt({ east: 0, west: 1, south: 2, north: 3 }[P.facing]), open_bit: brByte(t(P.open)), upside_down_bit: brByte(P.half === 'top') });
+    case 'iron_door': return B('iron_door', { direction: brInt({ east: 0, south: 1, west: 2, north: 3 }[P.facing]), door_hinge_bit: brByte(P.hinge === 'right'), open_bit: brByte(t(P.open)), upper_block_bit: brByte(P.half === 'upper') });
+  }
+  return B('stone');
+}
+
+/* ---------- LevelDB : CRC32C, journal, MANIFEST ---------- */
+const CRC32C_TABLE = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0x82F63B78 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32c(u8, c = 0) { c = ~c >>> 0; for (let i = 0; i < u8.length; i++) c = CRC32C_TABLE[(c ^ u8[i]) & 255] ^ (c >>> 8); return ~c >>> 0; }
+const crcMask = c => ((((c >>> 15) | (c << 17)) >>> 0) + 0xa282ead8) >>> 0;
+class ByteBuf {
+  constructor() { this.b = new Uint8Array(1 << 16); this.n = 0; }
+  room(k) { if (this.n + k > this.b.length) { let s = this.b.length * 2; while (s < this.n + k) s *= 2; const nb = new Uint8Array(s); nb.set(this.b.subarray(0, this.n)); this.b = nb; } }
+  bytes(u8) { this.room(u8.length); this.b.set(u8, this.n); this.n += u8.length; return this; }
+  u8(x) { this.room(1); this.b[this.n++] = x & 255; return this; }
+  u32(x) { this.room(4); new DataView(this.b.buffer).setUint32(this.n, x >>> 0, true); this.n += 4; return this; }
+  i32(x) { this.room(4); new DataView(this.b.buffer).setInt32(this.n, x | 0, true); this.n += 4; return this; }
+  u64(x) { this.u32(x % 4294967296); return this.u32(Math.floor(x / 4294967296)); }
+  varint(v) { while (v >= 128) { this.u8((v & 127) | 128); v = Math.floor(v / 128); } return this.u8(v); }
+  out() { return this.b.slice(0, this.n); }
+}
+/* Format « log » de LevelDB : blocs de 32 Kio, enregistrements fragmentés avec CRC32C masqué */
+function ldbLogFile(records) {
+  const f = new ByteBuf();
+  for (const rec of records) {
+    let p = 0, first = true;
+    while (first || p < rec.length) {
+      let room = 32768 - (f.n % 32768);
+      if (room < 7) { for (let i = 0; i < room; i++) f.u8(0); room = 32768; }
+      const len = Math.min(rec.length - p, room - 7), last = p + len >= rec.length;
+      const type = first && last ? 1 : first ? 2 : last ? 4 : 3, frag = rec.subarray(p, p + len);
+      f.u32(crcMask(crc32c(frag, crc32c(Uint8Array.of(type))))).u8(len & 255).u8(len >> 8).u8(type).bytes(frag);
+      p += len; first = false;
+    }
+  }
+  return f.out();
+}
+function ldbWriteBatch(seq, entries) {
+  const w = new ByteBuf().u64(seq).u32(entries.length);
+  for (const [k, v] of entries) w.u8(1).varint(k.length).bytes(k).varint(v.length).bytes(v);
+  return w.out();
+}
+function ldbManifest(logNumber, nextFile, lastSeq) {
+  const name = new TextEncoder().encode('leveldb.BytewiseComparator');
+  const e = new ByteBuf().varint(1).varint(name.length).bytes(name).varint(2).varint(logNumber).varint(3).varint(nextFile).varint(4).varint(lastSeq);
+  return ldbLogFile([e.out()]);
+}
+
+/* ---------- Chunks Bedrock ---------- */
+const nbtLE = comp => new NbtWriter(true).root('', comp);
+function brChunkKey(cx, cz, tag, y) {
+  const k = new ByteBuf().i32(cx).i32(cz).u8(tag); if (y !== undefined) k.u8(y & 255); return k.out();
+}
+function brPaletteEntry(e) {
+  const states = {}; for (const k of Object.keys(e.states).sort()) states[k] = e.states[k];
+  return nbtLE({ name: ['string', e.name], states: ['compound', states], version: ['int', BR_VERSION] });
+}
+/* Sous-chunk version 9 : une couche, indices XZY tassés dans des mots de 32 bits */
+function brSubchunk(cy, ids, palette) {
+  let bits = 1; while ((1 << bits) < palette.length) bits++;
+  if (bits === 7) bits = 8; else if (bits > 8) bits = 16;
+  const per = Math.floor(32 / bits), nw = Math.ceil(4096 / per), words = new Uint32Array(nw);
+  for (let i = 0; i < 4096; i++) words[Math.floor(i / per)] |= ids[i] << ((i % per) * bits);
+  const w = new ByteBuf().u8(9).u8(1).u8(cy).u8(bits << 1);
+  for (const x of words) w.u32(x);
+  w.i32(palette.length); for (const p of palette) w.bytes(p);
+  return w.out();
+}
+function brPlace(exp) {
+  const oy = exp.floor ? BR_GROUND : BR_GROUND + 1;        // le sol de pierre remplace l'herbe
+  return { x: c => c.x, y: c => c.y + oy, z: c => c.z };
+}
+function mcworldEntries(exp) {
+  const pos = brPlace(exp), chunks = new Map();
+  const chunk = (cx, cz) => { const k = cx + ',' + cz; let c = chunks.get(k); if (!c) chunks.set(k, c = { cx, cz, blocks: new Map(), bes: [] }); return c; };
+  for (const c of exp.cells) {
+    const b = javaToBedrock(c); if (!b) continue;
+    const x = pos.x(c), y = pos.y(c), z = pos.z(c), ch = chunk(x >> 4, z >> 4);
+    ch.blocks.set(((x & 15) << 8 | (z & 15) << 4) + ':' + y, b);
+    if (b.be) ch.bes.push(nbtLE({ ...b.be, x: ['int', x], y: ['int', y], z: ['int', z] }));
+  }
+  const entries = [], palCache = new Map();
+  const palBytes = b => { const key = b.name + JSON.stringify(b.states); let p = palCache.get(key); if (!p) palCache.set(key, p = brPaletteEntry(b)); return [key, p]; };
+  const layer = BR_LAYERS.map(n => ({ name: n, states: n === 'minecraft:dirt' ? { dirt_type: ['string', 'normal'] } : n === 'minecraft:bedrock' ? { infiniburn_bit: ['byte', 0] } : {} }));
+  for (const ch of chunks.values()) {
+    let top = -64; for (const k of ch.blocks.keys()) top = Math.max(top, +k.split(':')[1]);
+    const cyMax = Math.max(-4, top >> 4);
+    const height = new Int16Array(256).fill(BR_GROUND + 1 + 64);
+    for (let cy = -4; cy <= cyMax; cy++) {
+      const ids = new Uint16Array(4096), pal = [], idx = new Map();
+      const id = b => { const [k, p] = palBytes(b); let i = idx.get(k); if (i === undefined) { idx.set(k, i = pal.length); pal.push(p); } return i; };
+      id({ name: 'minecraft:air', states: {} });
+      for (let x = 0; x < 16; x++) for (let z = 0; z < 16; z++) for (let y = 0; y < 16; y++) {
+        const wy = cy * 16 + y, col = x << 8 | z << 4;
+        let b = ch.blocks.get(col + ':' + wy);
+        if (!b && wy >= -64 && wy <= BR_GROUND) b = layer[wy + 64];
+        if (b) { ids[(x * 16 + z) * 16 + y] = id(b); if (b.name !== 'minecraft:air') height[z * 16 + x] = Math.max(height[z * 16 + x], wy + 1 + 64); }
+      }
+      entries.push([brChunkKey(ch.cx, ch.cz, 47, cy), brSubchunk(cy, ids, pal)]);
+    }
+    // hauteurs + biomes (plaines partout ; 25 entrées, comme les outils qui font référence)
+    const d3 = new ByteBuf(); for (const h of height) d3.u8(h & 255).u8(h >> 8);
+    for (let i = 0; i < 25; i++) d3.u8(1).i32(1);
+    entries.push([brChunkKey(ch.cx, ch.cz, 43), d3.out()]);
+    entries.push([brChunkKey(ch.cx, ch.cz, 44), Uint8Array.of(BR_CHUNK_VERSION)]);
+    entries.push([brChunkKey(ch.cx, ch.cz, 54), new ByteBuf().i32(2).out()]);      // chunk terminé
+    entries.push([brChunkKey(ch.cx, ch.cz, 64), Uint8Array.of(0, 5)]);              // pas de fondu avec le terrain voisin
+    if (ch.bes.length) { const be = new ByteBuf(); for (const e of ch.bes) be.bytes(e); entries.push([brChunkKey(ch.cx, ch.cz, 49), be.out()]); }
+  }
+  return entries;
+}
+
+/* ---------- level.dat ---------- */
+function brLevelDat(exp) {
+  const pos = brPlace(exp), now = Math.floor(Date.now() / 1000);
+  const flat = JSON.stringify({ biome_id: 1, block_layers: BR_LAYERS.map((n, i) => ({ block_name: n, count: 1 })), encoding_version: 6, structure_options: null, world_version: 'version.post_1_18' });
+  const ver = ['list', 'int', [1, 21, 0, 0, 0]], b = v => ['byte', v ? 1 : 0], i = v => ['int', v];
+  const root = {
+    LevelName: ['string', exp.title], StorageVersion: i(10), NetworkVersion: i(685), WorldVersion: i(1), Platform: i(2),
+    lastOpenedWithVersion: ver, MinimumCompatibleClientVersion: ver, InventoryVersion: ['string', '1.21.0'], baseGameVersion: ['string', '*'],
+    Generator: i(2), FlatWorldLayers: ['string', flat], RandomSeed: ['long', 0], GameType: i(1), Difficulty: i(0), ForceGameType: b(0),
+    SpawnX: i(Math.floor(exp.size.x / 2)), SpawnY: i(pos.y({ y: exp.floor ? 1 : 0 })), SpawnZ: i(-3),
+    Time: ['long', 6000], currentTick: ['long', 0], LastPlayed: ['long', now], hasBeenLoadedInCreative: b(1), commandsEnabled: b(1),
+    texturePacksRequired: b(0), spawnMobs: b(0), isFromWorldTemplate: b(0), isWorldTemplateOptionLocked: b(0), educationFeaturesEnabled: b(0),
+    MultiplayerGame: b(1), MultiplayerGameIntent: b(1), LANBroadcast: b(1), LANBroadcastIntent: b(1), XBLBroadcastIntent: i(3), PlatformBroadcastIntent: i(3),
+    dodaylightcycle: b(0), doweathercycle: b(0), domobspawning: b(0), domobloot: b(1), dotiledrops: b(1), doentitydrops: b(1), dofiretick: b(0),
+    mobgriefing: b(1), tntexplodes: b(1), showcoordinates: b(1), commandblockoutput: b(1), sendcommandfeedback: b(1), commandblocksenabled: b(1),
+    keepinventory: b(1), naturalregeneration: b(1), pvp: b(1), falldamage: b(1), firedamage: b(1), drowningdamage: b(1), randomtickspeed: i(1), spawnradius: i(0),
+    maxcommandchainlength: i(65535), functioncommandlimit: i(10000), rainLevel: ['float', 0], rainTime: i(0), lightningLevel: ['float', 0], lightningTime: i(0),
+  };
+  const nbt = nbtLE(root), out = new Uint8Array(8 + nbt.length), v = new DataView(out.buffer);
+  v.setInt32(0, 10, true); v.setInt32(4, nbt.length, true); out.set(nbt, 8);
+  return out;
+}
+
+/* ---------- Archive .mcworld ---------- */
+/* Vignette du monde (liste des mondes de Minecraft) : la vue 3D du circuit */
+function mcworldIcon() {
+  try {
+    const src = Iso.image(), c = cnv(640, 360), g = c.getContext('2d');
+    g.fillStyle = '#0f1115'; g.fillRect(0, 0, 640, 360);
+    const k = Math.min(600 / src.width, 330 / src.height); g.drawImage(src, (640 - src.width * k) / 2, (360 - src.height * k) / 2, src.width * k, src.height * k);
+    const bin = atob(c.toDataURL('image/jpeg', 0.85).split(',')[1]), u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    return u8;
+  } catch (e) { return null; }
+}
+function mcworldBytes(exp, icon) {
+  const entries = mcworldEntries(exp), batches = [];
+  let seq = 1;
+  for (let i = 0; i < entries.length; i += 64) { const part = entries.slice(i, i + 64); batches.push(ldbWriteBatch(seq, part)); seq += part.length; }
+  return zipStore([
+    { name: 'level.dat', data: brLevelDat(exp) },
+    { name: 'levelname.txt', data: exp.title },
+    { name: 'db/CURRENT', data: 'MANIFEST-000001\n' },
+    { name: 'db/MANIFEST-000001', data: ldbManifest(2, 3, 0) },
+    { name: 'db/000002.log', data: ldbLogFile(batches) },
+    ...(icon ? [{ name: 'world_icon.jpeg', data: icon }] : []),
+  ]);
+}
 
 /* =====================================================================
    20. IMPORT DEPUIS MINECRAFT
@@ -4252,7 +4483,7 @@ function importWorldArea(world, box, title) {
   for (let y = box.y0; y <= box.y1; y++) for (let z = box.z0; z <= box.z1; z++) for (let x = box.x0; x <= box.x1; x++) {
     const b = world.blockAt(x, y, z);
     if (!b || /air$/.test(b.name)) continue;
-    if (world.edition === 'Bedrock') pushBedrock(imp, x, y, z, b.name, b.props);
+    if (world.edition === 'Bedrock') pushBedrock(imp, x, y, z, b.name, b.props, b.be);
     else pushJava(imp, x, y, z, b.name, b.props, b.be);
   }
   if (world.edition === 'Bedrock') fixPistonExt(imp);
@@ -4299,10 +4530,11 @@ function ldbEntries(b, cb) {
     cb(k, b.subarray(p, p + vl)); p += vl; key = k;
   }
 }
-/* Seules les clés de sous-chunks de l'Overworld nous intéressent : x, z (int32), 47, y */
+/* Clés utiles de l'Overworld : sous-chunks (x, z en int32, 47, y) et entités de bloc (x, z, 49) */
 const isSubchunkKey = k => k.length === 10 && k[8] === 47;
+const isWantedKey = k => isSubchunkKey(k) || (k.length === 9 && k[8] === 49);
 function ldbPut(map, uk, seq, val) {
-  if (!isSubchunkKey(uk)) return;
+  if (!isWantedKey(uk)) return;
   const s = String.fromCharCode(...uk), cur = map.get(s);
   if (!cur || cur.seq < seq) map.set(s, { seq, val: val ? val.slice() : null });
 }
@@ -4314,7 +4546,7 @@ async function ldbReadTable(u8, map) {
   for (const [o, s] of handles) {
     const blk = await ldbBlock(u8, o, s);
     ldbEntries(blk, (ik, val) => {
-      const n = ik.length - 8; if (n !== 10 || ik[8] !== 47) return;
+      const n = ik.length - 8; if (!isWantedKey(ik.subarray(0, n))) return;
       let seq = 0; for (let i = 7; i >= 1; i--) seq = seq * 256 + ik[n + i];
       ldbPut(map, ik.subarray(0, n), seq, ik[n] === 1 ? val : null);
     });
@@ -4371,13 +4603,17 @@ async function scanBedrockWorld(files, progress) {
   let k = 0;
   for (const f of tables) { await ldbReadTable(new Uint8Array(await f.blob.arrayBuffer()), map); k++; if (progress) progress(k / (tables.length + logs.length) * 0.7, `Base LevelDB : table ${k}/${tables.length}`); }
   for (const f of logs) { ldbReadLog(new Uint8Array(await f.blob.arrayBuffer()), map); k++; }
-  const world = { edition: 'Bedrock', chunks: new Map(), components: [], skipped: 0, tooOld: 0 };
+  const world = { edition: 'Bedrock', chunks: new Map(), components: [], skipped: 0, tooOld: 0, bes: new Map() };
   let i = 0;
   for (const [key, e] of map) {
     i++;
     if (!e.val) continue;
     const kb = Uint8Array.from(key, c => c.charCodeAt(0)), kd = new DataView(kb.buffer);
     const cx = kd.getInt32(0, true), cz = kd.getInt32(4, true), ky = (kb[9] << 24) >> 24;
+    if (kb.length === 9) {             // entités de bloc : composés NBT collés les uns aux autres
+      try { const rd = new NbtReader(e.val, true); while (rd.p < e.val.length) { rd.i8(); rd.str(); const be = rd.payload(10); world.bes.set(be.x + ',' + be.y + ',' + be.z, be); } } catch (err) { /* entité illisible : ignorée */ }
+      continue;
+    }
     let sc; try { sc = bedrockSubchunk(e.val, ky); } catch (err) { world.skipped++; continue; }
     if (!sc) { world.skipped++; continue; }
     const ck = cx + ',' + cz; let ch = world.chunks.get(ck);
@@ -4393,7 +4629,8 @@ async function scanBedrockWorld(files, progress) {
   world.blockAt = (x, y, z) => {
     const ch = world.chunks.get((x >> 4) + ',' + (z >> 4)); if (!ch) return null;
     const sc = ch.sections.get(y >> 4); if (!sc) return null;
-    return sc.palette[bedrockIndex(sc, ((x & 15) << 8) | ((z & 15) << 4) | (y & 15))] || null;
+    const p = sc.palette[bedrockIndex(sc, ((x & 15) << 8) | ((z & 15) << 4) | (y & 15))];
+    return p ? { name: p.name, props: p.props, be: world.bes.get(x + ',' + y + ',' + z) } : null;
   };
   return world;
 }
@@ -4409,7 +4646,7 @@ const BR_PISTON = ['down', 'up', 'south', 'north', 'east', 'west'];     // facin
 const BR_FACING = ['down', 'up', 'north', 'south', 'west', 'east'];     // facing_direction usuel
 const BR_OPP = { north: 'south', south: 'north', east: 'west', west: 'east', up: 'down', down: 'up' };
 const bBit = v => v === 1 || v === true || v === '1' || v === 'true' || v === '1b';
-function bedrockToJava(rawName, S = {}) {
+function bedrockToJava(rawName, S = {}, be) {
   const n = String(rawName).replace(/^minecraft:/, ''), sig = +S.redstone_signal || 0;
   const card = () => S['minecraft:cardinal_direction'] || BR_CARD[+S.direction & 3] || 'north';
   const face6 = (tbl) => typeof S['minecraft:facing_direction'] === 'string' ? S['minecraft:facing_direction'] : tbl[+S.facing_direction] || tbl[0];
@@ -4442,7 +4679,7 @@ function bedrockToJava(rawName, S = {}) {
     case 'daylight_detector': case 'daylight_detector_inverted':
       return ['daylight_detector', { power: sig, inverted: String(n.endsWith('inverted')) }];
     case 'redstone_lamp': case 'lit_redstone_lamp': return ['redstone_lamp', { lit: String(n.startsWith('lit')) }];
-    case 'noteblock': return ['note_block', {}];
+    case 'noteblock': return ['note_block', { note: be && be.note !== undefined ? String(be.note) : '0' }];
     case 'grass': return ['grass_block', {}];                 // ancien nom Bedrock du bloc d'herbe
     case 'wooden_button': return ['oak_button', btnProps(S)];
     case 'wooden_door': return ['oak_door', doorProps(S)];
@@ -4474,14 +4711,16 @@ function trapProps(S) {
   const c = S['minecraft:cardinal_direction'];
   return { facing: c || ['east', 'west', 'south', 'north'][+S.direction & 3], open: String(bBit(S.open_bit)) };
 }
-function pushBedrock(imp, x, y, z, name, props) {
-  const j = bedrockToJava(name, props);
+function pushBedrock(imp, x, y, z, name, props, be) {
+  const j = bedrockToJava(name, props, be);
   if (!j) { if (!/air$/.test(String(name))) imp.skipped++; return; }
-  pushJava(imp, x, y, z, j[0], j[1]);
+  pushJava(imp, x, y, z, j[0], j[1], be);   // hopper (Items/Count) et comparateur (OutputSignal) se lisent comme en Java
 }
-/* Bedrock ne stocke pas « extended » : un piston est sorti si sa tête est devant lui */
+/* Bedrock ne stocke pas « extended » : un piston est sorti si sa tête est devant lui.
+   Le haut d'une porte reprend l'orientation du bas (Bedrock ne la garde qu'en bas). */
 function fixPistonExt(imp) {
   const at = new Map(imp.cells.map(c => [c.x + ',' + c.y + ',' + c.z, c]));
+  for (const c of imp.cells) if (c.t === 'door_top') { const d = at.get(c.x + ',' + (c.y - 1) + ',' + c.z); if (d && d.t === 'door') { c.f = d.f; c.on = d.on; } }
   for (const c of imp.cells) if (c.t === 'piston' || c.t === 'sticky') {
     const d = DIRS[c.f], h = at.get((c.x + d[0]) + ',' + (c.y + d[1]) + ',' + (c.z + d[2]));
     c.ext = !!(h && h.t === 'piston_head' && h.f === c.f);
