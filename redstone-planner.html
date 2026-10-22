@@ -215,7 +215,7 @@ kbd {
 .chip:hover { background: var(--fill-2); }
 .chip:active { transform: scale(.95); }
 .chip.on { background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, .12); }
-#isoCtl { left: 50%; bottom: max(14px, env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); align-items: center; }
+#isoCtl { left: 50%; bottom: calc(max(14px, env(safe-area-inset-bottom, 0px)) + 66px); transform: translateX(-50%); align-items: center; }
 #warn {
   position: absolute; left: 50%; top: 120px; transform: translateX(-50%); z-index: 6;
   color: #9a5a00; padding: 9px 16px; border-radius: 999px; font-size: 12.5px; font-weight: 500;
@@ -429,7 +429,7 @@ table.bom canvas { width: 26px; height: 26px; vertical-align: middle; image-rend
 .welcome footer .btn.primary { width: 100%; height: 44px; font-size: 15px; font-weight: 600; }
 
 /* ---------- Notifications ---------- */
-#toasts { position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 70; display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; }
+#toasts { position: fixed; left: 50%; bottom: 136px; transform: translateX(-50%); z-index: 70; display: flex; flex-direction: column; gap: 6px; align-items: center; pointer-events: none; }
 .toast {
   padding: 10px 18px; border-radius: 20px; font-size: 13px; font-weight: 500; max-width: min(520px, 92vw); text-align: center;
   background: var(--glass-strong); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur);
@@ -5075,7 +5075,7 @@ const UI = {
   setView(v) {
     this.view = v;
     $('view2d').classList.toggle('on', v === '2d'); $('viewIso').classList.toggle('on', v === 'iso');
-    $('isoCtl').hidden = v !== 'iso'; $('tools').hidden = v === 'iso'; $('hotbar').hidden = v === 'iso'; $('selBar').hidden = v === 'iso' || !this.sel;
+    $('isoCtl').hidden = v !== 'iso'; $('selBar').hidden = v === 'iso' || !this.sel; this.isoHover = null;
     $('cv').style.cursor = v === 'iso' ? 'grab' : '';
     this.hideTip();
     if (v === 'iso' && !Iso.fitted) { Iso.fit(R.w, R.h); Iso.fitted = true; }
@@ -5114,14 +5114,14 @@ const UI = {
     const c = this.hover;
     $('stPos').innerHTML = c ? `X <b>${c.x}</b> · Y <b>${this.layer}</b> · Z <b>${c.z}</b>` : `Y <b>${this.layer}</b>`;
     const modes = { build: 'Construire : <b>' + BT[this.current()].name + '</b>', hand: '<b>Main</b> : actionner', erase: '<b>Gomme</b>', select: '<b>Sélection</b>' };
-    $('stMode').innerHTML = this.view === 'iso' ? '<b>Vue 3D</b> (lecture seule)' : this.pasting ? '<b>Collage</b>' : modes[this.tool];
+    $('stMode').innerHTML = this.view === 'iso' ? '<b>Vue 3D</b> : ' + modes[this.tool] : this.pasting ? '<b>Collage</b>' : modes[this.tool];
     const hints = {
       build: 'Clic : poser · glisser : tracer · clic sur un bloc : l’actionner ou le régler · R : tourner',
       hand: 'Clic : actionner leviers, boutons, plaques · clic droit : régler',
       erase: 'Clic ou glisser pour effacer',
       select: 'Glisse un rectangle · Ctrl+C/X/V · R : tourner la zone · Suppr',
     };
-    $('stHint').textContent = this.view === 'iso' ? 'Glisser : déplacer · molette : zoom · les boutons en bas à droite tournent la vue'
+    $('stHint').textContent = this.view === 'iso' ? 'Clic : poser contre la face visée · clic droit : actionner/régler · glisser : déplacer · molette : zoom'
       : this.pasting ? 'Clic : coller · R : tourner · Échap : terminer' : hints[this.tool];
   },
   orientName(t, f) {
@@ -5291,7 +5291,7 @@ const UI = {
       this.closeMenu();
       const m = this.pos(e); this.mouse = { ...m, in: true };
       try { cv.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
-      if (this.view === 'iso') { this.drag = { kind: 'iso', sx: m.x, sy: m.y, ox: Iso.ox, oy: Iso.oy }; cv.style.cursor = 'grabbing'; return; }
+      if (this.view === 'iso') { this.isoDown(e, m); return; }
       const c = R.cellAt(m.x, m.y); this.hover = c;
       if (e.button === 1) { e.preventDefault(); this.pick(c); return; }
       if (e.button === 2 || (e.button === 0 && this.space)) { this.drag = { kind: e.button === 2 ? 'rpan' : 'pan', sx: m.x, sy: m.y, cx: R.cam.x, cy: R.cam.y, moved: e.button !== 2, c }; this.hideTip(); if (e.button !== 2) cv.classList.add('pan'); return; }
@@ -5320,7 +5320,7 @@ const UI = {
     cv.addEventListener('pointermove', e => {
       const m = this.pos(e); this.mouse = { ...m, in: true };
       const d = this.drag;
-      if (this.view === 'iso') { if (d && d.kind === 'iso') { Iso.ox = d.ox + m.x - d.sx; Iso.oy = d.oy + m.y - d.sy; R.dirty = true; } return; }
+      if (this.view === 'iso') { this.isoMove(m); return; }
       const c = R.cellAt(m.x, m.y);
       const changed = !this.hover || c.x !== this.hover.x || c.z !== this.hover.z;
       this.hover = c;
@@ -5341,8 +5341,8 @@ const UI = {
       R.dirty = true;
     });
     const up = e => {
+      if (this.view === 'iso') { this.isoUp(e, this.pos(e)); return; }
       const d = this.drag; this.drag = null; cv.classList.remove('pan');
-      if (this.view === 'iso') { cv.style.cursor = 'grab'; return; }
       if (!d) return;
       if (d.kind === 'rpan' && !d.moved) { const c = d.c; if (this.pasting) { this.pasting = false; this.status(); } else this.interact(c, e, true); }
       if (d.kind === 'plate') Sim.plateUp(d.b);
@@ -7236,6 +7236,145 @@ document.addEventListener('pointerdown', e => {
 });
 
 /* =====================================================================
+   21 bis. CONSTRUIRE EN VUE 3D
+   Clic gauche sur une face : pose le bloc contre elle (comme en jeu).
+   Clic dans le vide : pose à l'étage courant. Glisser : déplacer la vue.
+   Clic droit : actionner/régler. Gomme : efface le bloc visé. Molette (clic) : pipette.
+   ===================================================================== */
+function pointInPoly(px, py, pts) {
+  let inside = false;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    const [xi, yi] = pts[i], [xj, yj] = pts[j];
+    if ((yi > py) !== (yj > py) && px < (xj - xi) * (py - yi) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+/* Face d'un cube unité visible sous la souris (U = dessus, ou une direction latérale) */
+function isoFaceAt(x, y, z, mx, my) {
+  const a = Iso.a(), P = (X, Y, Z) => Iso.pt(X, Y, Z, a);
+  if (pointInPoly(mx, my, [P(x, y + 1, z), P(x + 1, y + 1, z), P(x + 1, y + 1, z + 1), P(x, y + 1, z + 1)])) return U;
+  for (const [d] of Iso.sides()) {
+    const q = d === N ? [P(x, y, z), P(x + 1, y, z), P(x + 1, y + 1, z), P(x, y + 1, z)]
+      : d === S ? [P(x, y, z + 1), P(x + 1, y, z + 1), P(x + 1, y + 1, z + 1), P(x, y + 1, z + 1)]
+      : d === E ? [P(x + 1, y, z), P(x + 1, y, z + 1), P(x + 1, y + 1, z + 1), P(x + 1, y + 1, z)]
+      : [P(x, y, z), P(x, y, z + 1), P(x, y + 1, z + 1), P(x, y + 1, z)];
+    if (pointInPoly(mx, my, q)) return d;
+  }
+  return -1;
+}
+/* Ce que vise la souris : le bloc le plus en avant, sa face et la case où poser ; sinon le plan de l'étage courant */
+Iso.pick = function (mx, my) {
+  const list = this.sorted();
+  for (let i = list.length - 1; i >= 0; i--) {
+    const b = list[i].b; if (b.mv || b.dead) continue;
+    const face = isoFaceAt(b.x, b.y, b.z, mx, my);
+    if (face < 0) continue;
+    const d = DIRS[face], t = { x: b.x + d[0], y: b.y + d[1], z: b.z + d[2] };
+    return { b, face, target: t, attach: face === U ? D : OPP[face] };
+  }
+  // rien sous la souris : on vise le sol de l'étage courant
+  const a = this.a(), Y = UI.layer, u = (mx - this.ox) / a, v = 2 * (my - this.oy + Y * a * 1.15) / a;
+  const X = (u + v) / 2, Z = (v - u) / 2;
+  let x, z;
+  switch (this.rot) { case 0: x = X; z = Z; break; case 1: x = Z; z = -X; break; case 2: x = -X; z = -Z; break; default: x = -Z; z = X; }
+  const t = { x: Math.floor(x), y: Y, z: Math.floor(z) };
+  return inRange(t.x, t.y, t.z) ? { b: null, face: U, target: t, attach: D } : null;
+};
+const USABLE = new Set(['lever', 'button_stone', 'button_wood', 'plate', 'repeater', 'comparator', 'note', 'daylight', 'hopper']);
+Object.assign(UI, {
+  isoHover: null,
+  /* actionne/règle un bloc précis (les fonctions 2D travaillent sur l'étage courant) */
+  atBlock(b, fn) { const L = this.layer; this.layer = b.y; try { return fn({ x: b.x, z: b.z }); } finally { this.layer = L; } },
+  isoDown(e, m) {
+    this.drag = { kind: 'iso', sx: m.x, sy: m.y, ox: Iso.ox, oy: Iso.oy, button: e.button, moved: false, shift: e.shiftKey };
+  },
+  isoMove(m) {
+    const d = this.drag;
+    if (d && d.kind === 'iso') {
+      if (!d.moved && Math.hypot(m.x - d.sx, m.y - d.sy) > 4) { d.moved = true; $('cv').style.cursor = 'grabbing'; this.isoHover = null; }
+      if (d.moved) { Iso.ox = d.ox + m.x - d.sx; Iso.oy = d.oy + m.y - d.sy; R.dirty = true; }
+      return;
+    }
+    if (d && d.kind === 'plate') return;
+    const h = Iso.pick(m.x, m.y), k = h ? [h.target.x, h.target.y, h.target.z, h.b ? h.b.x + ',' + h.b.y + ',' + h.b.z : ''].join(':') : '';
+    if (k !== (this.isoHover && this.isoHover.k)) { this.isoHover = h ? { ...h, k } : null; R.dirty = true; }
+  },
+  isoUp(e, m) {
+    const d = this.drag; this.drag = null; $('cv').style.cursor = 'grab';
+    if (!d) return;
+    if (d.kind === 'plate') { Sim.plateUp(d.b); R.dirty = true; return; }
+    if (d.kind !== 'iso' || d.moved) return;
+    const h = Iso.pick(m.x, m.y);
+    if (d.button === 1) { if (h && h.b) this.atBlock(h.b, c => this.pick(c)); return; }
+    if (d.button === 2) { if (h && h.b) this.atBlock(h.b, c => this.interact(c, { shiftKey: d.shift }, true)); R.dirty = true; return; }
+    if (d.button !== 0 || !h) return;
+    if (this.pasting) { this.toast('Le collage se fait en vue 2D (V pour changer de vue).'); return; }
+    switch (this.tool) {
+      case 'erase':
+        if (h.b) { Edit.begin('Gomme'); const b = h.b.t === 'door_top' ? (W.get(h.b.x, h.b.y - 1, h.b.z) || h.b) : h.b; Ed.erase(b.x, b.y, b.z); Edit.commit(); Sim.settle(); this.layerInfo(); }
+        break;
+      case 'hand':
+        if (h.b) this.atBlock(h.b, c => this.interact(c, { shiftKey: d.shift }, false));
+        break;
+      case 'select': this.toast('La sélection se fait en vue 2D (V pour changer de vue).'); break;
+      default: {
+        if (h.b && USABLE.has(h.b.t) && !d.shift) { this.atBlock(h.b, c => this.interact(c, { shiftKey: false }, false)); break; }
+        this.placeAt(this.current(), h);
+      }
+    }
+    this.isoHover = null; this.isoMove(m); R.dirty = true;
+  },
+  /* pose comme à la main : torche, levier, bouton s'accrochent à la face visée */
+  placeAt(t, h) {
+    const { x, y, z } = h.target;
+    if (!inRange(x, y, z)) { this.toast('Hors de la zone de construction (32 étages au plus).'); return false; }
+    const def = BT[t], base = def.alias ? BT[def.alias] : def;
+    const save = Ed.orient[t];
+    if (base.needs === 'att' && ROT_OPTS[base.rot].includes(h.attach)) Ed.orient[t] = h.attach;
+    Edit.begin('Poser ' + def.name.toLowerCase());
+    const ok = Ed.place2(t, x, y, z);
+    Ed.orient[t] = save;
+    if (!ok) this.explainInvalid(t, x, y, z);
+    Edit.commit(); Sim.settle();
+    if (ok && Iso.cut && y > this.layer) this.setLayer(y); else this.layerInfo();   // en coupe, l'étage suit pour que le bloc reste visible
+    return ok;
+  },
+});
+/* Aperçu en 3D : la case visée (contour) et le bloc qui sera posé (en transparence) */
+{
+  const draw0 = Iso.draw;
+  Iso.draw = function (g, w, h, now, bg = true) {
+    draw0.call(this, g, w, h, now, bg);
+    const hv = UI.isoHover;
+    if (!bg || g !== R.g || UI.view !== 'iso' || !hv || UI.drag || !UI.mouse.in) return;
+    const a = this.a(), D_ = this.D;
+    const cube = (x, y, z, col) => {
+      g.setTransform(D_, 0, 0, D_, 0, 0);
+      const P = (X, Y, Z) => this.pt(X, Y, Z, a), c = [];
+      for (const [dx, dy, dz] of [[0, 0, 0], [1, 0, 0], [1, 0, 1], [0, 0, 1], [0, 1, 0], [1, 1, 0], [1, 1, 1], [0, 1, 1]]) c.push(P(x + dx, y + dy, z + dz));
+      g.strokeStyle = col; g.lineWidth = 1.5; g.beginPath();
+      for (const [i, j] of [[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]]) { g.moveTo(c[i][0], c[i][1]); g.lineTo(c[j][0], c[j][1]); }
+      g.stroke();
+    };
+    if (UI.tool === 'erase' || UI.tool === 'hand' || (hv.b && USABLE.has(hv.b.t) && UI.tool === 'build')) {
+      if (hv.b) cube(hv.b.x, hv.b.y, hv.b.z, UI.tool === 'erase' ? 'rgba(255,59,48,.95)' : 'rgba(29,29,31,.7)');
+      return;
+    }
+    if (UI.tool !== 'build') return;
+    const t = UI.current(), { x, y, z } = hv.target;
+    if (!inRange(x, y, z) || W.get(x, y, z)) return;
+    const def = BT[t], base = def.alias ? BT[def.alias] : def;
+    let f = Ed.orient[t] ?? DEFAULT_F[def.alias || t] ?? 0;
+    if (base.needs === 'att' && ROT_OPTS[base.rot].includes(hv.attach)) f = hv.attach;
+    const ok = Ed.resolve(t, x, y, z).ok || (base.needs === 'att' && attachOk(x, y, z, f));
+    const ghost = def.alias ? mk(def.alias, x, y, z, { f, id: def.mc.id }) : mk(t, x, y, z, { f });
+    g.save(); g.globalAlpha = ok ? 0.5 : 0.25; this.block(g, ghost, a, now, []); g.restore();
+    cube(x, y, z, ok ? 'rgba(52,199,89,.95)' : 'rgba(255,59,48,.9)');
+    g.setTransform(1, 0, 0, 1, 0, 0);
+  };
+}
+
+/* =====================================================================
    22. ANALYSE DU PLAN (vérification automatique + Claude)
    - un « bac à sable » : copie du monde et de la simulation, pour essayer
      sans jamais toucher au plan de l'utilisateur ;
@@ -7460,6 +7599,9 @@ function applyActions(actions) {
 }
 
 /* ---------- Claude ---------- */
+/* Modèle de l'analyse : toujours Claude Sonnet, effort moyen (choix du projet).
+   Si ce modèle n'est pas disponible pour le compte, la plateforme répond avec le niveau équivalent (« default »). */
+const AI_MODEL = { model: 'claude-sonnet-5-5', modelTier: 'default', effort: 'medium' };
 let samplePromise = null;
 function getSample() {
   if (!samplePromise) samplePromise = (window.claude && typeof window.claude.use === 'function') ? Promise.resolve(window.claude.use('sample')).catch(() => null) : Promise.resolve(null);
@@ -7526,7 +7668,7 @@ TA MISSION : comprends la structure et le fonctionnement du circuit, repère les
 
 ${AI_FORMAT}`;
   const lim = await sample.limits().catch(() => null);
-  const opts = { modelTier: 'complex', signal, onText: () => onStatus && onStatus('Claude écrit son analyse…') };
+  const opts = { ...AI_MODEL, signal, onText: () => onStatus && onStatus('Claude écrit son analyse…') };
   if (lim && lim.tools) opts.tools = aiTools(onStatus || (() => {}));
   if (prompt.length > 240000) throw { code: 'prompt_too_large' };
   onStatus && onStatus('Claude lit le plan (' + plan.n + ' blocs)…');
@@ -7568,7 +7710,7 @@ Object.assign(UI, {
     const stop = el('button', { class: 'btn', hidden: '' }, 'Arrêter');
     const check = el('button', { class: 'btn' }, svgIcon('check'), 'Vérifier seulement');
     const note = el('p', { class: 'muted ai-note' });
-    body.append(el('div', { class: 'ls-sum' }, el('b', null, 'Claude lit ton plan'), el('small', null, 'Il comprend la structure et la redstone, repère les erreurs et propose des corrections que tu peux appliquer (Ctrl+Z pour revenir).'), goal,
+    body.append(el('div', { class: 'ls-sum' }, el('b', null, 'Claude lit ton plan'), el('small', { class: 'ai-model' }, 'Claude Sonnet · effort moyen'), el('small', null, 'Il comprend la structure et la redstone, repère les erreurs et propose des corrections que tu peux appliquer (Ctrl+Z pour revenir).'), goal,
       el('div', { class: 'ls-actions' }, go, stop, check), status, note));
     sampleP.then(s => { if (!s) { go.disabled = true; note.textContent = 'L’analyse par Claude fonctionne dans la page publiée sur claude.ai. Ici, seule la vérification automatique est disponible.'; } });
     const setStatus = t => { status.hidden = !t; status.textContent = t || ''; };
