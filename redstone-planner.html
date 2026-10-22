@@ -3400,7 +3400,7 @@ const UI = {
         <li><span>Clique sur un levier ou un bouton pour l’actionner ; clic droit sur un répéteur pour régler son délai.</span></li>
         <li><span>Molette pour zoomer, clic droit ou <kbd>Espace</kbd> + glisser pour te déplacer, <kbd>R</kbd> pour tourner.</span></li>
         <li><span><kbd>E</kbd> / <kbd>Q</kbd> changent d’étage, <kbd>Ctrl</kbd>+<kbd>Z</kbd> annule. <b>Leçons</b> t’apprend la redstone pas à pas, la <b>Bibliothèque</b> contient des schémas prêts.</span></li>` }));
-    const dlg = this.openModal({ body, cls: 'welcome', buttons: [{ label: 'C’est parti', primary: true, run: () => store.set(WELCOME_KEY, '1') }] });
+    const dlg = this.openModal({ body, cls: 'welcome', buttons: [{ label: 'C’est parti', primary: true, run: () => { store.set(WELCOME_KEY, '1'); } }] });   // ne rien renvoyer : « false » garderait la fenêtre ouverte (stockage bloqué)
     this.modal.onClose = () => store.set(WELCOME_KEY, '1');
     return dlg;
   },
