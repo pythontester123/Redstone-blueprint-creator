@@ -68,6 +68,7 @@
 | `ext` | 1 | piston sorti. Il faut alors une `piston_head` devant |
 | `sticky` | 1 | tête de piston collant |
 | `id` | texte | variante Minecraft d'un composant (ex. `oak_door`), voir section 5 |
+| `inv` | liste | contenu d'un `mc:dispenser` ou `mc:dropper` : 9 cases au plus, `["bone_meal", 64]` ou `null` |
 
 Les booléens s'écrivent `1`. Omets un champ quand il est faux ou nul.
 
@@ -105,6 +106,9 @@ Les booléens s'écrivent `1`. Omets un champ quand il est faux ou nul.
 | `trapdoor` | trappe en fer | 0-3 = côté de la charnière | `on: 1` = ouverte. N'a pas besoin de support. |
 | `door` | porte en fer (bas) | 0-3, voir ci-dessous | Toujours avec `{"t":"door_top", même x/z, y+1, même f, même id}`. Sur un bloc plein. |
 | `hopper` | trémie | 0 | `lvl` = remplissage 0-15. La poudre peut se poser dessus. Ne conduit pas. |
+| `mc:dispenser` | distributeur | **direction de la bouche** (0-5) | Bloc plein conducteur. `inv` = contenu. À chaque front montant (quasi-connectivité comprise), il utilise un objet au hasard 2 ticks plus tard. Poudre d'os sur un cornichon de mer posé sur du corail vivant : le cornichon passe à 4 et d'autres apparaissent dans l'eau (`mc:water`) sur le corail autour (losange de rayon 2). Seau d'eau ou de lave : verse devant si la case est vide. Seau vide : ramasse l'eau ou la lave. Flèches, boules, œufs, TNT : consommés. |
+| `mc:dropper` | dropper | **direction de la bouche** (0-5) | Comme le distributeur, mais lâche l'objet sans l'utiliser. |
+| `mc:sea_pickle` | cornichon de mer | 0 | `lvl` = nombre de cornichons 1-4. |
 | `command` | bloc de commande | 0 | Bloc plein décoratif. La commande n'est pas simulée. |
 
 Pour la porte, `f` est l'opposé du `facing` de Minecraft. Avec `f: 2` (sud), la porte vue en jeu « regarde » vers le nord, donc on la pose en se tenant au sud. Si l'orientation compte, aligne `f` sur celui d'une porte des exemples.

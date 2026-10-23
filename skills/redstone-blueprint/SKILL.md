@@ -52,10 +52,13 @@ Le planificateur est strict : un type inconnu disparaît, et un composant sans s
 | `observer` | observateur | direction de la **face qui observe** (il émet par l'arrière) |
 | `piston`, `sticky` | pistons | direction de **poussée** |
 | `rail` | rail propulseur | 0 = axe nord-sud, 1 = axe est-ouest |
+| `mc:dispenser`, `mc:dropper` (`inv` = contenu) | distributeur, dropper | direction de la **bouche** (0-5) |
 | `door` + `door_top` | porte en fer (2 blocs) | 0-3. Les deux moitiés ont le même `f` |
 | `trapdoor` | trappe en fer | 0-3 (`on: 1` = ouverte) |
 | `dust`, `plate`, `lamp`, `rblock`, `note` (`p` 0-24), `hopper` (`lvl` 0-15), `daylight` (`m: 1` = nuit), `command` | — | 0 |
 | `solid` (pierre, **conduit**), `glass` (verre, ne conduit pas), `obsidian` (conduit, inamovible) | blocs de construction | 0 |
+
+**Contenu des distributeurs et droppers** : `"inv"` liste jusqu'à 9 cases, chacune `["objet", nombre]` ou `null`. Exemple : `{"t":"mc:dispenser","x":0,"y":1,"z":1,"f":0,"inv":[["bone_meal",64],["bone_meal",64]]}`. Objets possibles (pile max) : `bone_meal` (64), `arrow` (64), `fire_charge` (64), `snowball` (16), `egg` (16), `tnt` (64), `water_bucket` (1), `lava_bucket` (1), `bucket` (16), `flint_and_steel` (1), `shears` (1). Le planificateur simule le tir à chaque front montant : la poudre d'os fait grandir et se répandre un cornichon de mer posé sur du corail vivant (`mc:tube_coral_block`…), et les seaux posent ou ramassent l'eau devant la bouche. Le contenu part dans l'export Minecraft.
 
 **Tous les autres blocs Minecraft** s'écrivent `"t": "mc:<id>"`, par exemple `mc:oak_planks`, `mc:wheat`, `mc:white_wool` ou `mc:oak_stairs` (pour un escalier, `f` = côté haut). On les trouve avec `python3 scripts/blueprint.py find chêne` ou dans `references/blocs-minecraft.md`.
 
@@ -86,6 +89,7 @@ p.add("torch", 2, 0, 2, f="N")                          # accrochée au bloc au 
 p.line("dust", (2, 0, 3), (2, 0, 3)); p.add("lamp", 2, 0, 4)
 p.door(6, 0, 0, f="S", id="oak_door")                   # porte de 2 blocs
 p.piston(8, 0, 0, f="E", sticky=True)
+p.dispenser(10, 0, 0, f="N", items={"bone_meal": 576})  # 9 piles de poudre d'os ; dropper=True pour un dropper
 p.include("<dossier du skill>/assets/exemples/porte-non.json", dx=0, dz=10, turns=0)  # réutiliser un exemple
 print(p.show())                                         # dessin des couches
 p.save("porte-et.json")                                 # vérifie, et refuse d'écrire s'il reste une erreur

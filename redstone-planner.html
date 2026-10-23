@@ -2640,6 +2640,40 @@ const BT = {
 };
 registerCatalog();                     // + tous les blocs posables de Minecraft (catalogue)
 CATS.push(...MC_CATS);
+
+/* ---------- Distributeurs et droppers : orientables, avec 9 cases de contenu (b.inv) ---------- */
+const DISP_TYPES = ['mc:dispenser', 'mc:dropper'];
+Object.assign(BT['mc:dispenser'], { rot: 'all6', inv: 9, desc: 'Utilise ou tire un objet à chaque impulsion : la poudre d’os fait pousser, les seaux posent ou ramassent l’eau. Clic droit : contenu. R : orientation.' });
+Object.assign(BT['mc:dropper'], { rot: 'all6', inv: 9, desc: 'Lâche un objet à chaque impulsion. Clic droit : contenu. R : orientation.' });
+/* Objets qu'on peut mettre dedans (identifiants communs à Java et Bedrock) */
+const ITEMS = {
+  bone_meal:       { fr: 'Poudre d’os', max: 64 },
+  arrow:           { fr: 'Flèches', max: 64 },
+  fire_charge:     { fr: 'Boules de feu', max: 64 },
+  snowball:        { fr: 'Boules de neige', max: 16 },
+  egg:             { fr: 'Œufs', max: 16 },
+  tnt:             { fr: 'TNT', max: 64 },
+  water_bucket:    { fr: 'Seau d’eau', max: 1 },
+  lava_bucket:     { fr: 'Seau de lave', max: 1 },
+  bucket:          { fr: 'Seau vide', max: 16 },
+  flint_and_steel: { fr: 'Briquet', max: 1 },
+  shears:          { fr: 'Cisailles', max: 1 },
+};
+/* Contenu propre : 9 cases au plus, [id, nombre] ou null ; undefined si tout est vide */
+function invClean(inv) {
+  if (!Array.isArray(inv)) return undefined;
+  const out = [];
+  for (let i = 0; i < Math.min(9, inv.length); i++) {
+    let s = inv[i];
+    if (s && !Array.isArray(s) && typeof s === 'object') s = [s.id, s.n ?? s.count];
+    const id = s && String(s[0] || '').replace(/^minecraft:/, ''), it = id && ITEMS[id];
+    out.push(it ? [id, clamp(Math.round(+s[1] || 1), 1, it.max)] : null);
+  }
+  while (out.length && !out[out.length - 1]) out.pop();
+  return out.length ? out : undefined;
+}
+const invCount = (inv, id) => (inv || []).reduce((n, s) => n + (s && (!id || s[0] === id) ? s[1] : 0), 0);
+const LIVE_CORAL = /^mc:(tube|brain|bubble|fire|horn)_coral_block$/;
 const ROT_OPTS = { h4: [N, E, S, O], all6: [N, E, S, O, U, D], att5: [D, N, E, S, O], att6: [D, N, E, S, O, U], axis: [0, 1] };
 const DEFAULT_F = { repeater: E, comparator: E, piston: E, sticky: E, observer: O, torch: D, lever: D, button_stone: D, button_wood: D, rail: 1, trapdoor: N, door: S };
 const isPiston = b => b && (b.t === 'piston' || b.t === 'sticky');
@@ -2662,6 +2696,7 @@ function ser(b) {
   const o = { t: b.t, x: b.x, y: b.y, z: b.z, f: b.f };
   for (const k of SAVE_KEYS) { if (k === 'f') continue; const v = b[k]; if (v) o[k] = v === true ? 1 : v; }
   if (b.t !== 'repeater') delete o.d;
+  const inv = invClean(b.inv); if (inv) o.inv = inv;
   return o;
 }
 function deser(o) {
@@ -2670,6 +2705,7 @@ function deser(o) {
   for (const k of SAVE_KEYS) if (o[k] !== undefined) b[k] = k === 'id' ? (MC[o.id] ? String(o.id) : undefined) : BOOL_KEYS.has(k) ? !!o[k] : (+o[k] || 0);
   if (b.t === 'repeater') b.d = clamp(b.d || 1, 1, 4);
   if (b.t === 'torch' && o.on === undefined) b.on = false;
+  if (BT[b.t].inv) b.inv = invClean(o.inv);
   return b;
 }
 
@@ -2788,7 +2824,7 @@ function checkSupport(cells) {
      e) observateurs : comparaison de l'état du bloc observé
    Tout est borné : aucune boucle de calcul ne peut geler la page.
    ===================================================================== */
-const COMP_TYPES = ['repeater', 'comparator', 'torch', 'lamp', 'piston', 'sticky', 'note', 'trapdoor', 'door', 'hopper', 'command'];
+const COMP_TYPES = ['repeater', 'comparator', 'torch', 'lamp', 'piston', 'sticky', 'note', 'trapdoor', 'door', 'hopper', 'command', ...DISP_TYPES];
 const COND_TYPES = Object.keys(BT).filter(t => BT[t].cond);
 const isCond = b => !!(b && !b.mv && BT[b.t].cond);
 const isDust = b => !!(b && b.t === 'dust' && !b.mv);
@@ -3075,6 +3111,12 @@ const Sim = {
           else if (!p && b.ext) moved = this.retract(b) || moved;
           break;
         }
+        case 'mc:dispenser': case 'mc:dropper': {             // front montant (quasi-connectivité comprise) : tir 2 ticks plus tard
+          const p = this.received(b) > 0 || (this.opts.qc && b.y + 1 < MAXY && this.receivedAt(b.x, b.y + 1, b.z, D) > 0);
+          if (p && !b.on) { b.on = true; this.schedule(b, 2, 'fire'); }
+          else if (!p && b.on) b.on = false;
+          break;
+        }
         case 'note': {
           const p = this.received(b) > 0;
           if (p !== b.on) { b.on = p; this.touch(b); if (p) { b.flash = performance.now(); UI.flashUntil = b.flash + 450; Sfx.note(b.p); } }
@@ -3129,6 +3171,7 @@ const Sim = {
       return () => { b.on = false; this.touch(b); Sfx.click(.5); };
     }
     if (kind === 'recover') return () => { b.burnt = false; b.hist = []; this.touch(b); };
+    if (kind === 'fire') return () => this.dispense(b);
     switch (b.t) {
       case 'repeater': {
         if (this.repLocked(b)) return null;
@@ -3155,6 +3198,34 @@ const Sim = {
       case 'observer': return b.on ? () => { b.on = false; this.touch(b); } : () => { b.on = true; this.touch(b); this.schedule(b, 1); };
     }
     return null;
+  },
+
+  /* ---------- Distributeurs et droppers ---------- */
+  dispense(b) {
+    const inv = invClean(b.inv) || [], full = [];
+    inv.forEach((s, i) => { if (s && s[1] > 0) full.push(i); });
+    b.flash = performance.now(); b.shot = null; UI.flashUntil = Math.max(UI.flashUntil || 0, b.flash + 320);
+    if (!full.length) { b.shot = 'vide'; this.shots = (this.shots | 0) + 1; return; }
+    const i = full[Math.floor(Math.random() * full.length)], s = inv[i], it = s[0];
+    const d = DIRS[b.f], x = b.x + d[0], y = b.y + d[1], z = b.z + d[2], front = W.get(x, y, z);
+    const take = () => { if (--s[1] <= 0) inv[i] = null; };
+    const give = id => { const j = inv.findIndex((q, k) => k < 9 && !q); if (j >= 0) inv[j] = [id, 1]; else if (inv.length < 9) inv.push([id, 1]); };
+    if (b.t === 'mc:dropper') { take(); b.shot = it; }
+    else if (it === 'bone_meal') { if (boneMeal(x, y, z)) { take(); b.shot = it; } else b.shot = 'raté'; }
+    else if (it === 'water_bucket' || it === 'lava_bucket') {
+      if (inRange(x, y, z) && !front) { W.add(mk(it === 'water_bucket' ? 'mc:water' : 'mc:lava', x, y, z)); this.structChanged(); inv[i] = ['bucket', 1]; }
+      else take();                                         // impossible de verser : le seau est lâché
+      b.shot = it;
+    } else if (it === 'bucket') {
+      if (front && (front.t === 'mc:water' || front.t === 'mc:lava') && !front.mv) {
+        W.remove(front); this.structChanged(); take(); give(front.t === 'mc:water' ? 'water_bucket' : 'lava_bucket'); checkSupport([[x, y, z]]);
+      } else take();
+      b.shot = it;
+    } else if (it === 'flint_and_steel' || it === 'shears') b.shot = it;   // outils : ils s'usent mais restent
+    else { take(); b.shot = it; }
+    b.inv = invClean(inv) || [];
+    this.shots = (this.shots | 0) + 1;
+    this.powerDirty = true; if (this.onChange) this.onChange(false);
   },
 
   /* ---------- Observateurs ---------- */
@@ -3311,6 +3382,28 @@ const Sfx = {
   note(p) { this.tone(185 * Math.pow(2, p / 12), 0.5, 'triangle', 0.08); },
 };
 
+/* Poudre d'os sur le bloc (x, y, z). Renvoie true si elle a servi (sinon le distributeur ne la consomme pas).
+   Cornichon de mer sur du corail vivant : il passe à 4 et en fait apparaître d'autres dans l'eau autour
+   (losange de rayon 2, sur sa couche et celle du dessous, 1 chance sur 6 par case, sur du corail vivant). */
+function boneMeal(x, y, z) {
+  const b = W.get(x, y, z);
+  if (!b || b.mv || b.t !== 'mc:sea_pickle') return false;
+  const below = W.get(x, y - 1, z);
+  if (!below || below.mv || !LIVE_CORAL.test(below.t)) return false;
+  let w = 1, l = 0;
+  for (let j = 0; j < 5; j++) {
+    for (let k = 0; k < w; k++) for (let yy = y - 1; yy <= y; yy++) {
+      const px = x - 2 + j, pz = z - l + k;
+      if ((px === x && yy === y && pz === z) || Math.random() * 6 >= 1) continue;
+      const c = W.get(px, yy, pz), under = W.get(px, yy - 1, pz);
+      if (c && c.t === 'mc:water' && !c.mv && under && !under.mv && LIVE_CORAL.test(under.t)) { W.remove(c); W.add(mk('mc:sea_pickle', px, yy, pz, { lvl: 1 + Math.floor(Math.random() * 4) })); }
+    }
+    if (j < 2) { w += 2; l++; } else { w -= 2; l--; }
+  }
+  b.lvl = 4; Sim.structChanged();
+  return true;
+}
+
 /* =====================================================================
    6. ANNULER / RÉTABLIR (transactions sur les cases modifiées)
    ===================================================================== */
@@ -3403,6 +3496,7 @@ const Ed = {
         if (d.t === 'door') { const up = W.get(d.x, d.y + 1, d.z); if (up && up.t === 'door_top') up.on = d.on; }
         Sim.touch(d); R.dirty = true; return true;
       }
+      case 'mc:dispenser': case 'mc:dropper': if (UI.invDialog) UI.invDialog(b); return true;
       case 'repeater': case 'comparator': case 'note': case 'hopper': case 'daylight': case 'dust': break;
       default: return false;
     }
@@ -3479,7 +3573,7 @@ const Ed = {
       const ex = W.get(x, y, z); if (ex) destroy(ex);
       const b = deser({ ...o, x, y, z }); if (!b) continue;
       W.add(b); this.lastPasted.push(b);
-      if (b.t === 'door' && y + 1 < MAXY) { const t = W.get(x, y + 1, z); if (t) destroy(t); W.add(mk('door_top', x, y + 1, z, { f: b.f, on: b.on })); }
+      if (b.t === 'door' && y + 1 < MAXY) { const t = W.get(x, y + 1, z); if (t) destroy(t); W.add(mk('door_top', x, y + 1, z, { f: b.f, on: b.on, id: b.id })); }
       cells.push([x, y, z]);
     }
     const lost = checkSupport(cells);
@@ -4624,6 +4718,100 @@ Iso.setAngles(Math.PI / 4, Math.PI / 6);
 }
 
 /* =====================================================================
+   DISTRIBUTEURS, DROPPERS ET OBJETS
+   Face avant (la bouche) en 2D et en 3D, pastille du contenu, et
+   petits dessins des objets qu'on peut mettre dedans.
+   ===================================================================== */
+/* Dessin d'un objet dans le carré (x, y, s) */
+function itemPic(g, id, x, y, s) {
+  const k = s / 16, P = (i, j, w, h, c) => { g.fillStyle = c; g.fillRect(x + i * k, y + j * k, w * k, h * k); };
+  const disc = (cx, cy, r, c) => { g.fillStyle = c; g.beginPath(); g.arc(x + cx * k, y + cy * k, r * k, 0, Math.PI * 2); g.fill(); };
+  switch (id) {
+    case 'bone_meal':
+      disc(5, 10, 3.2, '#d9d4c4'); disc(10.5, 10.5, 3.4, '#ece8dc'); disc(8, 6, 3.4, '#f7f5ee'); disc(7, 7, 1, '#ffffff'); break;
+    case 'arrow':
+      g.save(); g.translate(x + 8 * k, y + 8 * k); g.rotate(-Math.PI / 4);
+      g.fillStyle = '#8a6a3c'; g.fillRect(-6 * k, -0.8 * k, 11 * k, 1.6 * k);
+      g.fillStyle = '#9fa3a8'; g.beginPath(); g.moveTo(7.5 * k, 0); g.lineTo(4 * k, -2.6 * k); g.lineTo(4 * k, 2.6 * k); g.fill();
+      g.fillStyle = '#f2f2f2'; g.fillRect(-7 * k, -2.6 * k, 3 * k, 1.6 * k); g.fillRect(-7 * k, 1 * k, 3 * k, 1.6 * k); g.restore(); break;
+    case 'fire_charge':
+      disc(8, 8, 6, '#3a1f12'); disc(8, 8, 4.6, '#d2581c'); disc(6.5, 6.5, 2, '#ffb43a'); disc(10, 10, 1.2, '#5a2a12'); break;
+    case 'snowball': disc(8, 8.5, 5.5, '#dfe9f2'); disc(6.5, 7, 2, '#ffffff'); break;
+    case 'egg':
+      g.fillStyle = '#e8d7b0'; g.beginPath(); g.ellipse(x + 8 * k, y + 8.6 * k, 4.4 * k, 5.8 * k, 0, 0, Math.PI * 2); g.fill(); disc(6.6, 6.4, 1.3, '#fbf3df'); break;
+    case 'tnt':
+      P(2, 3, 12, 10, '#c8332b'); P(2, 6.5, 12, 3, '#efe7d8'); g.fillStyle = '#222'; g.font = `bold ${Math.max(5, 3.2 * k)}px sans-serif`;
+      g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('TNT', x + 8 * k, y + 8.1 * k); P(7.5, 1, 1, 2, '#555'); break;
+    case 'water_bucket': case 'lava_bucket': case 'bucket': {
+      g.fillStyle = '#b9bec4'; g.beginPath(); g.moveTo(x + 3 * k, y + 5 * k); g.lineTo(x + 13 * k, y + 5 * k); g.lineTo(x + 11.5 * k, y + 14 * k); g.lineTo(x + 4.5 * k, y + 14 * k); g.fill();
+      P(3, 4, 10, 2, '#8d939a');
+      if (id !== 'bucket') P(4, 4.5, 8, 1.4, id === 'water_bucket' ? '#3f76e4' : '#f08a1c');
+      g.strokeStyle = '#8d939a'; g.lineWidth = Math.max(1, k); g.beginPath(); g.arc(x + 8 * k, y + 5 * k, 4.6 * k, Math.PI, 0); g.stroke(); break;
+    }
+    case 'flint_and_steel':
+      P(3, 3, 3, 9, '#9fa3a8'); P(3, 10, 8, 3, '#9fa3a8'); disc(11, 6, 3, '#3b3b3f'); disc(10, 5, 1, '#6a6a70'); break;
+    case 'shears':
+      g.save(); g.translate(x + 8 * k, y + 8 * k);
+      for (const r of [-0.45, 0.45]) { g.save(); g.rotate(r); g.fillStyle = '#c9ced4'; g.fillRect(-1 * k, -7 * k, 2 * k, 8 * k); g.fillStyle = '#7b5a3a'; g.fillRect(-1.4 * k, 1 * k, 2.8 * k, 5 * k); g.restore(); }
+      g.restore(); break;
+    default: disc(8, 8, 5, '#aaa');
+  }
+}
+/* Objet le plus présent dans un contenu (pour la pastille) */
+function invMain(inv) {
+  const n = {}; for (const s of inv || []) if (s) n[s[0]] = (n[s[0]] || 0) + s[1];
+  let best = null; for (const id in n) if (!best || n[id] > n[best]) best = id;
+  return best ? [best, n[best]] : null;
+}
+/* Face avant : la bouche du distributeur (ronde) ou du dropper (carrée) */
+function dispFrontTex(id) {
+  const name = 'mc:' + id + ':front';
+  if (TEX[name]) return TEX[name];
+  const col = MC[id].side, round = id === 'dispenser';
+  return genTex(name, mcSeed(name), P => {
+    const { c1 } = col, amp = 6 + col.v * 0.9;
+    for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) { const d = (P.rnd() - .5) * amp; P.set(x, y, [c1[0] + d, c1[1] + d, c1[2] + d]); }
+    for (let y = 3; y < 13; y++) for (let x = 3; x < 13; x++) {
+      const r = Math.hypot(x - 7.5, y - 7.5);
+      if (round ? r < 4.6 : (x > 3 && x < 12 && y > 3 && y < 12)) P.set(x, y, [24, 24, 26]);
+      else if (round ? r < 5.6 : true) P.set(x, y, [70, 70, 74]);
+    }
+  });
+}
+{
+  const draw2d = drawMc;
+  drawMc = function (g, b, x, y, s) {
+    draw2d(g, b, x, y, s);
+    if (BT[b.t].inv) {
+      const f = b.f;
+      if (f === U) { const k = s / 16; g.drawImage(dispFrontTex(BT[b.t].mc.id), x + 3 * k, y + 3 * k, 10 * k, 10 * k); }
+      else if (f < 4) { pr(g, x, y, s, f, 0, 0, 16, 3, '#2a2a2c'); pr(g, x, y, s, f, 5, 0, 6, 2, '#0c0c0e'); }
+      else { g.fillStyle = 'rgba(0,0,0,.35)'; const k = s / 16; g.fillRect(x + 6 * k, y + 6 * k, 4 * k, 4 * k); }
+      const main = invMain(b.inv);
+      if (main && s >= 14) {
+        const r = s * 0.46, bx = x + s - r - s * 0.02, by = y + s - r - s * 0.02;
+        g.fillStyle = 'rgba(255,255,255,.92)'; rr(g, bx, by, r, r, r * 0.28); g.fill();
+        g.strokeStyle = 'rgba(0,0,0,.18)'; g.lineWidth = 1; g.stroke();
+        itemPic(g, main[0], bx + r * 0.08, by + r * 0.08, r * 0.84);
+      }
+      if (b.flash && performance.now() - b.flash < 300) { g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(x, y, s, s); }
+    } else if (b.t === 'mc:sea_pickle' && b.lvl > 1 && s >= 12) {
+      const k = s / 16; g.fillStyle = 'rgba(20,40,10,.85)'; g.font = `bold ${Math.max(7, 5 * k)}px sans-serif`;
+      g.textAlign = 'right'; g.textBaseline = 'bottom'; g.fillText('×' + b.lvl, x + s - k, y + s);
+    }
+  };
+  const iso = mcIso;
+  mcIso = function (I, g, b, box, boxQ, cull, x, y, z, a) {
+    if (!BT[b.t].inv) return iso(I, g, b, box, boxQ, cull, x, y, z, a);
+    const id = BT[b.t].mc.id, top = mcTex(id, 'top'), side = mcTex(id, 'side'), front = dispFrontTex(id);
+    box(0, 0, 0, 16, 16, 16, face => {
+      const d = face === 'U' ? U : face === 'D' ? D : FACE_OF[face];
+      return d === b.f ? front : face === 'U' ? top : side;
+    }, cull);
+  };
+}
+
+/* =====================================================================
    12 bis. BIBLIOTHÈQUE DE SCHÉMAS (presets) — tous vérifiés par simulation
    P(x, y, z, type, propriétés) ; f = orientation (N 0, E 1, S 2, O 3, haut 4, bas 5)
    ===================================================================== */
@@ -5059,7 +5247,9 @@ function bomData() {
   const rows = Object.keys(BT).filter(t => cnt[t]).map(t => ({ t, n: cnt[t] }));
   const raw = {};
   for (const r of rows) { const rc = RECIPE[r.t]; if (!rc) continue; for (const k in rc) raw[k] = (raw[k] || 0) + rc[k] * r.n; }
-  return { rows, raw };
+  const items = {};                                     // contenu des distributeurs et droppers
+  for (const b of W.all()) for (const s of b.inv || []) if (s) items[s[0]] = (items[s[0]] || 0) + s[1];
+  return { rows, raw, items };
 }
 const stacks = n => n < 64 ? '' : Math.floor(n / 64) + ' pile' + (n >= 128 ? 's' : '') + (n % 64 ? ' + ' + (n % 64) : '');
 
@@ -5412,6 +5602,7 @@ const UI = {
     if (b.t === 'repeater') Ed.extra.repeater = { d: b.d };
     if (b.t === 'comparator') Ed.extra.comparator = { m: b.m };
     if (b.t === 'note') Ed.extra.note = { p: b.p };
+    if (BT[b.t].inv) Ed.extra[b.t] = { inv: invClean(b.inv) };
     this.toast('Pipette : ' + blockName(b));
   },
   stroke(c, fn) {
@@ -5768,7 +5959,7 @@ const UI = {
     R.fit(); Iso.fitted = false; this.layerInfo(); this.offerAnalysis(n + ' blocs importés.');
   },
   bomDialog() {
-    const { rows, raw } = bomData();
+    const { rows, raw, items } = bomData();
     const body = el('div', { class: 'body' });
     if (!rows.length) body.append(el('p', { class: 'muted', style: 'margin:0' }, 'Le circuit est vide.'));
     else {
@@ -5779,8 +5970,12 @@ const UI = {
       const rawBox = el('div', { class: 'bom-raw' });
       for (const k of Object.keys(RAW)) if (raw[k]) rawBox.append(el('span', { html: `${RAW[k]} : <b>${Math.ceil(raw[k] - 1e-9)}</b>` }));
       if (rawBox.children.length) body.append(el('h3', { style: 'margin:16px 0 0;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em' }, 'Ressources de base à fabriquer'), rawBox);
+      const itBox = el('div', { class: 'bom-raw' });
+      for (const id in items) itBox.append(el('span', { html: `${ITEMS[id].fr} : <b>${items[id]}</b>${items[id] >= 64 ? ' (' + stacks(items[id]) + ')' : ''}` }));
+      if (itBox.children.length) body.append(el('h3', { style: 'margin:16px 0 0;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em' }, 'Objets à mettre dans les distributeurs'), itBox);
     }
-    const text = rows.map(r => `${r.n} × ${BT[r.t].name}`).join('\n') + (Object.keys(raw).length ? '\n\nRessources :\n' + Object.keys(RAW).filter(k => raw[k]).map(k => `${Math.ceil(raw[k] - 1e-9)} × ${RAW[k]}`).join('\n') : '');
+    const text = rows.map(r => `${r.n} × ${BT[r.t].name}`).join('\n') + (Object.keys(raw).length ? '\n\nRessources :\n' + Object.keys(RAW).filter(k => raw[k]).map(k => `${Math.ceil(raw[k] - 1e-9)} × ${RAW[k]}`).join('\n') : '')
+      + (Object.keys(items).length ? '\n\nDans les distributeurs :\n' + Object.keys(items).map(id => `${items[id]} × ${ITEMS[id].fr}`).join('\n') : '');
     this.openModal({ title: 'Liste de matériaux', body, buttons: rows.length ? [{ label: 'Copier la liste', icon: 'copy', primary: true, keep: true, run: () => { (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(() => this.toast('Liste copiée.'), () => this.toast('Copie impossible ici.')); } }] : [] });
   },
   saveTimer: 0,
@@ -5793,7 +5988,7 @@ Ed.extra = {};
 Ed.place2 = function (t, x, y, z) {
   if (!this.place(t, x, y, z)) return false;
   const b = W.get(x, y, z);
-  if (b && this.extra[t]) Object.assign(b, this.extra[t]);
+  if (b && this.extra[t]) { Object.assign(b, this.extra[t]); if (BT[t].inv) b.inv = invClean(b.inv); }
   return true;
 };
 
@@ -5918,13 +6113,22 @@ function mcBlock(b, target) {
     case 'trapdoor': return { name: b.id || 'iron_trapdoor', props: { facing: MC_DIR[OPP[b.f]], half: 'bottom', open: on, powered: on } };
     case 'door': case 'door_top': return { name: b.id || 'iron_door', props: { facing: MC_DIR[OPP[b.f]], half: b.t === 'door' ? 'lower' : 'upper', hinge: 'left', open: on, powered: on } };
   }
-  if (BT[b.t].mc) return mcCatalogBlock(b, BT[b.t].mc);
+  if (BT[b.t].mc) return mcCatalogBlock(b, BT[b.t].mc, target);
   return { name: 'stone' };
 }
 /* Blocs du catalogue : état par défaut, sauf orientation des escaliers, dalle du bas, feuilles persistantes, cultures mûres */
 const MC_MAX_AGE = { wheat: 7, carrots: 7, potatoes: 7, beetroots: 3, nether_wart: 3, sweet_berry_bush: 3, cocoa: 2, melon_stem: 7, pumpkin_stem: 7, pitcher_crop: 4, torchflower_crop: 1 };
-function mcCatalogBlock(b, m) {
+/* Contenu d'un distributeur, d'un dropper… au format Items de Java */
+function mcItems(inv, target) {
+  const out = [];
+  (inv || []).forEach((s, i) => { if (s) out.push(target.newItems ? { Slot: ['byte', i], id: ['string', 'minecraft:' + s[0]], count: ['int', s[1]] } : { Slot: ['byte', i], id: ['string', 'minecraft:' + s[0]], Count: ['byte', s[1]] }); });
+  return out;
+}
+function mcCatalogBlock(b, m, target = MC_TARGETS[0]) {
   const id = m.id;
+  if (id === 'dispenser' || id === 'dropper')
+    return { name: id, props: { facing: MC_DIR[b.f] || 'north', triggered: b.on ? 'true' : 'false' }, be: { id: ['string', 'minecraft:' + id], Items: ['list', 'compound', mcItems(b.inv, target)] } };
+  if (id === 'sea_pickle') return { name: id, props: { pickles: String(clamp(b.lvl || 1, 1, 4)), waterlogged: 'true' } };
   if (m.cls === 'stairs') return { name: id, props: { facing: MC_DIR[b.f], half: 'bottom', shape: 'straight' } };
   if (m.cls === 'slab') return { name: id, props: { type: 'bottom' } };
   if (/_leaves$/.test(id)) return { name: id, props: { persistent: 'true' } };
@@ -6331,6 +6535,7 @@ const BR_LAYERS = ['minecraft:bedrock', 'minecraft:dirt', 'minecraft:dirt', 'min
 /* ---------- État Java (celui de l'export Java) → état Bedrock ---------- */
 const brByte = v => ['byte', v ? 1 : 0], brInt = v => ['int', v | 0], brStr = v => ['string', String(v)];
 const BR_PISTON_DIR = { down: 0, up: 1, south: 2, north: 3, east: 4, west: 5 };
+const BR_FACING_DIR = { down: 0, up: 1, north: 2, south: 3, west: 4, east: 5 };   // facing_direction usuel (distributeur, dropper)
 const BR_BUTTON_DIR = { north: 2, south: 3, west: 4, east: 5 };
 function javaToBedrock(c) {
   const P = c.props || {}, t = v => v === 'true', be = c.be || {};
@@ -6364,6 +6569,11 @@ function javaToBedrock(c) {
       const items = ((be.Items && be.Items[2]) || []).map(it => ({ Count: ['byte', (it.count || it.Count)[1]], Damage: ['short', 0], Name: ['string', 'minecraft:redstone'], Slot: ['byte', it.Slot[1]], WasPickedUp: ['byte', 0] }));
       return B('hopper', { facing_direction: brInt(0), toggle_bit: brByte(!t(P.enabled)) }, BE('Hopper', { Items: ['list', 'compound', items], TransferCooldown: ['int', 0] }));
     }
+    case 'dispenser': case 'dropper': {
+      const items = ((be.Items && be.Items[2]) || []).map(it => ({ Count: ['byte', (it.count || it.Count)[1]], Damage: ['short', 0], Name: it.id, Slot: ['byte', it.Slot[1]], WasPickedUp: ['byte', 0] }));
+      return B(c.name, { facing_direction: brInt(BR_FACING_DIR[P.facing] ?? 2), triggered_bit: brByte(t(P.triggered)) }, BE(c.name === 'dispenser' ? 'Dispenser' : 'Dropper', { Items: ['list', 'compound', items] }));
+    }
+    case 'sea_pickle': return B('sea_pickle', { cluster_count: brInt((+P.pickles || 1) - 1), dead_bit: brByte(0) });
     case 'redstone_wire': return B('redstone_wire', { redstone_signal: brInt(+P.power || 0) });
     case 'repeater': return B(t(P.powered) ? 'powered_repeater' : 'unpowered_repeater', { 'minecraft:cardinal_direction': brStr(P.facing), repeater_delay: brInt((+P.delay || 1) - 1) });
     case 'comparator': {
@@ -6655,6 +6865,18 @@ const WOOD_BUTTON = /^(oak|spruce|birch|jungle|acacia|dark_oak|mangrove|cherry|b
 const SKIP_RX = /(^|_)(air|grass|fern|flower|tulip|poppy|dandelion|orchid|allium|bluet|daisy|cornflower|lily_of_the_valley|rose_bush|peony|lilac|sunflower|bush|sapling|vine|vines|carpet|sign|banner|torch|lantern|candle|ladder|cobweb|sugar_cane|kelp|kelp_plant|seagrass|coral|coral_fan|snow|water|lava|bubble_column|fire|tripwire|tripwire_hook|head|skull|flower_pot|sea_pickle|scaffolding|chain|light|structure_void|moss_carpet|glow_lichen|sculk_vein|pointed_dripstone|hanging_roots|spore_blossom|azalea|roots|sprouts|wheat|carrots|potatoes|beetroots|melon_stem|pumpkin_stem|cave_vines|big_dripleaf|small_dripleaf|pink_petals|leaf_litter|rail|pressure_plate|cake|bed|end_rod|lightning_rod|frogspawn|item_frame|button)$/;
 const SEE_THROUGH_RX = /(glass|leaves|_slab|stairs|ice$|glowstone|sea_lantern|beacon|chest$|slime_block|honey_block|fence|_wall$|pane|iron_bars|farmland|dirt_path|soul_sand|mud$|cactus|anvil|enchanting_table|brewing_stand|cauldron|hopper|composter|lectern|bell|grindstone|stonecutter|campfire|conduit|shulker_box|dragon_egg|tnt$|barrier|mangrove_roots|chorus|bamboo$|heavy_core|vault|trial_spawner|spawner|decorated_pot|crafter)/;
 const IMMOVABLE_RX = /^(bedrock|crying_obsidian|respawn_anchor|reinforced_deepslate|end_portal_frame|ender_chest|enchanting_table)$/;
+/* Contenu d'un conteneur (Items Java ou Bedrock) → cases du planificateur */
+function invFromItems(be) {
+  const items = be && (be.Items || be.items);
+  if (!Array.isArray(items)) return undefined;
+  const a = [];
+  items.forEach((it, i) => {
+    const slot = Number(it.Slot ?? it.slot ?? i), id = String(it.id ?? it.Name ?? '');
+    if (slot >= 0 && slot < 9 && id) a[slot] = [id, Number(it.count ?? it.Count ?? 1)];
+  });
+  for (let i = 0; i < a.length; i++) if (!a[i]) a[i] = null;
+  return invClean(a);
+}
 function hopperLevel(be) {
   const items = be && (be.Items || be.items);
   if (!Array.isArray(items) || !items.length) return 0;
@@ -6707,6 +6929,8 @@ function fromJavaBlock(rawName, P = {}, be) {
       case 'plate': return ex('plate', { on: tr(P.powered) || +P.power > 0, id });
       case 'rail': return ex('rail', { f: /east|west/.test(P.shape || '') ? 1 : 0, on: tr(P.powered), id });
     }
+    if (BT['mc:' + id].inv) return ex('mc:' + id, { f: Math.max(0, dir(P.facing)), on: tr(P.triggered), inv: invFromItems(be) });
+    if (id === 'sea_pickle') return ex('mc:' + id, { lvl: clamp(+P.pickles || 1, 1, 4) });
     return ex('mc:' + id, m.cls === 'stairs' ? { f: Math.max(0, dir(P.facing)) } : {});
   }
   // proches cousins, convertis au plus juste
@@ -6821,7 +7045,11 @@ function importMcfunction(text) {
   for (const c of cells.values()) {
     const s = parseStateString(c.st); if (!s) continue;
     let be = null;
-    if (c.nbt) { const o = /OutputSignal:(\d+)/.exec(c.nbt); be = o ? { OutputSignal: +o[1] } : null; const cnt = [...c.nbt.matchAll(/[Cc]ount:(\d+)/g)].map(r => ({ count: +r[1] })); if (cnt.length) be = { Items: cnt }; }
+    if (c.nbt) {
+      const o = /OutputSignal:(\d+)/.exec(c.nbt); be = o ? { OutputSignal: +o[1] } : null;
+      const its = [...c.nbt.matchAll(/\{([^{}]*)\}/g)].map(r => { const q = rx => (rx.exec(r[1]) || [])[1]; return { Slot: q(/Slot:(\d+)/), id: q(/id:"?([a-z0-9_:]+)"?/), count: +(q(/[Cc]ount:(\d+)/) || 1) }; }).filter(it => it.id);
+      if (its.length) be = { Items: its };
+    }
     pushJava(imp, c.x, c.y, c.z, s.name, s.props, be);
   }
   if (!imp.cells.length) throw new Error('Aucune commande setblock ou fill reconnue dans ce texte.');
@@ -7103,6 +7331,8 @@ function bedrockToJava(rawName, S = {}, be) {
       return ['piston_head', { facing: face6(BR_PISTON), type: n.startsWith('sticky') ? 'sticky' : 'normal' }];
     case 'observer': return ['observer', { facing: face6(BR_FACING), powered: String(bBit(S.powered_bit)) }];
     case 'hopper': return ['hopper', { enabled: String(!bBit(S.toggle_bit)) }];
+    case 'dispenser': case 'dropper': return [n, { facing: face6(BR_FACING), triggered: String(bBit(S.triggered_bit)) }];
+    case 'sea_pickle': return ['sea_pickle', { pickles: String((+S.cluster_count || 0) + 1) }];
     case 'daylight_detector': case 'daylight_detector_inverted':
       return ['daylight_detector', { power: sig, inverted: String(n.endsWith('inverted')) }];
     case 'redstone_lamp': case 'lit_redstone_lamp': return ['redstone_lamp', { lit: String(n.startsWith('lit')) }];
@@ -7394,6 +7624,85 @@ document.addEventListener('pointerdown', e => {
 });
 
 /* =====================================================================
+   22. CONTENU DES DISTRIBUTEURS ET DROPPERS
+   9 cases comme dans le jeu. Clic sur une case, puis sur un objet.
+   Toute la fenêtre compte pour une seule annulation (Ctrl+Z).
+   ===================================================================== */
+document.head.append(el('style', null, `
+.inv-grid { display: grid; grid-template-columns: repeat(3, 64px); gap: 6px; justify-content: center; margin: 4px 0 14px; }
+.inv-slot { width: 64px; height: 64px; border-radius: 14px; border: 0; background: var(--fill-2); position: relative; cursor: pointer; padding: 0; display: grid; place-items: center; transition: transform .15s; }
+.inv-slot:hover { background: var(--fill-3); }
+.inv-slot:active { transform: scale(.95); }
+.inv-slot.on { box-shadow: 0 0 0 2px var(--accent) inset; background: #fff; }
+.inv-slot canvas { width: 40px; height: 40px; image-rendering: auto; }
+.inv-slot b { position: absolute; right: 7px; bottom: 4px; font-size: 13px; font-weight: 700; color: var(--label); }
+.inv-items { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.inv-items .chip { background: var(--fill-2); padding-left: 6px; }
+.inv-items .chip.on { background: #fff; box-shadow: 0 0 0 2px var(--accent) inset; }
+.inv-items .chip canvas { width: 22px; height: 22px; }
+.inv-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
+.inv-row .chip { background: var(--fill-2); }
+.inv-note { margin: 4px 0 0; font-size: 12.5px; color: var(--secondary); line-height: 1.45; }
+.inv-keep { display: flex; gap: 8px; align-items: center; font-size: 13px; margin-top: 6px; cursor: pointer; }
+`));
+function itemCanvas(id, size = 40) {
+  const r = Math.min(2, window.devicePixelRatio || 1), c = cnv(size * r, size * r), g = c.getContext('2d');
+  itemPic(g, id, 0, 0, size * r);
+  return c;
+}
+Object.assign(UI, {
+  invDialog(b) {
+    if (document.pointerLockElement) document.exitPointerLock();
+    const disp = b.t === 'mc:dispenser', name = disp ? 'Distributeur' : 'Dropper';
+    Edit.begin('Contenu du ' + name.toLowerCase()); Edit.touch(K(b.x, b.y, b.z));
+    const inv = () => { const a = (b.inv || []).slice(); while (a.length < 9) a.push(null); return a; };
+    const save = a => { b.inv = invClean(a) || []; Sim.powerDirty = true; R.dirty = true; render(); };
+    let sel = Math.max(0, inv().findIndex(s => !s)), pick = (inv()[sel] || [])[0] || 'bone_meal';
+    const grid = el('div', { class: 'inv-grid', role: 'group', 'aria-label': 'Cases' });
+    const items = el('div', { class: 'inv-items', role: 'group', 'aria-label': 'Objets' });
+    const count = el('span', { class: 'muted', style: 'font-size:12.5px;margin-left:4px' });
+    const keep = el('input', { type: 'checkbox' }); keep.checked = !!(Ed.extra[b.t] && Ed.extra[b.t].inv);
+    const put = (i, s) => { const a = inv(); a[i] = s; save(a); };
+    const add = d => { const a = inv(), s = a[sel]; if (!s) { if (d > 0) a[sel] = [pick, 1]; } else { s[1] += d; if (s[1] <= 0) a[sel] = null; else s[1] = Math.min(s[1], ITEMS[s[0]].max); } save(a); };
+    function render() {
+      const a = inv();
+      grid.replaceChildren(...a.map((s, i) => el('button', {
+        class: 'inv-slot' + (i === sel ? ' on' : ''), 'aria-label': `Case ${i + 1} : ${s ? s[1] + ' ' + ITEMS[s[0]].fr : 'vide'}`,
+        onclick: () => { sel = i; if (a[i]) pick = a[i][0]; render(); },
+      }, s ? itemCanvas(s[0]) : null, s && ITEMS[s[0]].max > 1 ? el('b', null, String(s[1])) : null)));
+      items.replaceChildren(...Object.keys(ITEMS).map(id => el('button', {
+        class: 'chip' + (id === pick ? ' on' : ''), title: ITEMS[id].fr + ' (pile de ' + ITEMS[id].max + ')',
+        onclick: () => { pick = id; put(sel, [id, ITEMS[id].max]); },
+      }, itemCanvas(id, 22), ITEMS[id].fr)));
+      const total = invCount(b.inv);
+      count.textContent = total ? `${total} objet${total > 1 ? 's' : ''} au total` : 'Vide';
+      if (keep.checked) Ed.extra[b.t] = { inv: invClean(b.inv) };
+    }
+    const body = el('div', { class: 'body' },
+      el('p', { class: 'muted', style: 'margin:0 0 10px;font-size:13px' }, 'Choisis une case, puis un objet : la case reçoit une pile pleine. Ajuste avec − et +.'),
+      grid,
+      el('div', { class: 'inv-row' },
+        el('button', { class: 'chip', onclick: () => add(-1) }, '−1'),
+        el('button', { class: 'chip', onclick: () => add(1) }, '+1'),
+        el('button', { class: 'chip', onclick: () => put(sel, null) }, 'Vider la case'),
+        el('button', { class: 'chip', onclick: () => save(Array.from({ length: 9 }, () => [pick, ITEMS[pick].max])) }, 'Tout remplir'),
+        el('button', { class: 'chip', onclick: () => save([]) }, 'Tout vider'),
+        count),
+      items,
+      el('label', { class: 'inv-keep' }, keep, `Les prochains ${name.toLowerCase()}s posés auront ce contenu`),
+      el('p', { class: 'inv-note' }, disp
+        ? 'À chaque impulsion de redstone, il utilise un objet pris au hasard. Poudre d’os : un cornichon de mer posé sur du corail vivant passe à 4 et en fait pousser d’autres dans l’eau autour. Seaux : posent ou ramassent l’eau et la lave devant lui. Le contenu part aussi dans l’export Minecraft.'
+        : 'À chaque impulsion de redstone, il lâche un objet pris au hasard. Le contenu part aussi dans l’export Minecraft.'));
+    keep.onchange = () => { if (keep.checked) Ed.extra[b.t] = { inv: invClean(b.inv) }; else delete Ed.extra[b.t]; };
+    render();
+    this.openModal({ title: name + ' : contenu', body, buttons: [
+      { label: 'Poudre d’os partout', run: () => { pick = 'bone_meal'; save(Array.from({ length: 9 }, () => ['bone_meal', 64])); return false; } },
+      { label: 'OK', primary: true }] });
+    this.modal.onClose = () => { Edit.commit(); Sim.settle(); this.saveSoon(); R.dirty = true; };
+  },
+});
+
+/* =====================================================================
    21 bis. CONSTRUIRE EN VUE 3D
    Clic gauche sur une face : pose le bloc contre elle (comme en jeu).
    Clic dans le vide : pose à l'étage courant. Glisser : déplacer la vue.
@@ -7435,7 +7744,7 @@ Iso.pick = function (mx, my) {
   const t = { x: Math.floor(x), y: Y, z: Math.floor(z) };
   return inRange(t.x, t.y, t.z) ? { b: null, face: U, target: t, attach: D } : null;
 };
-const USABLE = new Set(['lever', 'button_stone', 'button_wood', 'plate', 'repeater', 'comparator', 'note', 'daylight', 'hopper']);
+const USABLE = new Set(['lever', 'button_stone', 'button_wood', 'plate', 'repeater', 'comparator', 'note', 'daylight', 'hopper', ...DISP_TYPES]);
 Object.assign(UI, {
   isoHover: null,
   /* actionne/règle un bloc précis (les fonctions 2D travaillent sur l'étage courant) */
@@ -7779,7 +8088,7 @@ const FP = {
     let f = null;
     if (bd.needs === 'att') f = h.face === U ? D : h.face === D ? U : OPP[h.face];
     else if (base === 'repeater' || base === 'comparator' || (def.mc && def.mc.cls === 'stairs')) f = hz;
-    else if (base === 'piston' || base === 'sticky' || base === 'observer') f = OPP[this.look6()];
+    else if (base === 'piston' || base === 'sticky' || base === 'observer' || bd.inv) f = OPP[this.look6()];
     else if (base === 'door' || base === 'trapdoor') f = OPP[hz];
     else if (base === 'rail') f = hz % 2;
     // pas de bloc solide dans le joueur
@@ -7989,7 +8298,7 @@ const DIR_WORD = ['nord', 'est', 'sud', 'ouest', 'haut', 'bas'];
 const dirFromWord = w => { const i = DIR_WORD.indexOf(String(w || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')); return i; };
 const INPUT_T = new Set(['lever', 'button_stone', 'button_wood', 'plate']);
 const OUTPUT_T = new Set(['lamp', 'piston', 'sticky', 'door', 'trapdoor', 'rail', 'note', 'command']);
-const COMPONENT_T = new Set(['lever', 'button_stone', 'button_wood', 'plate', 'rblock', 'torch', 'daylight', 'dust', 'repeater', 'comparator', 'observer', 'hopper', 'command', 'lamp', 'piston', 'sticky', 'piston_head', 'note', 'rail', 'trapdoor', 'door']);
+const COMPONENT_T = new Set(['lever', 'button_stone', 'button_wood', 'plate', 'rblock', 'torch', 'daylight', 'dust', 'repeater', 'comparator', 'observer', 'hopper', 'command', 'lamp', 'piston', 'sticky', 'piston_head', 'note', 'rail', 'trapdoor', 'door', ...DISP_TYPES]);
 const P3 = b => `(${b.x},${b.y},${b.z})`;
 
 /* ---------- Bac à sable ---------- */
@@ -8080,6 +8389,12 @@ function checkPlan() {
     if (b.mv) continue;
     if (!hasSupport(b) && b.t !== 'piston_head') add('erreur', `${blockName(b)} sans support`, `En jeu, ce bloc casserait aussitôt : il lui faut ${BT[b.t].needs === 'att' ? 'un bloc solide auquel s’accrocher' : 'un bloc solide en dessous'}.`, [b],
       BT[b.t].needs && b.y > 0 && !W.get(b.x, b.y - 1, b.z) ? [{ op: 'poser', x: b.x, y: b.y - 1, z: b.z, bloc: 'solid' }] : null);
+    if (BT[b.t].inv && !invCount(b.inv)) add('attention', `${blockName(b)} vide`, 'Il ne contient aucun objet : une impulsion ne fera rien. Clic droit dessus pour le remplir (poudre d’os pour une ferme).', [b],
+      b.t === 'mc:dispenser' ? [{ op: 'regler', x: b.x, y: b.y, z: b.z, contenu: Array.from({ length: 9 }, () => ['bone_meal', 64]) }] : null);
+    if (b.t === 'mc:dispenser') {
+      const tg = at(b, b.f), meal = invCount(b.inv, 'bone_meal');
+      if (meal && tg && tg.t === 'mc:sea_pickle') { const u = at(tg, D); if (!u || !LIVE_CORAL.test(u.t)) add('attention', 'Poudre d’os sans effet', 'Le cornichon de mer visé n’est pas posé sur un bloc de corail vivant : la poudre d’os ne le fera pas pousser.', [b, tg]); }
+    }
     if (b.t === 'torch' && b.burnt) add('erreur', 'Torche grillée', 'Elle s’est éteinte trop souvent (8 fois en 3 s) : le circuit forme sans doute une boucle trop rapide.', [b]);
     if (b.t === 'repeater' || b.t === 'comparator') {
       const back = at(b, OPP[b.f]), front = at(b, b.f);
@@ -8114,6 +8429,11 @@ function describeBlock(b) {
     case 'door': case 'trapdoor': parts.push(b.on ? 'ouverte' : 'fermée'); break;
     case 'rail': parts.push(b.f ? 'axe est-ouest' : 'axe nord-sud', b.on ? 'actif' : ''); break;
     case 'hopper': parts.push(`remplissage ${b.lvl}`, b.on ? 'bloquée' : ''); break;
+    case 'mc:dispenser': case 'mc:dropper': {
+      const c = {}; for (const s of b.inv || []) if (s) c[s[0]] = (c[s[0]] || 0) + s[1];
+      parts.push(`bouche vers ${d}`, Object.keys(c).length ? 'contenu : ' + Object.entries(c).map(([id, n]) => `${n} ${id}`).join(', ') : 'VIDE (il ne fera rien)'); break;
+    }
+    case 'mc:sea_pickle': parts.push(`${Math.max(1, b.lvl)} cornichon(s)`); break;
     case 'note': parts.push(`note ${b.p}`); break;
     case 'daylight': parts.push(b.m ? 'inversé' : '', `signal ${b.lvl}`); break;
     case 'plate': parts.push(b.on ? 'enfoncée' : ''); break;
@@ -8176,6 +8496,7 @@ function applyAction(a) {
     if (a.mode !== undefined && cur.t === 'comparator') cur.m = /sous/.test(String(a.mode)) ? 1 : 0;
     if (a.note !== undefined && cur.t === 'note') cur.p = clamp(Math.round(+a.note), 0, 24);
     if (a.actif !== undefined && cur.t === 'lever') cur.on = !!a.actif;
+    if (a.contenu !== undefined && BT[cur.t].inv) cur.inv = invClean(a.contenu) || [];
     Sim.structChanged(); Sim.touch(cur); return `réglé ${x},${y},${z}`;
   }
   if (op !== 'poser') throw new Error('opération inconnue : ' + a.op);
@@ -8191,6 +8512,7 @@ function applyAction(a) {
   if (a.delai !== undefined && b.t === 'repeater') b.d = clamp(Math.round(+a.delai), 1, 4);
   if (a.mode !== undefined && b.t === 'comparator') b.m = /sous/.test(String(a.mode)) ? 1 : 0;
   if (a.actif !== undefined && b.t === 'lever') b.on = !!a.actif;
+  if (a.contenu !== undefined && BT[b.t].inv) b.inv = invClean(a.contenu) || [];
   return `posé ${BT[t].name} en ${x},${y},${z}`;
 }
 function applyActions(actions) {
@@ -8222,6 +8544,7 @@ ACTION est l'un de :
  {"op":"poser","x":..,"y":..,"z":..,"bloc":"<type>","dir":"nord|est|sud|ouest|haut|bas","delai":1-4,"mode":"comparaison|soustraction"}
  {"op":"retirer","x":..,"y":..,"z":..}
  {"op":"regler","x":..,"y":..,"z":..,"dir":"...","delai":..,"mode":"...","actif":true|false}
+Distributeur ou dropper (mc:dispenser, mc:dropper) : "dir" = côté de la bouche ; "contenu" règle ses 9 cases, ex. "contenu":[["bone_meal",64],["bone_meal",64]] (objets : bone_meal, arrow, fire_charge, snowball, egg, tnt, water_bucket, lava_bucket, bucket, flint_and_steel, shears). Un distributeur VIDE ne fait rien : c'est une erreur dans une ferme.
 <type> : un type entre crochets du plan, ou l'un de : lever, button_stone, button_wood, plate, rblock, torch, daylight, dust, repeater, comparator, observer, hopper, command, lamp, piston, sticky, note, rail, trapdoor, door, solid, glass, obsidian, ou "mc:<id Minecraft>" (ex. mc:oak_planks).
 Sens de "dir" : répéteur et comparateur = côté où sort le signal ; piston = sens de poussée ; observateur = côté de la face qui observe (il émet à l'opposé) ; torche, levier, bouton = côté du bloc qui les porte ("bas" = posé au sol) ; escalier = côté haut. Un bloc posé doit avoir son support (bloc plein en dessous pour poudre, répéteur, comparateur, rail, porte, plantes ; bloc plein à côté pour une torche murale ou un levier mural).
 N'invente pas de problème : si le circuit est correct, renvoie "problemes": [] ou seulement des conseils utiles. Coordonnées exactes du plan. Écris en français simple.`;

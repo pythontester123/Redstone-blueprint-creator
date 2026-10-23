@@ -79,10 +79,14 @@ MC_OF_BASE = {'lever': 'lever', 'button_stone': 'stone_button', 'button_wood': '
 BASE_OF_MC = {v: k for k, v in MC_OF_BASE.items()}
 BASE_OF_MC.update({'redstone_wall_torch': 'torch', 'piston_head': 'piston_head', 'moving_piston': 'piston'})
 ROT_OK = {'h4': {0, 1, 2, 3}, 'all6': set(range(6)), 'att6': set(range(6)), 'att5': {0, 1, 2, 3, 5}, 'axis': {0, 1}}
-KEYS = ['t', 'x', 'y', 'z', 'f', 'on', 'lvl', 'd', 'm', 'p', 'ext', 'dot', 'lock', 'burnt', 'sticky', 'id']
+KEYS = ['t', 'x', 'y', 'z', 'f', 'on', 'lvl', 'd', 'm', 'p', 'ext', 'dot', 'lock', 'burnt', 'sticky', 'id', 'inv']
+# Distributeurs et droppers : orientables (f = côté de la bouche) et 9 cases de contenu ("inv")
+CONTAINERS = {'mc:dispenser', 'mc:dropper'}
+ITEMS = {'bone_meal': 64, 'arrow': 64, 'fire_charge': 64, 'snowball': 16, 'egg': 16, 'tnt': 64,
+         'water_bucket': 1, 'lava_bucket': 1, 'bucket': 16, 'flint_and_steel': 1, 'shears': 1}
 REDSTONE = {'lever', 'button_stone', 'button_wood', 'plate', 'rblock', 'torch', 'daylight', 'dust', 'repeater',
             'comparator', 'observer', 'hopper'}
-OUTPUTS = {'lamp', 'piston', 'sticky', 'note', 'door', 'trapdoor', 'rail', 'command'}
+OUTPUTS = {'lamp', 'piston', 'sticky', 'note', 'door', 'trapdoor', 'rail', 'command', 'mc:dispenser', 'mc:dropper'}
 
 _BLOCS = None
 
@@ -103,7 +107,10 @@ def props(t):
     if isinstance(t, str) and t.startswith('mc:'):
         info = blocs().get(t[3:])
         if info and len(info) < 4:
-            return dict(CLASS[info[0]], fr=info[1], cls=info[0])
+            p = dict(CLASS[info[0]], fr=info[1], cls=info[0])
+            if t in CONTAINERS:
+                p.update(rot='all6', inv=9)
+            return p
     return None
 
 
@@ -189,6 +196,20 @@ class Plan:
         self.add('door', x, y, z, f, **kw)
         self.add('door_top', x, y + 1, z, f, **kw)
         return self
+
+    def dispenser(self, x, y, z, f, items=None, dropper=False):
+        """Distributeur (ou dropper) dont la bouche regarde vers f, rempli par piles.
+        items = {"bone_meal": 576} ou "bone_meal" (9 piles pleines)."""
+        if isinstance(items, str):
+            items = {items: ITEMS[items] * 9}
+        inv = []
+        for it, n in (items or {}).items():
+            if it not in ITEMS:
+                raise ValueError(f'objet inconnu : {it} (au choix : {", ".join(ITEMS)})')
+            while n > 0 and len(inv) < 9:
+                inv.append([it, min(n, ITEMS[it])])
+                n -= ITEMS[it]
+        return self.add('mc:dropper' if dropper else 'mc:dispenser', x, y, z, f, inv=inv or None)
 
     def piston(self, x, y, z, f, sticky=False, ext=False):
         """Piston (collant ou non). ext=True ajoute la tête devant lui."""
@@ -328,6 +349,20 @@ def check(data):
             errors.append(f'{where} : hauteur "p" de 0 à 24.')
         if 'lvl' in b and not (0 <= b['lvl'] <= 15):
             errors.append(f'{where} : "lvl" de 0 à 15.')
+        if 'inv' in b:
+            inv = b['inv']
+            if t not in CONTAINERS:
+                errors.append(f'{where} : "inv" n’existe que pour mc:dispenser et mc:dropper.')
+            elif not isinstance(inv, list) or len(inv) > 9:
+                errors.append(f'{where} : "inv" est une liste de 9 cases au plus.')
+            else:
+                for k, slot in enumerate(inv):
+                    if slot is None:
+                        continue
+                    ok = isinstance(slot, list) and len(slot) == 2 and slot[0] in ITEMS and isinstance(slot[1], int) and 1 <= slot[1] <= ITEMS.get(slot[0], 0)
+                    if not ok:
+                        errors.append(f'{where} : case {k + 1} de "inv" invalide {slot!r}. Format ["bone_meal", 64] ; objets : '
+                                      + ', '.join(f'{i} (max {m})' for i, m in ITEMS.items()) + '.')
         if 'id' in b and BASE_OF_MC.get(b['id']) == (lo_t := ('door' if t == 'door_top' else t)):
             warnings.append(f'{where} : "id": "{b["id"]}" est déjà le bloc par défaut de {lo_t}, tu peux le retirer.')
         elif 'id' in b:
